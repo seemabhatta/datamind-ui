@@ -1090,9 +1090,9 @@ outputs:
                   </div>
                 </div>
                 
-                <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0">
+                <div className="flex-1 min-h-0">
                   {/* YAML Editor */}
-                  <div className="bg-white rounded-lg border border-gray-200 flex flex-col">
+                  <div className="bg-white rounded-lg border border-gray-200 flex flex-col h-full">
                     <div className="p-4 border-b border-gray-200 flex items-center justify-between">
                       <h3 className="text-lg font-semibold text-gray-900">YAML Configuration</h3>
                       <div className="flex space-x-2">
@@ -1112,87 +1112,6 @@ outputs:
                         style={{ minHeight: '500px' }}
                         spellCheck={false}
                       />
-                    </div>
-                  </div>
-                  
-                  {/* Assistant Integration */}
-                  <div className="bg-white rounded-lg border border-gray-200 flex flex-col">
-                    <div className="p-4 border-b border-gray-200">
-                      <h3 className="text-lg font-semibold text-gray-900">AI Assistant</h3>
-                      <p className="text-sm text-gray-600">Get help fine-tuning your semantic model</p>
-                    </div>
-                    
-                    <div className="flex-1 flex flex-col min-h-0">
-                      {/* Messages */}
-                      <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                        {messages.length === 0 && (
-                          <div className="text-center py-8">
-                            <Brain className="w-8 h-8 mx-auto text-gray-300 mb-2" />
-                            <p className="text-sm text-gray-500">Ask me to help improve your YAML model</p>
-                            <div className="mt-4 space-y-2">
-                              <button 
-                                onClick={() => setChatInput('Add business rules for fair lending compliance')}
-                                className="block w-full text-xs text-blue-600 hover:text-blue-700 p-2 bg-blue-50 rounded"
-                              >
-                                "Add business rules for fair lending compliance"
-                              </button>
-                              <button 
-                                onClick={() => setChatInput('Optimize relationships between tables')}
-                                className="block w-full text-xs text-blue-600 hover:text-blue-700 p-2 bg-blue-50 rounded"
-                              >
-                                "Optimize relationships between tables"
-                              </button>
-                              <button 
-                                onClick={() => setChatInput('Add validation rules for data quality')}
-                                className="block w-full text-xs text-blue-600 hover:text-blue-700 p-2 bg-blue-50 rounded"
-                              >
-                                "Add validation rules for data quality"
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {messages.map((message) => (
-                          <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
-                              message.role === 'user' 
-                                ? 'bg-blue-600 text-white' 
-                                : 'bg-gray-100 text-gray-900'
-                            }`}>
-                              {message.content}
-                            </div>
-                          </div>
-                        ))}
-                        
-                        {isLoading && (
-                          <div className="flex justify-start">
-                            <div className="bg-gray-100 px-3 py-2 rounded-lg text-sm text-gray-600">
-                              <span className="animate-pulse">Assistant is analyzing your model...</span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Chat Input */}
-                      <div className="border-t border-gray-200 p-4">
-                        <form onSubmit={handleChatSubmit} className="flex space-x-2">
-                          <input
-                            type="text"
-                            value={chatInput}
-                            onChange={(e) => setChatInput(e.target.value)}
-                            placeholder="Ask me to improve your model..."
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            disabled={isLoading}
-                          />
-                          <button
-                            type="submit"
-                            disabled={!chatInput.trim() || isLoading}
-                            className="px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            <Send className="w-4 h-4" />
-                          </button>
-                        </form>
-                      </div>
                     </div>
                   </div>
                 </div>

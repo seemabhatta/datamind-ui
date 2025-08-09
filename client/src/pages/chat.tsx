@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { BarChart3, MessageSquare, Home, Database, ChevronLeft, ChevronRight, Minimize2, Maximize2, X, Zap, BookOpen, Settings, Cloud, Link, Send, GraduationCap, ChevronDown, Upload, Plus, Play, Save, Eye, Edit3 } from 'lucide-react';
+import { BarChart3, MessageSquare, Home, Database, ChevronLeft, ChevronRight, Minimize2, Maximize2, X, Zap, BookOpen, Settings, Cloud, Link, Send, GraduationCap, ChevronDown, Upload, Plus, Play, Save, Eye, Edit3, Brain } from 'lucide-react';
 
 // Type definitions for messages
 interface Message {
@@ -12,7 +12,7 @@ interface Message {
 }
 
 export default function ChatPage() {
-  const [currentView, setCurrentView] = useState<'chat' | 'dashboard' | 'studio' | 'trainings' | 'settings'>('dashboard');
+  const [currentView, setCurrentView] = useState<'chat' | 'dashboard' | 'studio' | 'models' | 'trainings' | 'settings'>('dashboard');
   const [agentMode, setAgentMode] = useState<'model' | 'query' | 'dashboard'>('query');
   const [currentSessionId, setCurrentSessionId] = useState<string>('');
   const [isConnected, setIsConnected] = useState(false);
@@ -265,6 +265,19 @@ export default function ChatPage() {
               title={isLeftSidebarCollapsed ? 'Studio' : ''}
             >
               <Database className="w-4 h-4" />
+              {!isLeftSidebarCollapsed && <span>studio</span>}
+            </button>
+
+            <button
+              onClick={() => setCurrentView('models')}
+              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                currentView === 'models'
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+              title={isLeftSidebarCollapsed ? 'Models' : ''}
+            >
+              <Brain className="w-4 h-4" />
               {!isLeftSidebarCollapsed && <span>models</span>}
             </button>
 
@@ -882,7 +895,203 @@ outputs:
               </div>
             </div>
           </div>
-        ) : (
+        ) : currentView === 'models' ? (
+          <div className="flex-1 p-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Models</h2>
+              <p className="text-gray-600">Browse and manage mortgage domain AI models</p>
+            </div>
+            
+            {/* Models Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              {/* HMDA Model */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">HMDA</h3>
+                  <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Active</span>
+                </div>
+                <p className="text-sm text-gray-600 mb-4">Home Mortgage Disclosure Act compliance model for fair lending analysis and regulatory reporting.</p>
+                <div className="space-y-2 mb-4">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Accuracy:</span>
+                    <span className="font-medium">96.8%</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Last Updated:</span>
+                    <span className="font-medium">2 days ago</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Training Data:</span>
+                    <span className="font-medium">2.1M records</span>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <button className="flex-1 px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
+                    Deploy
+                  </button>
+                  <button className="flex-1 px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
+                    Configure
+                  </button>
+                </div>
+              </div>
+
+              {/* Credit Risk Model */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Credit Risk Assessment</h3>
+                  <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Active</span>
+                </div>
+                <p className="text-sm text-gray-600 mb-4">Advanced credit scoring model for mortgage underwriting and risk evaluation with machine learning.</p>
+                <div className="space-y-2 mb-4">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Accuracy:</span>
+                    <span className="font-medium">94.2%</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Last Updated:</span>
+                    <span className="font-medium">1 week ago</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Training Data:</span>
+                    <span className="font-medium">1.8M records</span>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <button className="flex-1 px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
+                    Deploy
+                  </button>
+                  <button className="flex-1 px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
+                    Configure
+                  </button>
+                </div>
+              </div>
+
+              {/* Property Valuation Model */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Property Valuation</h3>
+                  <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">Training</span>
+                </div>
+                <p className="text-sm text-gray-600 mb-4">Automated property valuation model using market data, comparables, and location analytics.</p>
+                <div className="space-y-2 mb-4">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Accuracy:</span>
+                    <span className="font-medium">89.5%</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Last Updated:</span>
+                    <span className="font-medium">3 days ago</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Training Data:</span>
+                    <span className="font-medium">950K records</span>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <button className="flex-1 px-3 py-1.5 text-xs bg-gray-400 text-white rounded cursor-not-allowed">
+                    Training...
+                  </button>
+                  <button className="flex-1 px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
+                    Configure
+                  </button>
+                </div>
+              </div>
+
+              {/* Fraud Detection Model */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Fraud Detection</h3>
+                  <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Active</span>
+                </div>
+                <p className="text-sm text-gray-600 mb-4">Real-time mortgage application fraud detection using behavioral patterns and document analysis.</p>
+                <div className="space-y-2 mb-4">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Accuracy:</span>
+                    <span className="font-medium">97.1%</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Last Updated:</span>
+                    <span className="font-medium">5 days ago</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Training Data:</span>
+                    <span className="font-medium">1.4M records</span>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <button className="flex-1 px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
+                    Deploy
+                  </button>
+                  <button className="flex-1 px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
+                    Configure
+                  </button>
+                </div>
+              </div>
+
+              {/* Income Verification Model */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Income Verification</h3>
+                  <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Active</span>
+                </div>
+                <p className="text-sm text-gray-600 mb-4">Automated income and employment verification using bank statements and payroll data analysis.</p>
+                <div className="space-y-2 mb-4">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Accuracy:</span>
+                    <span className="font-medium">93.8%</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Last Updated:</span>
+                    <span className="font-medium">1 day ago</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Training Data:</span>
+                    <span className="font-medium">1.2M records</span>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <button className="flex-1 px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
+                    Deploy
+                  </button>
+                  <button className="flex-1 px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
+                    Configure
+                  </button>
+                </div>
+              </div>
+
+              {/* Loan Pricing Model */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Loan Pricing Optimization</h3>
+                  <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">Scheduled</span>
+                </div>
+                <p className="text-sm text-gray-600 mb-4">Dynamic loan pricing model based on market conditions, risk factors, and competitive analysis.</p>
+                <div className="space-y-2 mb-4">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Accuracy:</span>
+                    <span className="font-medium">91.6%</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Last Updated:</span>
+                    <span className="font-medium">2 weeks ago</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Training Data:</span>
+                    <span className="font-medium">800K records</span>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <button className="flex-1 px-3 py-1.5 text-xs bg-gray-400 text-white rounded cursor-not-allowed">
+                    Scheduled
+                  </button>
+                  <button className="flex-1 px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
+                    Configure
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : currentView === 'trainings' ? (
           <div className="flex-1 p-6">
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Trainings</h2>
@@ -1023,6 +1232,13 @@ outputs:
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 p-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome</h2>
+              <p className="text-gray-600">Select a section from the navigation to get started</p>
             </div>
           </div>
         )}

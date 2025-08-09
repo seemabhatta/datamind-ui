@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { BarChart3, MessageSquare, Home, Database, ChevronLeft, ChevronRight, Minimize2, Maximize2 } from 'lucide-react';
+import { BarChart3, MessageSquare, Home, Database, ChevronLeft, ChevronRight, Minimize2, Maximize2, X } from 'lucide-react';
 
 // Type definitions for messages
 interface Message {
@@ -21,6 +21,7 @@ export default function ChatPage() {
   const [chatInput, setChatInput] = useState('');
   const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(false);
   const [isAssistantMinimized, setIsAssistantMinimized] = useState(false);
+  const [isAssistantFullscreen, setIsAssistantFullscreen] = useState(false);
   
   const userId = 'user_1';
 
@@ -123,8 +124,19 @@ export default function ChatPage() {
     };
   };
 
+  const handleAssistantToggle = () => {
+    if (isAssistantMinimized) {
+      setIsAssistantMinimized(false);
+    } else if (!isAssistantFullscreen) {
+      setIsAssistantFullscreen(true);
+    } else {
+      setIsAssistantFullscreen(false);
+      setIsAssistantMinimized(true);
+    }
+  };
+
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 relative">
       {/* Left Sidebar */}
       <div className={`${isLeftSidebarCollapsed ? 'w-16' : 'w-48'} bg-white border-r border-gray-200 flex flex-col transition-all duration-300`}>
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
@@ -237,81 +249,212 @@ export default function ChatPage() {
       </div>
 
       {/* Right Assistant Sidebar */}
-      <div className={`${isAssistantMinimized ? 'w-16' : 'w-80'} bg-white border-l border-gray-200 flex flex-col transition-all duration-300`}>
-        <div className="p-4 border-b border-gray-200">
-          <div className="flex items-center justify-between mb-3">
-            {!isAssistantMinimized && (
-              <h3 className="text-lg font-semibold text-gray-900">assistant</h3>
-            )}
-            <button
-              onClick={() => setIsAssistantMinimized(!isAssistantMinimized)}
-              className="p-1 hover:bg-gray-100 rounded transition-colors"
-              title={isAssistantMinimized ? 'Maximize Assistant' : 'Minimize Assistant'}
-            >
-              {isAssistantMinimized ? (
-                <Maximize2 className="w-4 h-4 text-gray-600" />
-              ) : (
-                <Minimize2 className="w-4 h-4 text-gray-600" />
+      {!isAssistantFullscreen && (
+        <div className={`${isAssistantMinimized ? 'w-16' : 'w-80'} bg-white border-l border-gray-200 flex flex-col transition-all duration-300`}>
+          <div className="p-4 border-b border-gray-200">
+            <div className="flex items-center justify-between mb-3">
+              {!isAssistantMinimized && (
+                <h3 className="text-lg font-semibold text-gray-900">assistant</h3>
               )}
-            </button>
+              <div className="flex space-x-1">
+                {!isAssistantMinimized && (
+                  <button
+                    onClick={() => setIsAssistantFullscreen(true)}
+                    className="p-1 hover:bg-gray-100 rounded transition-colors"
+                    title="Fullscreen Assistant"
+                  >
+                    <Maximize2 className="w-4 h-4 text-gray-600" />
+                  </button>
+                )}
+                <button
+                  onClick={handleAssistantToggle}
+                  className="p-1 hover:bg-gray-100 rounded transition-colors"
+                  title={isAssistantMinimized ? 'Expand Assistant' : 'Minimize Assistant'}
+                >
+                  {isAssistantMinimized ? (
+                    <ChevronLeft className="w-4 h-4 text-gray-600" />
+                  ) : (
+                    <Minimize2 className="w-4 h-4 text-gray-600" />
+                  )}
+                </button>
+              </div>
+            </div>
+            
+            {!isAssistantMinimized && (
+              <>
+                {/* Mode Selector */}
+                <div className="space-y-2 text-sm">
+                  <div className="text-gray-600 mb-2">modes -</div>
+                  <button
+                    onClick={() => setAgentMode('model')}
+                    className={`block w-full text-left px-2 py-1 rounded transition-colors ${
+                      agentMode === 'model' 
+                        ? 'text-blue-700 bg-blue-50' 
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    }`}
+                  >
+                    model
+                  </button>
+                  <button
+                    onClick={() => setAgentMode('query')}
+                    className={`block w-full text-left px-2 py-1 rounded transition-colors ${
+                      agentMode === 'query' 
+                        ? 'text-blue-700 bg-blue-50' 
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    }`}
+                  >
+                    query
+                  </button>
+                  <button
+                    onClick={() => setAgentMode('dashboard')}
+                    className={`block w-full text-left px-2 py-1 rounded underline transition-colors ${
+                      agentMode === 'dashboard' 
+                        ? 'text-blue-700 bg-blue-50' 
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    }`}
+                  >
+                    dashboard
+                  </button>
+                </div>
+              </>
+            )}
           </div>
-          
+
           {!isAssistantMinimized && (
             <>
-              {/* Mode Selector */}
-              <div className="space-y-2 text-sm">
-                <div className="text-gray-600 mb-2">modes -</div>
-                <button
-                  onClick={() => setAgentMode('model')}
-                  className={`block w-full text-left px-2 py-1 rounded transition-colors ${
-                    agentMode === 'model' 
-                      ? 'text-blue-700 bg-blue-50' 
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                  }`}
-                >
-                  model
-                </button>
-                <button
-                  onClick={() => setAgentMode('query')}
-                  className={`block w-full text-left px-2 py-1 rounded transition-colors ${
-                    agentMode === 'query' 
-                      ? 'text-blue-700 bg-blue-50' 
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                  }`}
-                >
-                  query
-                </button>
-                <button
-                  onClick={() => setAgentMode('dashboard')}
-                  className={`block w-full text-left px-2 py-1 rounded underline transition-colors ${
-                    agentMode === 'dashboard' 
-                      ? 'text-blue-700 bg-blue-50' 
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                  }`}
-                >
-                  dashboard
-                </button>
+              {/* Chat Area */}
+              <div className="flex-1 flex flex-col min-h-0">
+                {/* Messages */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                  {messages.length === 0 && (
+                    <div className="text-center py-8">
+                      <MessageSquare className="w-8 h-8 mx-auto text-gray-300 mb-2" />
+                      <p className="text-sm text-gray-500">Start a conversation with the assistant</p>
+                    </div>
+                  )}
+                  
+                  {messages.map((message) => (
+                    <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
+                        message.role === 'user' 
+                          ? 'bg-blue-600 text-white' 
+                          : 'bg-gray-100 text-gray-900'
+                      }`}>
+                        {message.content}
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {isLoading && (
+                    <div className="flex justify-start">
+                      <div className="bg-gray-100 px-3 py-2 rounded-lg text-sm text-gray-600">
+                        <span className="animate-pulse">Assistant is typing...</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Chat Input */}
+                <div className="border-t border-gray-200 p-4">
+                  <form onSubmit={handleChatSubmit} className="flex space-x-2">
+                    <input
+                      type="text"
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      placeholder="Ask me anything..."
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      disabled={isLoading}
+                    />
+                    <button
+                      type="submit"
+                      disabled={!chatInput.trim() || isLoading}
+                      className="px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Send
+                    </button>
+                  </form>
+                </div>
               </div>
             </>
           )}
-        </div>
 
-        {!isAssistantMinimized && (
-          <>
-            {/* Chat Area */}
-            <div className="flex-1 flex flex-col min-h-0">
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {/* Minimized State - Show Chat Icon */}
+          {isAssistantMinimized && (
+            <div className="flex-1 flex items-center justify-center">
+              <MessageSquare className="w-8 h-8 text-gray-400" />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Fullscreen Assistant Overlay */}
+      {isAssistantFullscreen && (
+        <div className="fixed inset-0 bg-white z-50 flex flex-col">
+          {/* Fullscreen Header */}
+          <div className="p-4 border-b border-gray-200">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xl font-semibold text-gray-900">Assistant - Fullscreen Mode</h3>
+              <button
+                onClick={() => setIsAssistantFullscreen(false)}
+                className="p-2 hover:bg-gray-100 rounded transition-colors"
+                title="Exit Fullscreen"
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+            
+            {/* Mode Selector */}
+            <div className="flex space-x-4 text-sm">
+              <span className="text-gray-600">modes:</span>
+              <button
+                onClick={() => setAgentMode('model')}
+                className={`px-3 py-1 rounded transition-colors ${
+                  agentMode === 'model' 
+                    ? 'text-blue-700 bg-blue-50' 
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                model
+              </button>
+              <button
+                onClick={() => setAgentMode('query')}
+                className={`px-3 py-1 rounded transition-colors ${
+                  agentMode === 'query' 
+                    ? 'text-blue-700 bg-blue-50' 
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                query
+              </button>
+              <button
+                onClick={() => setAgentMode('dashboard')}
+                className={`px-3 py-1 rounded underline transition-colors ${
+                  agentMode === 'dashboard' 
+                    ? 'text-blue-700 bg-blue-50' 
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                dashboard
+              </button>
+            </div>
+          </div>
+
+          {/* Fullscreen Chat Area */}
+          <div className="flex-1 flex flex-col min-h-0">
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="max-w-4xl mx-auto space-y-4">
                 {messages.length === 0 && (
-                  <div className="text-center py-8">
-                    <MessageSquare className="w-8 h-8 mx-auto text-gray-300 mb-2" />
-                    <p className="text-sm text-gray-500">Start a conversation with the assistant</p>
+                  <div className="text-center py-16">
+                    <MessageSquare className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+                    <h4 className="text-lg font-medium text-gray-900 mb-2">Welcome to Assistant Fullscreen Mode</h4>
+                    <p className="text-gray-500">Start a conversation with enhanced workspace for detailed interactions</p>
                   </div>
                 )}
                 
                 {messages.map((message) => (
                   <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
+                    <div className={`max-w-2xl px-4 py-3 rounded-lg ${
                       message.role === 'user' 
                         ? 'bg-blue-600 text-white' 
                         : 'bg-gray-100 text-gray-900'
@@ -323,44 +466,39 @@ export default function ChatPage() {
                 
                 {isLoading && (
                   <div className="flex justify-start">
-                    <div className="bg-gray-100 px-3 py-2 rounded-lg text-sm text-gray-600">
+                    <div className="bg-gray-100 px-4 py-3 rounded-lg text-gray-600">
                       <span className="animate-pulse">Assistant is typing...</span>
                     </div>
                   </div>
                 )}
               </div>
+            </div>
 
-              {/* Chat Input */}
-              <div className="border-t border-gray-200 p-4">
-                <form onSubmit={handleChatSubmit} className="flex space-x-2">
+            {/* Fullscreen Chat Input */}
+            <div className="border-t border-gray-200 p-6">
+              <div className="max-w-4xl mx-auto">
+                <form onSubmit={handleChatSubmit} className="flex space-x-4">
                   <input
                     type="text"
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
                     placeholder="Ask me anything..."
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     disabled={isLoading}
                   />
                   <button
                     type="submit"
                     disabled={!chatInput.trim() || isLoading}
-                    className="px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Send
                   </button>
                 </form>
               </div>
             </div>
-          </>
-        )}
-
-        {/* Minimized State - Show Chat Icon */}
-        {isAssistantMinimized && (
-          <div className="flex-1 flex items-center justify-center">
-            <MessageSquare className="w-8 h-8 text-gray-400" />
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -822,19 +822,7 @@ outputs:
         <div className={`${isAssistantMinimized ? 'w-16' : 'w-80'} bg-white border-l border-gray-200 flex flex-col transition-all duration-300`}>
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center justify-between mb-3">
-              {!isAssistantMinimized && (
-                <h3 className="text-lg font-semibold text-gray-900">assistant</h3>
-              )}
-              <div className="flex items-center space-x-1">
-                {!isAssistantMinimized && (
-                  <button
-                    onClick={handleAssistantToggle}
-                    className="p-1 hover:bg-gray-100 rounded transition-colors"
-                    title="Maximize Assistant"
-                  >
-                    <Maximize2 className="w-4 h-4 text-gray-600" />
-                  </button>
-                )}
+              <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setIsAssistantMinimized(!isAssistantMinimized)}
                   className="p-1 hover:bg-gray-100 rounded transition-colors"
@@ -846,7 +834,19 @@ outputs:
                     <ChevronLeft className="w-4 h-4 text-gray-600" />
                   )}
                 </button>
+                {!isAssistantMinimized && (
+                  <h3 className="text-lg font-semibold text-gray-900">assistant</h3>
+                )}
               </div>
+              {!isAssistantMinimized && (
+                <button
+                  onClick={handleAssistantToggle}
+                  className="p-1 hover:bg-gray-100 rounded transition-colors"
+                  title="Maximize Assistant"
+                >
+                  <Maximize2 className="w-4 h-4 text-gray-600" />
+                </button>
+              )}
             </div>
 
           </div>

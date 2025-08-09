@@ -316,12 +316,214 @@ export default function ChatPage() {
               <p className="text-gray-600">Data exploration and analysis workspace</p>
             </div>
             
-            <div className="bg-white rounded-lg border border-gray-200 p-6 h-96">
-              <div className="h-full bg-gray-50 rounded-md flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <Database className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>Studio workspace</p>
-                  <p className="text-sm mt-1">Data exploration tools will appear here</p>
+            {/* Studio Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+              {/* YAML Editor */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">YAML Editor</h3>
+                  <div className="flex items-center space-x-2">
+                    <button className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
+                      Save
+                    </button>
+                    <button className="px-3 py-1 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
+                      Clear
+                    </button>
+                  </div>
+                </div>
+                <div className="h-96 border border-gray-200 rounded-md">
+                  <textarea
+                    className="w-full h-full p-4 font-mono text-sm bg-gray-50 border-none rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="# Enter your YAML configuration here
+version: '1.0'
+data_sources:
+  - name: 'sales_data'
+    type: 'database'
+    connection:
+      host: 'localhost'
+      port: 5432
+      database: 'sales_db'
+  
+transformations:
+  - name: 'clean_sales'
+    type: 'filter'
+    conditions:
+      - column: 'amount'
+        operator: '>'
+        value: 0
+        
+outputs:
+  - name: 'dashboard_data'
+    type: 'visualization'
+    chart_type: 'bar_chart'"
+                    spellCheck={false}
+                  />
+                </div>
+                <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
+                  <span>YAML syntax highlighting enabled</span>
+                  <span>Auto-save: OFF</span>
+                </div>
+              </div>
+
+              {/* YAML Preview/Validation */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Validation & Preview</h3>
+                  <button className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700">
+                    Validate
+                  </button>
+                </div>
+                
+                {/* Validation Status */}
+                <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                    <span className="text-sm text-green-800">YAML is valid</span>
+                  </div>
+                </div>
+
+                {/* Schema Info */}
+                <div className="space-y-3">
+                  <div className="border-b border-gray-200 pb-2">
+                    <h4 className="text-sm font-medium text-gray-900">Schema Information</h4>
+                  </div>
+                  
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Data Sources:</span>
+                      <span className="font-medium">1 configured</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Transformations:</span>
+                      <span className="font-medium">1 configured</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Outputs:</span>
+                      <span className="font-medium">1 configured</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-gray-200">
+                    <h4 className="text-sm font-medium text-gray-900 mb-2">Quick Actions</h4>
+                    <div className="space-y-2">
+                      <button className="w-full p-2 text-left text-sm text-gray-700 border border-gray-200 rounded hover:bg-gray-50">
+                        Generate Data Dictionary
+                      </button>
+                      <button className="w-full p-2 text-left text-sm text-gray-700 border border-gray-200 rounded hover:bg-gray-50">
+                        Export to Pipeline
+                      </button>
+                      <button className="w-full p-2 text-left text-sm text-gray-700 border border-gray-200 rounded hover:bg-gray-50">
+                        Test Configuration
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Data Preview */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Data Preview</h3>
+                  <button className="px-3 py-1 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
+                    Refresh
+                  </button>
+                </div>
+                
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="text-left py-2 px-3 font-medium text-gray-900">Column</th>
+                        <th className="text-left py-2 px-3 font-medium text-gray-900">Type</th>
+                        <th className="text-left py-2 px-3 font-medium text-gray-900">Sample</th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-gray-600">
+                      <tr className="border-b border-gray-100">
+                        <td className="py-2 px-3">amount</td>
+                        <td className="py-2 px-3">decimal</td>
+                        <td className="py-2 px-3">1,234.56</td>
+                      </tr>
+                      <tr className="border-b border-gray-100">
+                        <td className="py-2 px-3">date</td>
+                        <td className="py-2 px-3">timestamp</td>
+                        <td className="py-2 px-3">2024-01-15</td>
+                      </tr>
+                      <tr className="border-b border-gray-100">
+                        <td className="py-2 px-3">product_id</td>
+                        <td className="py-2 px-3">string</td>
+                        <td className="py-2 px-3">PROD_001</td>
+                      </tr>
+                      <tr className="border-b border-gray-100">
+                        <td className="py-2 px-3">customer_id</td>
+                        <td className="py-2 px-3">string</td>
+                        <td className="py-2 px-3">CUST_12345</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="mt-4 text-xs text-gray-500">
+                  Showing sample data based on current YAML configuration
+                </div>
+              </div>
+
+              {/* Query Builder */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Query Builder</h3>
+                  <button className="px-3 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-700">
+                    Run Query
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Select Table</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <option>sales_data</option>
+                      <option>customer_data</option>
+                      <option>product_data</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Columns</label>
+                    <div className="space-y-2">
+                      <label className="flex items-center">
+                        <input type="checkbox" className="mr-2" defaultChecked />
+                        <span className="text-sm">amount</span>
+                      </label>
+                      <label className="flex items-center">
+                        <input type="checkbox" className="mr-2" defaultChecked />
+                        <span className="text-sm">date</span>
+                      </label>
+                      <label className="flex items-center">
+                        <input type="checkbox" className="mr-2" />
+                        <span className="text-sm">product_id</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Filters</label>
+                    <div className="flex space-x-2">
+                      <select className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm">
+                        <option>amount</option>
+                        <option>date</option>
+                      </select>
+                      <select className="px-3 py-2 border border-gray-300 rounded-md text-sm">
+                        <option>&gt;</option>
+                        <option>&lt;</option>
+                        <option>=</option>
+                      </select>
+                      <input 
+                        type="text" 
+                        placeholder="Value"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

@@ -912,13 +912,6 @@ outputs:
               </div>
             </>
           )}
-
-          {/* Minimized State - Show Chat Icon */}
-          {isAssistantMinimized && (
-            <div className="flex-1 flex items-center justify-center">
-              <MessageSquare className="w-8 h-8 text-gray-400" />
-            </div>
-          )}
         </div>
       )}
       {/* Fullscreen Assistant Overlay */}

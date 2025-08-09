@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { queryClient } from '@/lib/queryClient';
 import { useQuery } from '@tanstack/react-query';
 import { BarChart3, MessageSquare, Home, Database, ChevronLeft, ChevronRight, Minimize2, Maximize2, X, Zap, BookOpen, Settings, Cloud, Link, Send, GraduationCap, ChevronDown, Upload, Plus, Play, Save, Eye, Edit3, Brain, Search } from 'lucide-react';
 
@@ -37,7 +38,7 @@ export default function ChatPage() {
   });
 
   // Load messages for current session
-  const { data: sessionMessages } = useQuery({
+  const { data: sessionMessages, refetch: refetchMessages } = useQuery({
     queryKey: ['/api/sessions', currentSessionId, 'messages'],
     enabled: !!currentSessionId,
   });
@@ -47,6 +48,13 @@ export default function ChatPage() {
       setMessages(sessionMessages || []);
     }
   }, [sessionMessages]);
+
+  // Refetch messages when session changes
+  useEffect(() => {
+    if (currentSessionId) {
+      refetchMessages();
+    }
+  }, [currentSessionId, refetchMessages]);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -767,9 +775,16 @@ compliance:
                         </p>
                       </div>
                       <button
-                        onClick={() => {
+                        onClick={async () => {
+                          console.log('Opening session:', session.id);
+                          setMessages([]); // Clear current messages
                           setCurrentSessionId(session.id);
                           setCurrentView('chat');
+                          
+                          // Invalidate and refetch messages for this session
+                          await queryClient.invalidateQueries({
+                            queryKey: ['/api/sessions', session.id, 'messages']
+                          });
                         }}
                         className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
                       >

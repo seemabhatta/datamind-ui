@@ -1404,7 +1404,7 @@ compliance:
         )}
       </div>
       {/* Right Assistant Sidebar */}
-      {!isAssistantFullscreen && currentView !== 'chat' && (
+      {!isAssistantFullscreen && currentView !== 'chat' && currentView !== 'chats' && (
         <div className={`${isAssistantMinimized ? 'w-16' : 'w-80'} bg-white border-l border-gray-200 flex flex-col transition-all duration-300`}>
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center justify-between mb-3">

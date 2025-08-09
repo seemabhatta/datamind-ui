@@ -236,7 +236,7 @@ export default function ChatPage() {
               title={isLeftSidebarCollapsed ? 'Studio' : ''}
             >
               <Database className="w-4 h-4" />
-              {!isLeftSidebarCollapsed && <span>studio</span>}
+              {!isLeftSidebarCollapsed && <span>models</span>}
             </button>
 
             <button

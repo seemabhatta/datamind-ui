@@ -234,9 +234,32 @@ export default function ChatPage() {
 
   const handleChatSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!chatInput.trim() || isLoading || !currentSessionId) return;
+    if (!chatInput.trim() || isLoading) return;
     
     const messageContent = chatInput.trim();
+    
+    // Ensure we have a session ID
+    let sessionId = currentSessionId;
+    if (!sessionId) {
+      try {
+        const response = await fetch('/api/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, agentType: 'query' })
+        });
+        if (response.ok) {
+          const session = await response.json();
+          sessionId = session.id;
+          setCurrentSessionId(session.id);
+        } else {
+          console.error('Failed to create session');
+          return;
+        }
+      } catch (error) {
+        console.error('Failed to create session:', error);
+        return;
+      }
+    }
     
     // Auto-detect context and set mode
     const detectedMode = detectContextMode(messageContent);
@@ -245,21 +268,31 @@ export default function ChatPage() {
     setChatInput('');
     setIsLoading(true);
 
-    // Send message via WebSocket
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
-    const socket = new WebSocket(wsUrl);
+    try {
+      // Send message via WebSocket
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const wsUrl = `${protocol}//${window.location.host}/ws`;
+      const socket = new WebSocket(wsUrl);
 
-    socket.onopen = () => {
-      socket.send(JSON.stringify({
-        type: 'chat_message',
-        sessionId: currentSessionId,
-        content: messageContent,
-        agentType: detectedMode === 'query' ? 'query' : 'yaml',
-        userId: userId
-      }));
-      socket.close();
-    };
+      socket.onopen = () => {
+        socket.send(JSON.stringify({
+          type: 'chat_message',
+          sessionId: sessionId,
+          content: messageContent,
+          agentType: detectedMode === 'query' ? 'query' : 'yaml',
+          userId: userId
+        }));
+        socket.close();
+      };
+
+      socket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        setIsLoading(false);
+      };
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      setIsLoading(false);
+    }
   };
 
   const handleAssistantToggle = () => {

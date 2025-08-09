@@ -23,6 +23,8 @@ export default function ChatPage() {
   const [isAssistantMinimized, setIsAssistantMinimized] = useState(false);
   const [isAssistantFullscreen, setIsAssistantFullscreen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<string | null>(null);
+  const [yamlContent, setYamlContent] = useState<string>('');
 
 
   
@@ -41,7 +43,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (sessionMessages) {
-      setMessages(sessionMessages || []);
+      setMessages(sessionMessages);
     }
   }, [sessionMessages]);
 
@@ -205,6 +207,170 @@ export default function ChatPage() {
       setIsAssistantFullscreen(false);
       setIsAssistantMinimized(true);
     }
+  };
+
+  const handleCreateModel = () => {
+    // Generate example YAML content
+    const exampleYaml = `version: 1
+name: "HMDA Compliance Model"
+description: "Semantic model for HMDA compliance reporting and fair lending analysis"
+created_at: "${new Date().toISOString()}"
+
+data_sources:
+  - name: "PostgreSQL - Primary"
+    type: "postgresql"
+    connection: "primary_db"
+
+tables:
+  - name: "borrower_demographics"
+    source: "PostgreSQL - Primary"
+    columns:
+      - name: "borrower_id"
+        type: "varchar"
+        primary_key: true
+      - name: "race"
+        type: "varchar"
+      - name: "ethnicity"
+        type: "varchar"
+      - name: "gender"
+        type: "varchar"
+      - name: "income"
+        type: "decimal"
+        
+  - name: "census_tracts"
+    source: "PostgreSQL - Primary"
+    columns:
+      - name: "census_tract"
+        type: "varchar"
+        primary_key: true
+      - name: "minority_population_pct"
+        type: "decimal"
+      - name: "median_income"
+        type: "decimal"
+
+views:
+  - name: "demographic_analysis"
+    source: "PostgreSQL - Primary"
+    query: |
+      SELECT 
+        bd.borrower_id,
+        bd.race,
+        bd.ethnicity,
+        bd.income,
+        ct.minority_population_pct,
+        ct.median_income
+      FROM borrower_demographics bd
+      JOIN census_tracts ct ON bd.census_tract = ct.census_tract
+
+relationships:
+  - from: "borrower_demographics.borrower_id"
+    to: "hmda_loans.borrower_id"
+    type: "one_to_many"
+  - from: "census_tracts.census_tract"
+    to: "property_details.census_tract"
+    type: "one_to_many"
+
+metrics:
+  - name: "approval_rate_by_race"
+    description: "Loan approval rate segmented by borrower race"
+    type: "percentage"
+  - name: "avg_loan_amount_by_income_level"
+    description: "Average loan amount by borrower income level"
+    type: "currency"`;
+
+    setYamlContent(exampleYaml);
+    setSelectedModel('HMDA Compliance Model');
+  };
+
+  const handleOpenModel = (modelName: string) => {
+    const existingYaml = `version: 1
+name: "${modelName}"
+description: "Complete HMDA compliance model with borrower demographics and loan outcomes"
+created_at: "2024-12-20T10:30:00Z"
+last_updated: "2024-12-22T15:45:00Z"
+
+data_sources:
+  - name: "PostgreSQL - Primary"
+    type: "postgresql"
+    connection: "primary_db"
+    status: "connected"
+
+tables:
+  - name: "hmda_loans"
+    source: "PostgreSQL - Primary"
+    rows: 2100000
+    columns:
+      - name: "loan_id"
+        type: "varchar"
+        primary_key: true
+      - name: "borrower_id"
+        type: "varchar"
+        foreign_key: "borrower_demographics.borrower_id"
+      - name: "loan_amount"
+        type: "decimal"
+      - name: "loan_purpose"
+        type: "varchar"
+      - name: "action_taken"
+        type: "varchar"
+        
+  - name: "borrower_demographics"
+    source: "PostgreSQL - Primary"
+    rows: 850000
+    columns:
+      - name: "borrower_id"
+        type: "varchar"
+        primary_key: true
+      - name: "applicant_race"
+        type: "varchar"
+      - name: "applicant_ethnicity"
+        type: "varchar"
+      - name: "applicant_sex"
+        type: "varchar"
+      - name: "applicant_income"
+        type: "decimal"
+
+  - name: "loan_outcomes"
+    source: "PostgreSQL - Primary"
+    rows: 2100000
+    columns:
+      - name: "loan_id"
+        type: "varchar"
+        foreign_key: "hmda_loans.loan_id"
+      - name: "approval_status"
+        type: "varchar"
+      - name: "denial_reason"
+        type: "varchar"
+      - name: "rate_spread"
+        type: "decimal"
+
+relationships:
+  - from: "borrower_demographics.borrower_id"
+    to: "hmda_loans.borrower_id"
+    type: "one_to_many"
+    description: "One borrower can have multiple loan applications"
+  - from: "hmda_loans.loan_id"
+    to: "loan_outcomes.loan_id"
+    type: "one_to_one"
+    description: "Each loan has one outcome record"
+
+business_rules:
+  - name: "fair_lending_check"
+    description: "Ensure no discriminatory patterns in loan approvals"
+    type: "validation"
+  - name: "income_verification"
+    description: "Verify borrower income meets minimum requirements"
+    type: "business_logic"
+
+compliance:
+  regulations:
+    - "Home Mortgage Disclosure Act (HMDA)"
+    - "Fair Housing Act"
+    - "Community Reinvestment Act (CRA)"
+  reporting_frequency: "annually"
+  last_audit: "2024-10-15"`;
+
+    setYamlContent(existingYaml);
+    setSelectedModel(modelName);
   };
 
   return (
@@ -897,10 +1063,147 @@ outputs:
           </div>
         ) : currentView === 'models' ? (
           <div className="flex-1 p-6">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Semantic Models</h2>
-              <p className="text-gray-600">Create and manage semantic data models from your connected data sources</p>
-            </div>
+            {selectedModel ? (
+              // YAML Editor View
+              <div className="h-full flex flex-col">
+                <div className="mb-6 flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <button 
+                      onClick={() => setSelectedModel(null)}
+                      className="p-2 hover:bg-gray-100 rounded-md"
+                      title="Back to Models"
+                    >
+                      <ChevronLeft className="w-5 h-5 text-gray-600" />
+                    </button>
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900">{selectedModel}</h2>
+                      <p className="text-gray-600">Edit semantic model configuration in YAML</p>
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50">
+                      Validate
+                    </button>
+                    <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
+                      Save Model
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0">
+                  {/* YAML Editor */}
+                  <div className="bg-white rounded-lg border border-gray-200 flex flex-col">
+                    <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-gray-900">YAML Configuration</h3>
+                      <div className="flex space-x-2">
+                        <button className="p-1 hover:bg-gray-100 rounded text-gray-400" title="Format YAML">
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <button className="p-1 hover:bg-gray-100 rounded text-gray-400" title="Copy to Clipboard">
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex-1 p-4">
+                      <textarea
+                        value={yamlContent}
+                        onChange={(e) => setYamlContent(e.target.value)}
+                        className="w-full h-full font-mono text-sm border-none outline-none resize-none bg-gray-50 p-4 rounded"
+                        style={{ minHeight: '500px' }}
+                        spellCheck={false}
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Assistant Integration */}
+                  <div className="bg-white rounded-lg border border-gray-200 flex flex-col">
+                    <div className="p-4 border-b border-gray-200">
+                      <h3 className="text-lg font-semibold text-gray-900">AI Assistant</h3>
+                      <p className="text-sm text-gray-600">Get help fine-tuning your semantic model</p>
+                    </div>
+                    
+                    <div className="flex-1 flex flex-col min-h-0">
+                      {/* Messages */}
+                      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                        {messages.length === 0 && (
+                          <div className="text-center py-8">
+                            <Brain className="w-8 h-8 mx-auto text-gray-300 mb-2" />
+                            <p className="text-sm text-gray-500">Ask me to help improve your YAML model</p>
+                            <div className="mt-4 space-y-2">
+                              <button 
+                                onClick={() => setChatInput('Add business rules for fair lending compliance')}
+                                className="block w-full text-xs text-blue-600 hover:text-blue-700 p-2 bg-blue-50 rounded"
+                              >
+                                "Add business rules for fair lending compliance"
+                              </button>
+                              <button 
+                                onClick={() => setChatInput('Optimize relationships between tables')}
+                                className="block w-full text-xs text-blue-600 hover:text-blue-700 p-2 bg-blue-50 rounded"
+                              >
+                                "Optimize relationships between tables"
+                              </button>
+                              <button 
+                                onClick={() => setChatInput('Add validation rules for data quality')}
+                                className="block w-full text-xs text-blue-600 hover:text-blue-700 p-2 bg-blue-50 rounded"
+                              >
+                                "Add validation rules for data quality"
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {messages.map((message) => (
+                          <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
+                              message.role === 'user' 
+                                ? 'bg-blue-600 text-white' 
+                                : 'bg-gray-100 text-gray-900'
+                            }`}>
+                              {message.content}
+                            </div>
+                          </div>
+                        ))}
+                        
+                        {isLoading && (
+                          <div className="flex justify-start">
+                            <div className="bg-gray-100 px-3 py-2 rounded-lg text-sm text-gray-600">
+                              <span className="animate-pulse">Assistant is analyzing your model...</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Chat Input */}
+                      <div className="border-t border-gray-200 p-4">
+                        <form onSubmit={handleChatSubmit} className="flex space-x-2">
+                          <input
+                            type="text"
+                            value={chatInput}
+                            onChange={(e) => setChatInput(e.target.value)}
+                            placeholder="Ask me to improve your model..."
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            disabled={isLoading}
+                          />
+                          <button
+                            type="submit"
+                            disabled={!chatInput.trim() || isLoading}
+                            className="px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <Send className="w-4 h-4" />
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // Models List View
+              <div>
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Semantic Models</h2>
+                  <p className="text-gray-600">Create and manage semantic data models from your connected data sources</p>
+                </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
               {/* Data Source Selection */}
@@ -1085,7 +1388,10 @@ outputs:
                   </div>
                   
                   <div className="pt-4 border-t border-gray-200">
-                    <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button 
+                      onClick={handleCreateModel}
+                      className="w-full px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
                       Create Semantic Model
                     </button>
                     <button className="w-full mt-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50">
@@ -1111,7 +1417,10 @@ outputs:
                     <span>Updated 2 days ago</span>
                   </div>
                   <div className="flex space-x-2">
-                    <button className="flex-1 px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
+                    <button 
+                      onClick={() => handleOpenModel('HMDA Reporting Model')}
+                      className="flex-1 px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                    >
                       Open
                     </button>
                     <button className="flex-1 px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
@@ -1131,7 +1440,10 @@ outputs:
                     <span>Updated 1 week ago</span>
                   </div>
                   <div className="flex space-x-2">
-                    <button className="flex-1 px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
+                    <button 
+                      onClick={() => handleOpenModel('Fair Lending Analysis')}
+                      className="flex-1 px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                    >
                       Continue
                     </button>
                     <button className="flex-1 px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
@@ -1140,7 +1452,9 @@ outputs:
                   </div>
                 </div>
               </div>
+              </div>
             </div>
+            )}
           </div>
         ) : currentView === 'trainings' ? (
           <div className="flex-1 p-6">

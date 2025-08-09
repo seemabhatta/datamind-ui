@@ -663,6 +663,9 @@ compliance:
                     
                     {isPlusDropdownOpen && (
                       <div className="absolute bottom-full mb-2 left-0 bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-[160px] z-10">
+                        <div className="px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide border-b border-gray-100">
+                          Agent Tools
+                        </div>
                         <button
                           type="button"
                           onClick={() => handlePlusOption('generate')}

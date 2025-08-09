@@ -479,40 +479,40 @@ compliance:
                 setCurrentSessionId(''); // Clear session ID to create new one
                 setCurrentView('chat');
               }}
-              className={`w-full flex items-center justify-start px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`w-full flex items-center justify-start ${isLeftSidebarCollapsed ? 'px-2 py-3 justify-center' : 'px-3 py-2'} text-sm font-medium rounded-md transition-colors ${
                 currentView === 'chat'
                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              } ${isLeftSidebarCollapsed ? 'justify-center' : ''}`}
+              }`}
               title={isLeftSidebarCollapsed ? 'New Chat' : ''}
             >
-              <MessageSquare className={`w-4 h-4 ${isLeftSidebarCollapsed ? '' : 'mr-3'}`} />
+              <MessageSquare className={`${isLeftSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-3'}`} />
               {!isLeftSidebarCollapsed && <span>new chat</span>}
             </button>
             
             <button
               onClick={() => setCurrentView('dashboard')}
-              className={`w-full flex items-center justify-start px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`w-full flex items-center justify-start ${isLeftSidebarCollapsed ? 'px-2 py-3 justify-center' : 'px-3 py-2'} text-sm font-medium rounded-md transition-colors ${
                 currentView === 'dashboard'
                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              } ${isLeftSidebarCollapsed ? 'justify-center' : ''}`}
+              }`}
               title={isLeftSidebarCollapsed ? 'Dashboard' : ''}
             >
-              <Home className={`w-4 h-4 ${isLeftSidebarCollapsed ? '' : 'mr-3'}`} />
+              <Home className={`${isLeftSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-3'}`} />
               {!isLeftSidebarCollapsed && <span>dashboard</span>}
             </button>
             
             <button
               onClick={() => setCurrentView('models')}
-              className={`w-full flex items-center justify-start px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`w-full flex items-center justify-start ${isLeftSidebarCollapsed ? 'px-2 py-3 justify-center' : 'px-3 py-2'} text-sm font-medium rounded-md transition-colors ${
                 currentView === 'models'
                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              } ${isLeftSidebarCollapsed ? 'justify-center' : ''}`}
+              }`}
               title={isLeftSidebarCollapsed ? 'Models' : ''}
             >
-              <Brain className={`w-4 h-4 ${isLeftSidebarCollapsed ? '' : 'mr-3'}`} />
+              <Brain className={`${isLeftSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-3'}`} />
               {!isLeftSidebarCollapsed && <span>models</span>}
             </button>
 
@@ -521,14 +521,14 @@ compliance:
 
             <button
               onClick={() => setCurrentView('chats')}
-              className={`w-full flex items-center justify-start px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`w-full flex items-center justify-start ${isLeftSidebarCollapsed ? 'px-2 py-3 justify-center' : 'px-3 py-2'} text-sm font-medium rounded-md transition-colors ${
                 currentView === 'chats'
                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              } ${isLeftSidebarCollapsed ? 'justify-center' : ''}`}
+              }`}
               title={isLeftSidebarCollapsed ? 'Chats' : ''}
             >
-              <MessageSquare className={`w-4 h-4 ${isLeftSidebarCollapsed ? '' : 'mr-3'}`} />
+              <MessageSquare className={`${isLeftSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-3'}`} />
               {!isLeftSidebarCollapsed && <span>chats</span>}
             </button>
 

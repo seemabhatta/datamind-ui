@@ -492,11 +492,7 @@ compliance:
             
             <button
               onClick={() => setCurrentView('dashboard')}
-              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                currentView === 'dashboard'
-                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
+              className="w-full flex items-center justify-center px-3 py-2 text-sm font-medium rounded-md transition-colors bg-blue-50 text-blue-700 border border-blue-200 pl-[1px] pr-[1px]"
               title={isLeftSidebarCollapsed ? 'Dashboard' : ''}
             >
               <Home className="w-4 h-4" />

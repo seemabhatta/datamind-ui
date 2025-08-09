@@ -25,6 +25,7 @@ export default function ChatPage() {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [yamlContent, setYamlContent] = useState<string>('');
+  const [isPlusDropdownOpen, setIsPlusDropdownOpen] = useState(false);
 
 
   
@@ -47,20 +48,23 @@ export default function ChatPage() {
     }
   }, [sessionMessages]);
 
-  // Close profile dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (isProfileDropdownOpen) {
-        const target = event.target as Element;
-        if (!target.closest('.profile-dropdown-container')) {
-          setIsProfileDropdownOpen(false);
-        }
+      const target = event.target as Element;
+      
+      if (isProfileDropdownOpen && !target.closest('.profile-dropdown-container')) {
+        setIsProfileDropdownOpen(false);
+      }
+      
+      if (isPlusDropdownOpen && !target.closest('.plus-dropdown-container')) {
+        setIsPlusDropdownOpen(false);
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isProfileDropdownOpen]);
+  }, [isProfileDropdownOpen, isPlusDropdownOpen]);
 
   // WebSocket connection for real-time updates
   useEffect(() => {
@@ -207,6 +211,15 @@ export default function ChatPage() {
       setIsAssistantFullscreen(false);
       setIsAssistantMinimized(true);
     }
+  };
+
+  const handlePlusOption = (option: 'generate' | 'query') => {
+    if (option === 'generate') {
+      setChatInput('Generate a data dictionary for my semantic model');
+    } else if (option === 'query') {
+      setChatInput('Query my data to show ');
+    }
+    setIsPlusDropdownOpen(false);
   };
 
   const handleCreateModel = () => {
@@ -639,6 +652,37 @@ compliance:
             <div className="border-t border-gray-200 p-6">
               <div className="max-w-4xl mx-auto">
                 <form onSubmit={handleChatSubmit} className="flex space-x-4">
+                  <div className="relative plus-dropdown-container">
+                    <button
+                      type="button"
+                      onClick={() => setIsPlusDropdownOpen(!isPlusDropdownOpen)}
+                      className="px-3 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <Plus className="w-5 h-5 text-gray-600" />
+                    </button>
+                    
+                    {isPlusDropdownOpen && (
+                      <div className="absolute bottom-full mb-2 left-0 bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-[160px] z-10">
+                        <button
+                          type="button"
+                          onClick={() => handlePlusOption('generate')}
+                          className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                        >
+                          <Brain className="w-4 h-4" />
+                          <span>Generate</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handlePlusOption('query')}
+                          className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                        >
+                          <Search className="w-4 h-4" />
+                          <span>Query</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  
                   <input
                     type="text"
                     value={chatInput}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { BarChart3, MessageSquare, Home, Database, ChevronLeft, ChevronRight, Minimize2, Maximize2, X, Zap, BookOpen, Settings } from 'lucide-react';
+import { BarChart3, MessageSquare, Home, Database, ChevronLeft, ChevronRight, Minimize2, Maximize2, X, Zap, BookOpen, Settings, Cloud, Link, Send, GraduationCap, ChevronDown } from 'lucide-react';
 
 // Type definitions for messages
 interface Message {
@@ -22,6 +22,9 @@ export default function ChatPage() {
   const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(false);
   const [isAssistantMinimized, setIsAssistantMinimized] = useState(false);
   const [isAssistantFullscreen, setIsAssistantFullscreen] = useState(false);
+  const [showModeDropdown, setShowModeDropdown] = useState(false);
+  const [showIntegrationsDropdown, setShowIntegrationsDropdown] = useState(false);
+  const [showTrainingsDropdown, setShowTrainingsDropdown] = useState(false);
   
   const userId = 'user_1';
 
@@ -184,8 +187,74 @@ export default function ChatPage() {
               title={isLeftSidebarCollapsed ? 'Studio' : ''}
             >
               <Database className="w-4 h-4" />
-              {!isLeftSidebarCollapsed && <span>model</span>}
+              {!isLeftSidebarCollapsed && <span>studio</span>}
             </button>
+
+            {/* Integrations Section */}
+            <div className="pt-4">
+              <button
+                onClick={() => setShowIntegrationsDropdown(!showIntegrationsDropdown)}
+                className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3 justify-between'} px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50`}
+                title={isLeftSidebarCollapsed ? 'Integrations' : ''}
+              >
+                <div className={`flex items-center ${isLeftSidebarCollapsed ? '' : 'space-x-3'}`}>
+                  <Zap className="w-4 h-4" />
+                  {!isLeftSidebarCollapsed && <span>integrations</span>}
+                </div>
+                {!isLeftSidebarCollapsed && (
+                  <ChevronDown className={`w-4 h-4 transition-transform ${showIntegrationsDropdown ? 'rotate-180' : ''}`} />
+                )}
+              </button>
+              
+              {showIntegrationsDropdown && !isLeftSidebarCollapsed && (
+                <div className="ml-4 mt-2 space-y-1">
+                  {/* Sources */}
+                  <div className="text-xs text-gray-500 mb-2">sources</div>
+                  <button className="w-full text-left px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded">snowflake</button>
+                  <button className="w-full text-left px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded">aws dynamo db</button>
+                  <button className="w-full text-left px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded">aws s3</button>
+                  
+                  {/* Connections */}
+                  <div className="text-xs text-gray-500 mb-2 mt-3">connections</div>
+                  <button className="w-full text-left px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded">manage connections</button>
+                  
+                  {/* Destinations */}
+                  <div className="text-xs text-gray-500 mb-2 mt-3">destinations</div>
+                  <button className="w-full text-left px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded">manage destinations</button>
+                  
+                  {/* Publish to */}
+                  <div className="text-xs text-gray-500 mb-2 mt-3">publish to</div>
+                  <button className="w-full text-left px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded">power bi</button>
+                  <button className="w-full text-left px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded">google looker</button>
+                  <button className="w-full text-left px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded">data studio</button>
+                </div>
+              )}
+            </div>
+
+            {/* Trainings Section */}
+            <div className="pt-2">
+              <button
+                onClick={() => setShowTrainingsDropdown(!showTrainingsDropdown)}
+                className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3 justify-between'} px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50`}
+                title={isLeftSidebarCollapsed ? 'Trainings' : ''}
+              >
+                <div className={`flex items-center ${isLeftSidebarCollapsed ? '' : 'space-x-3'}`}>
+                  <GraduationCap className="w-4 h-4" />
+                  {!isLeftSidebarCollapsed && <span>trainings</span>}
+                </div>
+                {!isLeftSidebarCollapsed && (
+                  <ChevronDown className={`w-4 h-4 transition-transform ${showTrainingsDropdown ? 'rotate-180' : ''}`} />
+                )}
+              </button>
+              
+              {showTrainingsDropdown && !isLeftSidebarCollapsed && (
+                <div className="ml-4 mt-2 space-y-1">
+                  <button className="w-full text-left px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded">add training</button>
+                  <button className="w-full text-left px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded">remove training</button>
+                  <button className="w-full text-left px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded">publish trainings</button>
+                </div>
+              )}
+            </div>
           </div>
         </nav>
       </div>
@@ -276,45 +345,7 @@ export default function ChatPage() {
                 )}
               </button>
             </div>
-            
-            {!isAssistantMinimized && (
-              <>
-                {/* Mode Selector */}
-                <div className="space-y-2 text-sm">
-                  <div className="text-gray-600 mb-2">modes -</div>
-                  <button
-                    onClick={() => setAgentMode('model')}
-                    className={`block w-full text-left px-2 py-1 rounded transition-colors ${
-                      agentMode === 'model' 
-                        ? 'text-blue-700 bg-blue-50' 
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                    }`}
-                  >
-                    model
-                  </button>
-                  <button
-                    onClick={() => setAgentMode('query')}
-                    className={`block w-full text-left px-2 py-1 rounded transition-colors ${
-                      agentMode === 'query' 
-                        ? 'text-blue-700 bg-blue-50' 
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                    }`}
-                  >
-                    query
-                  </button>
-                  <button
-                    onClick={() => setAgentMode('dashboard')}
-                    className={`block w-full text-left px-2 py-1 rounded underline transition-colors ${
-                      agentMode === 'dashboard' 
-                        ? 'text-blue-700 bg-blue-50' 
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                    }`}
-                  >
-                    dashboard
-                  </button>
-                </div>
-              </>
-            )}
+
           </div>
 
           {!isAssistantMinimized && (
@@ -354,6 +385,50 @@ export default function ChatPage() {
                 {/* Chat Input */}
                 <div className="border-t border-gray-200 p-4">
                   <form onSubmit={handleChatSubmit} className="flex space-x-2">
+                    {/* Mode Selector Dropdown */}
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setShowModeDropdown(!showModeDropdown)}
+                        className="flex items-center space-x-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-md text-sm font-medium text-gray-700 transition-colors"
+                      >
+                        <span>{agentMode}</span>
+                        <ChevronDown className={`w-4 h-4 transition-transform ${showModeDropdown ? 'rotate-180' : ''}`} />
+                      </button>
+                      
+                      {showModeDropdown && (
+                        <div className="absolute bottom-full mb-1 left-0 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                          <button
+                            type="button"
+                            onClick={() => { setAgentMode('model'); setShowModeDropdown(false); }}
+                            className={`block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 ${
+                              agentMode === 'model' ? 'text-blue-700 bg-blue-50' : 'text-gray-700'
+                            }`}
+                          >
+                            model
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setAgentMode('query'); setShowModeDropdown(false); }}
+                            className={`block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 ${
+                              agentMode === 'query' ? 'text-blue-700 bg-blue-50' : 'text-gray-700'
+                            }`}
+                          >
+                            query
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setAgentMode('dashboard'); setShowModeDropdown(false); }}
+                            className={`block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 ${
+                              agentMode === 'dashboard' ? 'text-blue-700 bg-blue-50' : 'text-gray-700'
+                            }`}
+                          >
+                            dashboard
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    
                     <input
                       type="text"
                       value={chatInput}
@@ -399,7 +474,7 @@ export default function ChatPage() {
               </button>
             </div>
             
-            {/* Mode Selector */}
+            {/* Mode Selector for Fullscreen */}
             <div className="flex space-x-4 text-sm">
               <span className="text-gray-600">modes:</span>
               <button
@@ -474,6 +549,50 @@ export default function ChatPage() {
             <div className="border-t border-gray-200 p-6">
               <div className="max-w-4xl mx-auto">
                 <form onSubmit={handleChatSubmit} className="flex space-x-4">
+                  {/* Mode Selector for Fullscreen */}
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setShowModeDropdown(!showModeDropdown)}
+                      className="flex items-center space-x-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium text-gray-700 transition-colors"
+                    >
+                      <span>{agentMode}</span>
+                      <ChevronDown className={`w-4 h-4 transition-transform ${showModeDropdown ? 'rotate-180' : ''}`} />
+                    </button>
+                    
+                    {showModeDropdown && (
+                      <div className="absolute bottom-full mb-1 left-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                        <button
+                          type="button"
+                          onClick={() => { setAgentMode('model'); setShowModeDropdown(false); }}
+                          className={`block w-full text-left px-4 py-3 text-sm hover:bg-gray-50 first:rounded-t-lg ${
+                            agentMode === 'model' ? 'text-blue-700 bg-blue-50' : 'text-gray-700'
+                          }`}
+                        >
+                          model
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => { setAgentMode('query'); setShowModeDropdown(false); }}
+                          className={`block w-full text-left px-4 py-3 text-sm hover:bg-gray-50 ${
+                            agentMode === 'query' ? 'text-blue-700 bg-blue-50' : 'text-gray-700'
+                          }`}
+                        >
+                          query
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => { setAgentMode('dashboard'); setShowModeDropdown(false); }}
+                          className={`block w-full text-left px-4 py-3 text-sm hover:bg-gray-50 last:rounded-b-lg ${
+                            agentMode === 'dashboard' ? 'text-blue-700 bg-blue-50' : 'text-gray-700'
+                          }`}
+                        >
+                          dashboard
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  
                   <input
                     type="text"
                     value={chatInput}

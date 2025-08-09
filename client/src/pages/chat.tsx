@@ -12,7 +12,7 @@ interface Message {
 }
 
 export default function ChatPage() {
-  const [currentView, setCurrentView] = useState<'dashboard' | 'studio' | 'integrations'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'studio' | 'integrations' | 'trainings'>('dashboard');
   const [agentMode, setAgentMode] = useState<'model' | 'query' | 'dashboard'>('query');
   const [currentSessionId, setCurrentSessionId] = useState<string>('');
   const [isConnected, setIsConnected] = useState(false);
@@ -23,7 +23,7 @@ export default function ChatPage() {
   const [isAssistantMinimized, setIsAssistantMinimized] = useState(false);
   const [isAssistantFullscreen, setIsAssistantFullscreen] = useState(false);
 
-  const [showTrainingsDropdown, setShowTrainingsDropdown] = useState(false);
+
   
   const userId = 'user_1';
 
@@ -252,30 +252,18 @@ export default function ChatPage() {
               {!isLeftSidebarCollapsed && <span>integrations</span>}
             </button>
 
-            {/* Trainings Section */}
-            <div className="pt-2">
-              <button
-                onClick={() => setShowTrainingsDropdown(!showTrainingsDropdown)}
-                className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3 justify-between'} px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50`}
-                title={isLeftSidebarCollapsed ? 'Trainings' : ''}
-              >
-                <div className={`flex items-center ${isLeftSidebarCollapsed ? '' : 'space-x-3'}`}>
-                  <GraduationCap className="w-4 h-4" />
-                  {!isLeftSidebarCollapsed && <span>trainings</span>}
-                </div>
-                {!isLeftSidebarCollapsed && (
-                  <ChevronDown className={`w-4 h-4 transition-transform ${showTrainingsDropdown ? 'rotate-180' : ''}`} />
-                )}
-              </button>
-              
-              {showTrainingsDropdown && !isLeftSidebarCollapsed && (
-                <div className="ml-4 mt-2 space-y-1">
-                  <button className="w-full text-left px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded">add training</button>
-                  <button className="w-full text-left px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded">remove training</button>
-                  <button className="w-full text-left px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded">publish trainings</button>
-                </div>
-              )}
-            </div>
+            <button
+              onClick={() => setCurrentView('trainings')}
+              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                currentView === 'trainings'
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+              title={isLeftSidebarCollapsed ? 'Trainings' : ''}
+            >
+              <GraduationCap className="w-4 h-4" />
+              {!isLeftSidebarCollapsed && <span>trainings</span>}
+            </button>
           </div>
         </nav>
       </div>
@@ -338,7 +326,7 @@ export default function ChatPage() {
               </div>
             </div>
           </div>
-        ) : (
+        ) : currentView === 'integrations' ? (
           <div className="flex-1 p-6">
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Integrations</h2>
@@ -442,6 +430,149 @@ export default function ChatPage() {
                   </button>
                   <button className="w-full p-3 text-left text-sm text-gray-700 border border-gray-200 rounded-md hover:bg-gray-50">
                     View Integration Logs
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 p-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Trainings</h2>
+              <p className="text-gray-600">Manage AI training data and model configurations</p>
+            </div>
+
+            {/* Trainings Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Active Trainings */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Active Trainings</h3>
+                  <GraduationCap className="w-5 h-5 text-gray-400" />
+                </div>
+                <div className="space-y-3">
+                  <div className="p-3 bg-gray-50 rounded-md">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Sales Data Model</span>
+                      <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Active</span>
+                    </div>
+                    <p className="text-xs text-gray-500">Last updated: 3 hours ago</p>
+                    <p className="text-xs text-gray-500">Accuracy: 94.2%</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-md">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Customer Insights</span>
+                      <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">Training</span>
+                    </div>
+                    <p className="text-xs text-gray-500">Last updated: 1 day ago</p>
+                    <p className="text-xs text-gray-500">Progress: 67%</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-md">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Revenue Forecasting</span>
+                      <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">Scheduled</span>
+                    </div>
+                    <p className="text-xs text-gray-500">Starts: Tomorrow 9:00 AM</p>
+                    <p className="text-xs text-gray-500">Dataset: Q4 Revenue Data</p>
+                  </div>
+                  <button className="w-full mt-4 px-4 py-2 text-sm text-blue-600 border border-blue-200 rounded-md hover:bg-blue-50">
+                    Add New Training
+                  </button>
+                </div>
+              </div>
+
+              {/* Training Datasets */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Training Datasets</h3>
+                  <Database className="w-5 h-5 text-gray-400" />
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                    <div>
+                      <span className="text-sm font-medium block">Historical Sales Data</span>
+                      <span className="text-xs text-gray-500">2.1M records • Updated daily</span>
+                    </div>
+                    <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Ready</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                    <div>
+                      <span className="text-sm font-medium block">Customer Behavior Data</span>
+                      <span className="text-xs text-gray-500">856K records • Updated weekly</span>
+                    </div>
+                    <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Ready</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                    <div>
+                      <span className="text-sm font-medium block">Market Trends Data</span>
+                      <span className="text-xs text-gray-500">430K records • Processing</span>
+                    </div>
+                    <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">Processing</span>
+                  </div>
+                  <button className="w-full mt-4 px-4 py-2 text-sm text-blue-600 border border-blue-200 rounded-md hover:bg-blue-50">
+                    Upload Dataset
+                  </button>
+                </div>
+              </div>
+
+              {/* Model Performance */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Model Performance</h3>
+                  <BarChart3 className="w-5 h-5 text-gray-400" />
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-gray-600">Overall Accuracy</span>
+                      <span className="text-sm font-medium">92.8%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-green-500 h-2 rounded-full" style={{width: '92.8%'}}></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-gray-600">Training Progress</span>
+                      <span className="text-sm font-medium">67%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-blue-500 h-2 rounded-full" style={{width: '67%'}}></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-gray-600">Data Quality</span>
+                      <span className="text-sm font-medium">95.2%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-purple-500 h-2 rounded-full" style={{width: '95.2%'}}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Training Actions */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Training Actions</h3>
+                  <Settings className="w-5 h-5 text-gray-400" />
+                </div>
+                <div className="space-y-3">
+                  <button className="w-full p-3 text-left text-sm text-gray-700 border border-gray-200 rounded-md hover:bg-gray-50">
+                    Start New Training Session
+                  </button>
+                  <button className="w-full p-3 text-left text-sm text-gray-700 border border-gray-200 rounded-md hover:bg-gray-50">
+                    Evaluate Model Performance
+                  </button>
+                  <button className="w-full p-3 text-left text-sm text-gray-700 border border-gray-200 rounded-md hover:bg-gray-50">
+                    Export Training Results
+                  </button>
+                  <button className="w-full p-3 text-left text-sm text-gray-700 border border-gray-200 rounded-md hover:bg-gray-50">
+                    Schedule Automated Training
+                  </button>
+                  <button className="w-full p-3 text-left text-sm text-red-600 border border-red-200 rounded-md hover:bg-red-50">
+                    Remove Training Data
                   </button>
                 </div>
               </div>

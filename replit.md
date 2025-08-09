@@ -8,9 +8,9 @@ DataMind is a modern web application that provides AI-powered data analytics thr
 
 Preferred communication style: Simple, everyday language.
 Design philosophy: Clean, simple interface - strongly rejects modern/sleek design elements like gradients, glass morphism, or complex styling.
-Left sidebar: Collapsible navigation with dashboard/studio/integrations as top-level pages, and trainings management as dropdown section.
+Left sidebar: Collapsible navigation with dashboard/studio/integrations/trainings as top-level pages.
 Assistant panel: Should be minimizable/maximizable for better workspace management. Maximize should open fullscreen overlay mode.
-Context-aware assistant: Agent modes (model/query/dashboard) are automatically detected based on current navigation selection (dashboard/studio/integrations) combined with user input keywords. No mode indicators needed - intelligence is completely transparent.
+Context-aware assistant: Agent modes (model/query/dashboard) are automatically detected based on current navigation selection (dashboard/studio/integrations/trainings) combined with user input keywords. No mode indicators needed - intelligence is completely transparent.
 
 ## System Architecture
 
@@ -19,7 +19,7 @@ Context-aware assistant: Agent modes (model/query/dashboard) are automatically d
 - **UI Framework**: shadcn/ui component library with Radix UI primitives for accessible, customizable components
 - **Styling**: Tailwind CSS with clean, simple design - no gradients, glass morphism, or complex effects
 - **State Management**: TanStack Query (React Query) for server state management and caching
-- **Navigation**: Three-column layout with collapsible left sidebar (dashboard/studio/integrations pages), main content area, and assistant panel
+- **Navigation**: Three-column layout with collapsible left sidebar (dashboard/studio/integrations/trainings pages), main content area, and assistant panel
 - **Real-time Communication**: WebSocket integration for live chat functionality
 
 ### Backend Architecture

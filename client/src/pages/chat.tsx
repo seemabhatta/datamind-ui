@@ -126,10 +126,14 @@ export default function ChatPage() {
 
   const handleAssistantToggle = () => {
     if (isAssistantMinimized) {
+      // Minimized -> Normal
       setIsAssistantMinimized(false);
+      setIsAssistantFullscreen(false);
     } else if (!isAssistantFullscreen) {
+      // Normal -> Fullscreen
       setIsAssistantFullscreen(true);
     } else {
+      // Fullscreen -> Minimized
       setIsAssistantFullscreen(false);
       setIsAssistantMinimized(true);
     }
@@ -256,28 +260,23 @@ export default function ChatPage() {
               {!isAssistantMinimized && (
                 <h3 className="text-lg font-semibold text-gray-900">assistant</h3>
               )}
-              <div className="flex space-x-1">
-                {!isAssistantMinimized && (
-                  <button
-                    onClick={() => setIsAssistantFullscreen(true)}
-                    className="p-1 hover:bg-gray-100 rounded transition-colors"
-                    title="Fullscreen Assistant"
-                  >
-                    <Maximize2 className="w-4 h-4 text-gray-600" />
-                  </button>
+              <button
+                onClick={handleAssistantToggle}
+                className="p-1 hover:bg-gray-100 rounded transition-colors"
+                title={
+                  isAssistantMinimized 
+                    ? 'Expand Assistant' 
+                    : isAssistantFullscreen 
+                    ? 'Minimize Assistant' 
+                    : 'Maximize Assistant'
+                }
+              >
+                {isAssistantMinimized ? (
+                  <ChevronLeft className="w-4 h-4 text-gray-600" />
+                ) : (
+                  <Maximize2 className="w-4 h-4 text-gray-600" />
                 )}
-                <button
-                  onClick={handleAssistantToggle}
-                  className="p-1 hover:bg-gray-100 rounded transition-colors"
-                  title={isAssistantMinimized ? 'Expand Assistant' : 'Minimize Assistant'}
-                >
-                  {isAssistantMinimized ? (
-                    <ChevronLeft className="w-4 h-4 text-gray-600" />
-                  ) : (
-                    <Minimize2 className="w-4 h-4 text-gray-600" />
-                  )}
-                </button>
-              </div>
+              </button>
             </div>
             
             {!isAssistantMinimized && (
@@ -395,11 +394,11 @@ export default function ChatPage() {
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xl font-semibold text-gray-900">Assistant - Fullscreen Mode</h3>
               <button
-                onClick={() => setIsAssistantFullscreen(false)}
+                onClick={handleAssistantToggle}
                 className="p-2 hover:bg-gray-100 rounded transition-colors"
-                title="Exit Fullscreen"
+                title="Minimize Assistant"
               >
-                <X className="w-5 h-5 text-gray-600" />
+                <Minimize2 className="w-5 h-5 text-gray-600" />
               </button>
             </div>
             

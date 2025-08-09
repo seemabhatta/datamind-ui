@@ -814,9 +814,8 @@ compliance:
                   </div>
                 )}
                 <form onSubmit={handleChatSubmit} className="flex space-x-4">
-                  <div className="flex space-x-2">
-                    <div className="relative plus-dropdown-container">
-                      <button
+                  <div className="relative plus-dropdown-container">
+                    <button
                       type="button"
                       onClick={() => setIsPlusDropdownOpen(!isPlusDropdownOpen)}
                       className="px-3 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -859,17 +858,6 @@ compliance:
                         </button>
                       </div>
                     )}
-                    </div>
-                    
-                    {/* Dedicated Upload Button */}
-                    <button
-                      type="button"
-                      onClick={() => handlePlusOption('upload')}
-                      className="px-3 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      title="Upload File"
-                    >
-                      <Upload className="w-5 h-5 text-gray-600" />
-                    </button>
                   </div>
                   
                   <input

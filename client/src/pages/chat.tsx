@@ -460,18 +460,7 @@ compliance:
               {!isLeftSidebarCollapsed && <span>models</span>}
             </button>
 
-            <button
-              onClick={() => setCurrentView('trainings')}
-              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                currentView === 'trainings'
-                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-              title={isLeftSidebarCollapsed ? 'Trainings' : ''}
-            >
-              <GraduationCap className="w-4 h-4" />
-              {!isLeftSidebarCollapsed && <span>trainings</span>}
-            </button>
+            
 
 
           </div>

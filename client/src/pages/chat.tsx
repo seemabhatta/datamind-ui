@@ -184,12 +184,11 @@ export default function ChatPage() {
               title={isLeftSidebarCollapsed ? 'Studio' : ''}
             >
               <Database className="w-4 h-4" />
-              {!isLeftSidebarCollapsed && <span>studio</span>}
+              {!isLeftSidebarCollapsed && <span>model</span>}
             </button>
           </div>
         </nav>
       </div>
-
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col">
         {currentView === 'dashboard' ? (
@@ -251,7 +250,6 @@ export default function ChatPage() {
           </div>
         )}
       </div>
-
       {/* Right Assistant Sidebar */}
       {!isAssistantFullscreen && (
         <div className={`${isAssistantMinimized ? 'w-16' : 'w-80'} bg-white border-l border-gray-200 flex flex-col transition-all duration-300`}>
@@ -385,7 +383,6 @@ export default function ChatPage() {
           )}
         </div>
       )}
-
       {/* Fullscreen Assistant Overlay */}
       {isAssistantFullscreen && (
         <div className="fixed inset-0 bg-white z-50 flex flex-col">

@@ -193,16 +193,16 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-50 to-blue-50 relative">
+    <div className="flex h-screen bg-gray-50 relative">
       {/* Left Sidebar */}
-      <div className={`${isLeftSidebarCollapsed ? 'w-16' : 'w-64'} bg-white/80 backdrop-blur-sm border-r border-gray-200/50 flex flex-col transition-all duration-300 shadow-sm`}>
-        <div className="p-6 border-b border-gray-200/50 flex items-center justify-between">
+      <div className={`${isLeftSidebarCollapsed ? 'w-16' : 'w-48'} bg-white border-r border-gray-200 flex flex-col transition-all duration-300`}>
+        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
           {!isLeftSidebarCollapsed && (
-            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">DataMind</h1>
+            <h1 className="text-lg font-semibold text-gray-900">DataMind</h1>
           )}
           <button
             onClick={() => setIsLeftSidebarCollapsed(!isLeftSidebarCollapsed)}
-            className="p-2 hover:bg-gray-100/80 rounded-lg transition-all duration-200 hover:scale-105"
+            className="p-1 hover:bg-gray-100 rounded transition-colors"
           >
             {isLeftSidebarCollapsed ? (
               <ChevronRight className="w-4 h-4 text-gray-600" />
@@ -212,14 +212,14 @@ export default function ChatPage() {
           </button>
         </div>
         
-        <nav className="flex-1 p-6">
-          <div className="space-y-3">
+        <nav className="flex-1 p-4">
+          <div className="space-y-2">
             <button
               onClick={() => setCurrentView('dashboard')}
-              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
+              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                 currentView === 'dashboard'
-                  ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200/50 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50/80 hover:shadow-sm'
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
               title={isLeftSidebarCollapsed ? 'Dashboard' : ''}
             >
@@ -229,10 +229,10 @@ export default function ChatPage() {
             
             <button
               onClick={() => setCurrentView('studio')}
-              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
+              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                 currentView === 'studio'
-                  ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200/50 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50/80 hover:shadow-sm'
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
               title={isLeftSidebarCollapsed ? 'Studio' : ''}
             >
@@ -309,70 +309,60 @@ export default function ChatPage() {
         </nav>
       </div>
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col bg-gradient-to-br from-white/80 to-blue-50/30 backdrop-blur-sm">
+      <div className="flex-1 flex flex-col">
         {currentView === 'dashboard' ? (
-          <div className="flex-1 p-8">
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-3">Dashboard</h2>
-              <p className="text-gray-600 text-lg">Analytics and visualizations overview</p>
+          <div className="flex-1 p-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Dashboard</h2>
+              <p className="text-gray-600">Analytics and visualizations overview</p>
             </div>
             
             {/* Dashboard Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Sample Chart 1 */}
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-8 shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold text-gray-900">Sales Performance</h3>
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100">
-                    <BarChart3 className="w-6 h-6 text-blue-600" />
-                  </div>
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Sales Performance</h3>
+                  <BarChart3 className="w-5 h-5 text-gray-400" />
                 </div>
-                <div className="h-72 bg-gradient-to-br from-gray-50 to-blue-50/30 rounded-2xl flex items-center justify-center border border-gray-100">
+                <div className="h-64 bg-gray-50 rounded-md flex items-center justify-center">
                   <div className="text-center text-gray-500">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
-                      <BarChart3 className="w-8 h-8 text-blue-600" />
-                    </div>
-                    <p className="text-lg font-medium">Chart visualization</p>
-                    <p className="text-sm mt-2 text-gray-400">Connect to data source to populate</p>
+                    <BarChart3 className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p>Chart visualization would appear here</p>
+                    <p className="text-sm mt-1">Connect to data source to populate</p>
                   </div>
                 </div>
               </div>
 
               {/* Sample Chart 2 */}
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-8 shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold text-gray-900">Revenue Trends</h3>
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-green-100 to-emerald-100">
-                    <BarChart3 className="w-6 h-6 text-green-600" />
-                  </div>
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Revenue Trends</h3>
+                  <BarChart3 className="w-5 h-5 text-gray-400" />
                 </div>
-                <div className="h-72 bg-gradient-to-br from-gray-50 to-green-50/30 rounded-2xl flex items-center justify-center border border-gray-100">
+                <div className="h-64 bg-gray-50 rounded-md flex items-center justify-center">
                   <div className="text-center text-gray-500">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center">
-                      <BarChart3 className="w-8 h-8 text-green-600" />
-                    </div>
-                    <p className="text-lg font-medium">Chart visualization</p>
-                    <p className="text-sm mt-2 text-gray-400">Connect to data source to populate</p>
+                    <BarChart3 className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p>Chart visualization would appear here</p>
+                    <p className="text-sm mt-1">Connect to data source to populate</p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         ) : (
-          <div className="flex-1 p-8">
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-3">Studio</h2>
-              <p className="text-gray-600 text-lg">Data exploration and analysis workspace</p>
+          <div className="flex-1 p-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Studio</h2>
+              <p className="text-gray-600">Data exploration and analysis workspace</p>
             </div>
             
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-8 shadow-lg hover:shadow-xl transition-all duration-300 h-[500px]">
-              <div className="h-full bg-gradient-to-br from-gray-50 to-purple-50/30 rounded-2xl flex items-center justify-center border border-gray-100">
+            <div className="bg-white rounded-lg border border-gray-200 p-6 h-96">
+              <div className="h-full bg-gray-50 rounded-md flex items-center justify-center">
                 <div className="text-center text-gray-500">
-                  <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
-                    <Database className="w-10 h-10 text-purple-600" />
-                  </div>
-                  <p className="text-xl font-medium mb-2">Studio workspace</p>
-                  <p className="text-gray-400">Data exploration tools will appear here</p>
+                  <Database className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p>Studio workspace</p>
+                  <p className="text-sm mt-1">Data exploration tools will appear here</p>
                 </div>
               </div>
             </div>
@@ -381,15 +371,15 @@ export default function ChatPage() {
       </div>
       {/* Right Assistant Sidebar */}
       {!isAssistantFullscreen && (
-        <div className={`${isAssistantMinimized ? 'w-16' : 'w-96'} bg-white/90 backdrop-blur-sm border-l border-gray-200/50 flex flex-col transition-all duration-300 shadow-sm`}>
-          <div className="p-6 border-b border-gray-200/50">
+        <div className={`${isAssistantMinimized ? 'w-16' : 'w-80'} bg-white border-l border-gray-200 flex flex-col transition-all duration-300`}>
+          <div className="p-4 border-b border-gray-200">
             <div className="flex items-center justify-between mb-3">
               {!isAssistantMinimized && (
-                <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">assistant</h3>
+                <h3 className="text-lg font-semibold text-gray-900">assistant</h3>
               )}
               <button
                 onClick={handleAssistantToggle}
-                className="p-2 hover:bg-gray-100/80 rounded-xl transition-all duration-200 hover:scale-105"
+                className="p-1 hover:bg-gray-100 rounded transition-colors"
                 title={
                   isAssistantMinimized 
                     ? 'Expand Assistant' 
@@ -413,23 +403,20 @@ export default function ChatPage() {
               {/* Chat Area */}
               <div className="flex-1 flex flex-col min-h-0">
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                <div className="flex-1 overflow-y-auto p-4 space-y-3">
                   {messages.length === 0 && (
-                    <div className="text-center py-12">
-                      <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
-                        <MessageSquare className="w-8 h-8 text-indigo-600" />
-                      </div>
-                      <p className="text-lg font-medium text-gray-700 mb-2">Ready to help</p>
+                    <div className="text-center py-8">
+                      <MessageSquare className="w-8 h-8 mx-auto text-gray-300 mb-2" />
                       <p className="text-sm text-gray-500">Start a conversation with the assistant</p>
                     </div>
                   )}
                   
                   {messages.map((message) => (
                     <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-sm px-4 py-3 rounded-2xl text-sm shadow-sm ${
+                      <div className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
                         message.role === 'user' 
-                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white' 
-                          : 'bg-gray-100/80 backdrop-blur-sm text-gray-900 border border-gray-200/50'
+                          ? 'bg-blue-600 text-white' 
+                          : 'bg-gray-100 text-gray-900'
                       }`}>
                         {message.content}
                       </div>
@@ -438,7 +425,7 @@ export default function ChatPage() {
                   
                   {isLoading && (
                     <div className="flex justify-start">
-                      <div className="bg-gradient-to-r from-gray-100 to-gray-50 px-4 py-3 rounded-2xl text-sm text-gray-600 border border-gray-200/50 shadow-sm">
+                      <div className="bg-gray-100 px-3 py-2 rounded-lg text-sm text-gray-600">
                         <span className="animate-pulse">Assistant is typing...</span>
                       </div>
                     </div>
@@ -446,20 +433,20 @@ export default function ChatPage() {
                 </div>
 
                 {/* Chat Input */}
-                <div className="border-t border-gray-200/50 p-6">
-                  <form onSubmit={handleChatSubmit} className="flex space-x-3">
+                <div className="border-t border-gray-200 p-4">
+                  <form onSubmit={handleChatSubmit} className="flex space-x-2">
                     <input
                       type="text"
                       value={chatInput}
                       onChange={(e) => setChatInput(e.target.value)}
                       placeholder="Ask me anything..."
-                      className="flex-1 px-4 py-3 border border-gray-300/50 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 bg-gray-50/80 backdrop-blur-sm transition-all duration-200"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       disabled={isLoading}
                     />
                     <button
                       type="submit"
                       disabled={!chatInput.trim() || isLoading}
-                      className="px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl text-sm font-medium hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105"
+                      className="px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Send
                     </button>
@@ -472,23 +459,21 @@ export default function ChatPage() {
           {/* Minimized State - Show Chat Icon */}
           {isAssistantMinimized && (
             <div className="flex-1 flex items-center justify-center">
-              <div className="p-3 rounded-2xl bg-gradient-to-br from-indigo-100 to-purple-100">
-                <MessageSquare className="w-8 h-8 text-indigo-600" />
-              </div>
+              <MessageSquare className="w-8 h-8 text-gray-400" />
             </div>
           )}
         </div>
       )}
       {/* Fullscreen Assistant Overlay */}
       {isAssistantFullscreen && (
-        <div className="fixed inset-0 bg-gradient-to-br from-slate-50 to-blue-50 z-50 flex flex-col backdrop-blur-md">
+        <div className="fixed inset-0 bg-white z-50 flex flex-col">
           {/* Fullscreen Header */}
-          <div className="p-8 border-b border-gray-200/50 bg-white/80 backdrop-blur-sm">
+          <div className="p-4 border-b border-gray-200">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Assistant</h3>
+              <h3 className="text-xl font-semibold text-gray-900">Assistant - Fullscreen Mode</h3>
               <button
                 onClick={handleAssistantToggle}
-                className="p-3 hover:bg-gray-100/80 rounded-2xl transition-all duration-200 hover:scale-105 shadow-sm"
+                className="p-2 hover:bg-gray-100 rounded transition-colors"
                 title="Minimize Assistant"
               >
                 <Minimize2 className="w-6 h-6 text-gray-600" />
@@ -501,24 +486,22 @@ export default function ChatPage() {
           {/* Fullscreen Chat Area */}
           <div className="flex-1 flex flex-col min-h-0">
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-12">
-              <div className="max-w-5xl mx-auto space-y-6">
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="max-w-4xl mx-auto space-y-4">
                 {messages.length === 0 && (
-                  <div className="text-center py-24">
-                    <div className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
-                      <MessageSquare className="w-12 h-12 text-indigo-600" />
-                    </div>
-                    <h4 className="text-2xl font-bold text-gray-900 mb-3">Welcome to Assistant</h4>
-                    <p className="text-gray-600 text-lg">Enhanced workspace for detailed interactions and powerful AI assistance</p>
+                  <div className="text-center py-16">
+                    <MessageSquare className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+                    <h4 className="text-lg font-medium text-gray-900 mb-2">Welcome to Assistant Fullscreen Mode</h4>
+                    <p className="text-gray-500">Start a conversation with enhanced workspace for detailed interactions</p>
                   </div>
                 )}
                 
                 {messages.map((message) => (
                   <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-3xl px-6 py-4 rounded-3xl text-base shadow-sm ${
+                    <div className={`max-w-2xl px-4 py-3 rounded-lg ${
                       message.role === 'user' 
-                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white' 
-                        : 'bg-white/80 backdrop-blur-sm text-gray-900 border border-gray-200/50'
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-gray-100 text-gray-900'
                     }`}>
                       {message.content}
                     </div>
@@ -527,7 +510,7 @@ export default function ChatPage() {
                 
                 {isLoading && (
                   <div className="flex justify-start">
-                    <div className="bg-white/80 backdrop-blur-sm px-6 py-4 rounded-3xl text-gray-600 border border-gray-200/50 shadow-sm">
+                    <div className="bg-gray-100 px-4 py-3 rounded-lg text-gray-600">
                       <span className="animate-pulse">Assistant is typing...</span>
                     </div>
                   </div>
@@ -536,21 +519,21 @@ export default function ChatPage() {
             </div>
 
             {/* Fullscreen Chat Input */}
-            <div className="border-t border-gray-200/50 p-8 bg-white/80 backdrop-blur-sm">
-              <div className="max-w-5xl mx-auto">
-                <form onSubmit={handleChatSubmit} className="flex space-x-6">
+            <div className="border-t border-gray-200 p-6">
+              <div className="max-w-4xl mx-auto">
+                <form onSubmit={handleChatSubmit} className="flex space-x-4">
                   <input
                     type="text"
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
                     placeholder="Ask me anything..."
-                    className="flex-1 px-6 py-4 border border-gray-300/50 rounded-3xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 bg-gray-50/80 backdrop-blur-sm transition-all duration-200"
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     disabled={isLoading}
                   />
                   <button
                     type="submit"
                     disabled={!chatInput.trim() || isLoading}
-                    className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-3xl text-base font-medium hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Send
                   </button>

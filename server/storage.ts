@@ -5,7 +5,7 @@ import {
   type PinnedVisualization, type InsertPinnedVisualization
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -18,6 +18,8 @@ export interface IStorage {
   getChatSessionsByUser(userId: string): Promise<ChatSession[]>;
   createChatSession(session: InsertChatSession): Promise<ChatSession>;
   updateChatSession(id: string, updates: Partial<ChatSession>): Promise<ChatSession>;
+  deleteChatSession(id: string): Promise<void>;
+  deleteChatSessions(ids: string[]): Promise<void>;
 
   // Chat message methods
   getMessagesBySession(sessionId: string): Promise<ChatMessage[]>;
@@ -86,6 +88,24 @@ export class DatabaseStorage implements IStorage {
       .where(eq(chatSessions.id, id))
       .returning();
     return updated;
+  }
+
+  async deleteChatSession(id: string): Promise<void> {
+    // Delete messages first (cascade)
+    await db.delete(chatMessages).where(eq(chatMessages.sessionId, id));
+    // Then delete the session
+    await db.delete(chatSessions).where(eq(chatSessions.id, id));
+  }
+
+  async deleteChatSessions(ids: string[]): Promise<void> {
+    // Delete messages for all sessions
+    await db.delete(chatMessages).where(
+      inArray(chatMessages.sessionId, ids)
+    );
+    // Then delete the sessions
+    await db.delete(chatSessions).where(
+      inArray(chatSessions.id, ids)
+    );
   }
 
   async getMessagesBySession(sessionId: string): Promise<ChatMessage[]> {

@@ -172,6 +172,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete('/api/sessions/:sessionId', async (req, res) => {
+    try {
+      await storage.deleteChatSession(req.params.sessionId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting session:', error);
+      res.status(500).json({ message: 'Failed to delete session' });
+    }
+  });
+
+  app.delete('/api/sessions', async (req, res) => {
+    try {
+      const { sessionIds } = req.body;
+      if (!Array.isArray(sessionIds)) {
+        return res.status(400).json({ message: 'sessionIds must be an array' });
+      }
+      await storage.deleteChatSessions(sessionIds);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error bulk deleting sessions:', error);
+      res.status(500).json({ message: 'Failed to delete sessions' });
+    }
+  });
+
   // Messages
   app.get('/api/sessions/:sessionId/messages', async (req, res) => {
     try {

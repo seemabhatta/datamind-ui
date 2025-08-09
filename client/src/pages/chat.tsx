@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { queryClient } from '@/lib/queryClient';
-import { useQuery } from '@tanstack/react-query';
-import { BarChart3, MessageSquare, Home, Database, ChevronLeft, ChevronRight, Minimize2, Maximize2, X, Zap, BookOpen, Settings, Cloud, Link, Send, GraduationCap, ChevronDown, Upload, Plus, Play, Save, Eye, Edit3, Brain, Search } from 'lucide-react';
+import { queryClient, apiRequest } from '@/lib/queryClient';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { BarChart3, MessageSquare, Home, Database, ChevronLeft, ChevronRight, Minimize2, Maximize2, X, Zap, BookOpen, Settings, Cloud, Link, Send, GraduationCap, ChevronDown, Upload, Plus, Play, Save, Eye, Edit3, Brain, Search, Trash2, Check, Square } from 'lucide-react';
 
 // Type definitions for messages
 interface Message {
@@ -28,6 +28,8 @@ export default function ChatPage() {
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [yamlContent, setYamlContent] = useState<string>('');
   const [isPlusDropdownOpen, setIsPlusDropdownOpen] = useState(false);
+  const [selectedChatIds, setSelectedChatIds] = useState<string[]>([]);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
 
 
   
@@ -37,6 +39,59 @@ export default function ChatPage() {
     queryKey: ['/api/sessions', userId],
     enabled: !!userId,
   });
+
+  // Delete mutations
+  const deleteChatMutation = useMutation({
+    mutationFn: async (sessionId: string) => {
+      const response = await apiRequest('DELETE', `/api/sessions/${sessionId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/sessions', userId] });
+    },
+  });
+
+  const bulkDeleteChatsMutation = useMutation({
+    mutationFn: async (sessionIds: string[]) => {
+      const response = await apiRequest('DELETE', '/api/sessions', { sessionIds });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/sessions', userId] });
+      setSelectedChatIds([]);
+      setIsSelectionMode(false);
+    },
+  });
+
+  // Handlers for delete functionality
+  const handleDeleteChat = async (sessionId: string) => {
+    if (confirm('Are you sure you want to delete this chat? This action cannot be undone.')) {
+      await deleteChatMutation.mutateAsync(sessionId);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedChatIds.length === 0) return;
+    if (confirm(`Are you sure you want to delete ${selectedChatIds.length} chat(s)? This action cannot be undone.`)) {
+      await bulkDeleteChatsMutation.mutateAsync(selectedChatIds);
+    }
+  };
+
+  const toggleChatSelection = (sessionId: string) => {
+    setSelectedChatIds(prev => 
+      prev.includes(sessionId) 
+        ? prev.filter(id => id !== sessionId)
+        : [...prev, sessionId]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (sessions && selectedChatIds.length === sessions.length) {
+      setSelectedChatIds([]);
+    } else if (sessions) {
+      setSelectedChatIds(sessions.map((s: any) => s.id));
+    }
+  };
 
   // Load messages for current session
   const { data: sessionMessages, refetch: refetchMessages } = useQuery({
@@ -778,18 +833,87 @@ compliance:
           </div>
         ) : currentView === 'chats' ? (
           <div className="flex-1 p-6">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Chats</h2>
-              <p className="text-gray-600">Chat history and conversation management</p>
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Chats</h2>
+                <p className="text-gray-600">Chat history and conversation management</p>
+              </div>
+              <div className="flex items-center space-x-2">
+                {sessions && sessions.length > 0 && (
+                  <button
+                    onClick={() => setIsSelectionMode(!isSelectionMode)}
+                    className="px-3 py-2 text-sm border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                  >
+                    {isSelectionMode ? 'Cancel' : 'Select'}
+                  </button>
+                )}
+                {isSelectionMode && selectedChatIds.length > 0 && (
+                  <button
+                    onClick={handleBulkDelete}
+                    disabled={bulkDeleteChatsMutation.isPending}
+                    className="px-3 py-2 text-sm bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+                  >
+                    Delete ({selectedChatIds.length})
+                  </button>
+                )}
+              </div>
             </div>
+
+            {/* Bulk Selection Controls */}
+            {isSelectionMode && sessions && sessions.length > 0 && (
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={toggleSelectAll}
+                      className="flex items-center space-x-2 text-sm text-blue-700 hover:text-blue-900"
+                    >
+                      {selectedChatIds.length === sessions.length ? (
+                        <Check className="w-4 h-4" />
+                      ) : (
+                        <Square className="w-4 h-4" />
+                      )}
+                      <span>
+                        {selectedChatIds.length === sessions.length ? 'Deselect All' : 'Select All'}
+                      </span>
+                    </button>
+                  </div>
+                  <span className="text-sm text-gray-600">
+                    {selectedChatIds.length} of {sessions.length} selected
+                  </span>
+                </div>
+              </div>
+            )}
             
             {/* Chat History List */}
             <div className="space-y-4">
               {sessions && sessions.length > 0 ? (
                 sessions.map((session: any) => (
-                  <div key={session.id} className="bg-white rounded-lg border border-gray-200 p-4 hover:border-blue-200 cursor-pointer transition-colors">
+                  <div key={session.id} className="bg-white rounded-lg border border-gray-200 p-4 hover:border-blue-200 transition-colors">
                     <div className="flex items-center justify-between">
-                      <div className="flex-1">
+                      {isSelectionMode && (
+                        <div className="mr-3">
+                          <input
+                            type="checkbox"
+                            checked={selectedChatIds.includes(session.id)}
+                            onChange={() => toggleChatSelection(session.id)}
+                            className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                          />
+                        </div>
+                      )}
+                      
+                      <div className="flex-1 cursor-pointer" onClick={() => {
+                        if (!isSelectionMode) {
+                          console.log('Opening session:', session.id);
+                          setMessages([]);
+                          setCurrentSessionId(session.id);
+                          setCurrentSessionInfo(session);
+                          setCurrentView('chat');
+                          queryClient.invalidateQueries({
+                            queryKey: ['/api/sessions', session.id, 'messages']
+                          });
+                        }
+                      }}>
                         <div className="flex items-center space-x-2 mb-1">
                           <h3 className="text-sm font-medium text-gray-900">
                             {session.agentType === 'yaml' ? 'Data Generation Chat' : 'Query Analysis Chat'}
@@ -806,23 +930,39 @@ compliance:
                           {new Date(session.createdAt).toLocaleDateString()} • {new Date(session.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                         </p>
                       </div>
-                      <button
-                        onClick={async () => {
-                          console.log('Opening session:', session.id);
-                          setMessages([]); // Clear current messages
-                          setCurrentSessionId(session.id);
-                          setCurrentSessionInfo(session); // Store session info for header
-                          setCurrentView('chat');
-                          
-                          // Invalidate and refetch messages for this session
-                          await queryClient.invalidateQueries({
-                            queryKey: ['/api/sessions', session.id, 'messages']
-                          });
-                        }}
-                        className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
-                      >
-                        Open
-                      </button>
+                      
+                      <div className="flex items-center space-x-2">
+                        {!isSelectionMode && (
+                          <>
+                            <button
+                              onClick={async () => {
+                                console.log('Opening session:', session.id);
+                                setMessages([]);
+                                setCurrentSessionId(session.id);
+                                setCurrentSessionInfo(session);
+                                setCurrentView('chat');
+                                await queryClient.invalidateQueries({
+                                  queryKey: ['/api/sessions', session.id, 'messages']
+                                });
+                              }}
+                              className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                            >
+                              Open
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteChat(session.id);
+                              }}
+                              disabled={deleteChatMutation.isPending}
+                              className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded disabled:opacity-50"
+                              title="Delete chat"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))

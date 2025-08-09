@@ -265,6 +265,13 @@ export default function ChatPage() {
               {!isLeftSidebarCollapsed && <span>trainings</span>}
             </button>
 
+
+          </div>
+        </nav>
+        
+        {/* Profile Section */}
+        <div className="p-4 border-t border-gray-200">
+          <div className="space-y-2">
             <button
               onClick={() => setCurrentView('settings')}
               className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors ${
@@ -277,8 +284,32 @@ export default function ChatPage() {
               <Settings className="w-4 h-4" />
               {!isLeftSidebarCollapsed && <span>settings</span>}
             </button>
+            
+            <button
+              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50`}
+              title={isLeftSidebarCollapsed ? 'Help' : ''}
+            >
+              <BookOpen className="w-4 h-4" />
+              {!isLeftSidebarCollapsed && <span>help</span>}
+            </button>
+            
+            <button
+              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50`}
+              title={isLeftSidebarCollapsed ? 'Upgrade Plan' : ''}
+            >
+              <Zap className="w-4 h-4" />
+              {!isLeftSidebarCollapsed && <span>upgrade plan</span>}
+            </button>
+            
+            <button
+              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50`}
+              title={isLeftSidebarCollapsed ? 'Logout' : ''}
+            >
+              <X className="w-4 h-4" />
+              {!isLeftSidebarCollapsed && <span>logout</span>}
+            </button>
           </div>
-        </nav>
+        </div>
       </div>
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col">

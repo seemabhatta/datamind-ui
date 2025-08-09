@@ -12,7 +12,7 @@ interface Message {
 }
 
 export default function ChatPage() {
-  const [currentView, setCurrentView] = useState<'dashboard' | 'studio'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'studio' | 'integrations'>('dashboard');
   const [agentMode, setAgentMode] = useState<'model' | 'query' | 'dashboard'>('query');
   const [currentSessionId, setCurrentSessionId] = useState<string>('');
   const [isConnected, setIsConnected] = useState(false);
@@ -23,7 +23,6 @@ export default function ChatPage() {
   const [isAssistantMinimized, setIsAssistantMinimized] = useState(false);
   const [isAssistantFullscreen, setIsAssistantFullscreen] = useState(false);
 
-  const [showIntegrationsDropdown, setShowIntegrationsDropdown] = useState(false);
   const [showTrainingsDropdown, setShowTrainingsDropdown] = useState(false);
   
   const userId = 'user_1';
@@ -240,46 +239,18 @@ export default function ChatPage() {
               {!isLeftSidebarCollapsed && <span>studio</span>}
             </button>
 
-            {/* Integrations Section */}
-            <div className="pt-6">
-              <button
-                onClick={() => setShowIntegrationsDropdown(!showIntegrationsDropdown)}
-                className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3 justify-between'} px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50/80 hover:shadow-sm`}
-                title={isLeftSidebarCollapsed ? 'Integrations' : ''}
-              >
-                <div className={`flex items-center ${isLeftSidebarCollapsed ? '' : 'space-x-3'}`}>
-                  <Zap className="w-4 h-4" />
-                  {!isLeftSidebarCollapsed && <span>integrations</span>}
-                </div>
-                {!isLeftSidebarCollapsed && (
-                  <ChevronDown className={`w-4 h-4 transition-transform ${showIntegrationsDropdown ? 'rotate-180' : ''}`} />
-                )}
-              </button>
-              
-              {showIntegrationsDropdown && !isLeftSidebarCollapsed && (
-                <div className="ml-6 mt-3 space-y-2">
-                  {/* Sources */}
-                  <div className="text-xs font-medium text-gray-500 mb-3">sources</div>
-                  <button className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50/80 rounded-lg transition-all duration-150">snowflake</button>
-                  <button className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50/80 rounded-lg transition-all duration-150">aws dynamo db</button>
-                  <button className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50/80 rounded-lg transition-all duration-150">aws s3</button>
-                  
-                  {/* Connections */}
-                  <div className="text-xs text-gray-500 mb-2 mt-3">connections</div>
-                  <button className="w-full text-left px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded">manage connections</button>
-                  
-                  {/* Destinations */}
-                  <div className="text-xs text-gray-500 mb-2 mt-3">destinations</div>
-                  <button className="w-full text-left px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded">manage destinations</button>
-                  
-                  {/* Publish to */}
-                  <div className="text-xs text-gray-500 mb-2 mt-3">publish to</div>
-                  <button className="w-full text-left px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded">power bi</button>
-                  <button className="w-full text-left px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded">google looker</button>
-                  <button className="w-full text-left px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded">data studio</button>
-                </div>
-              )}
-            </div>
+            <button
+              onClick={() => setCurrentView('integrations')}
+              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                currentView === 'integrations'
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+              title={isLeftSidebarCollapsed ? 'Integrations' : ''}
+            >
+              <Zap className="w-4 h-4" />
+              {!isLeftSidebarCollapsed && <span>integrations</span>}
+            </button>
 
             {/* Trainings Section */}
             <div className="pt-2">

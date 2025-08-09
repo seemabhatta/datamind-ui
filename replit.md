@@ -2,13 +2,14 @@
 
 ## Overview
 
-DataMind is a modern web application that provides AI-powered data analytics through a dashboard-style interface with an integrated assistant sidebar. The platform features a three-column layout: navigation sidebar, main dashboard/studio area, and assistant chat panel. Users can explore visualizations in the dashboard view, work with data in the studio, and interact with AI agents through the right-side assistant panel with multiple modes (model, query, dashboard). Built as a full-stack application with real-time chat capabilities, it features a React frontend with shadcn/ui components and an Express.js backend with PostgreSQL database integration.
+DataMind is a modern web application that provides AI-powered data analytics through a dashboard-style interface with an integrated assistant sidebar. The platform features a three-column layout: navigation sidebar, main dashboard/studio area, and assistant chat panel. Users can explore visualizations in the dashboard view, work with data in the studio, create semantic data models from connected sources in the models section, and interact with AI agents through the right-side assistant panel with multiple modes (model, query, dashboard). Built as a full-stack application with real-time chat capabilities, it features a React frontend with shadcn/ui components and an Express.js backend with PostgreSQL database integration.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
 Design philosophy: Clean, simple interface - strongly rejects modern/sleek design elements like gradients, glass morphism, or complex styling.
-Left sidebar: Collapsible navigation with dashboard/studio/trainings/settings as top-level pages. Integrations moved under settings with tabbed interface.
+Left sidebar: Collapsible navigation with dashboard/studio/models/trainings as top-level pages. Settings moved to profile dropdown with integrations in tabbed interface.
+Models section: Semantic data modeling interface where users select data sources (configured in settings), browse available tables/views/folders, select multiple objects, and create semantic models with relationships and configurations.
 Assistant panel: Should be minimizable/maximizable for better workspace management. Maximize should open fullscreen overlay mode.
 Context-aware assistant: Agent modes (model/query/dashboard) are automatically detected based on current navigation selection (dashboard/studio/integrations/trainings) combined with user input keywords. No mode indicators needed - intelligence is completely transparent.
 

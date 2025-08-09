@@ -898,195 +898,246 @@ outputs:
         ) : currentView === 'models' ? (
           <div className="flex-1 p-6">
             <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Models</h2>
-              <p className="text-gray-600">Browse and manage mortgage domain AI models</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Semantic Models</h2>
+              <p className="text-gray-600">Create and manage semantic data models from your connected data sources</p>
             </div>
             
-            {/* Models Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              {/* HMDA Model */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+              {/* Data Source Selection */}
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">HMDA</h3>
-                  <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Active</span>
+                  <h3 className="text-lg font-semibold text-gray-900">Data Sources</h3>
+                  <Database className="w-5 h-5 text-gray-400" />
                 </div>
-                <p className="text-sm text-gray-600 mb-4">Home Mortgage Disclosure Act compliance model for fair lending analysis and regulatory reporting.</p>
-                <div className="space-y-2 mb-4">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-500">Accuracy:</span>
-                    <span className="font-medium">96.8%</span>
+                
+                <div className="space-y-3">
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-md cursor-pointer">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-blue-900">PostgreSQL - Primary</span>
+                      <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">Selected</span>
+                    </div>
+                    <p className="text-xs text-blue-700">47 tables • 12 views • Connected</p>
                   </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-500">Last Updated:</span>
-                    <span className="font-medium">2 days ago</span>
+                  
+                  <div className="p-3 bg-gray-50 rounded-md cursor-pointer hover:bg-gray-100">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-900">Snowflake - Analytics</span>
+                      <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Available</span>
+                    </div>
+                    <p className="text-xs text-gray-500">23 tables • 8 views • Connected</p>
                   </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-500">Training Data:</span>
-                    <span className="font-medium">2.1M records</span>
+                  
+                  <div className="p-3 bg-gray-50 rounded-md cursor-pointer hover:bg-gray-100">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-900">MongoDB - Documents</span>
+                      <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">Setup Required</span>
+                    </div>
+                    <p className="text-xs text-gray-500">15 collections • Not configured</p>
                   </div>
-                </div>
-                <div className="flex space-x-2">
-                  <button className="flex-1 px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
-                    Deploy
-                  </button>
-                  <button className="flex-1 px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
-                    Configure
-                  </button>
                 </div>
               </div>
 
-              {/* Credit Risk Model */}
+              {/* Available Data Objects */}
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Credit Risk Assessment</h3>
-                  <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Active</span>
-                </div>
-                <p className="text-sm text-gray-600 mb-4">Advanced credit scoring model for mortgage underwriting and risk evaluation with machine learning.</p>
-                <div className="space-y-2 mb-4">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-500">Accuracy:</span>
-                    <span className="font-medium">94.2%</span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-500">Last Updated:</span>
-                    <span className="font-medium">1 week ago</span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-500">Training Data:</span>
-                    <span className="font-medium">1.8M records</span>
+                  <h3 className="text-lg font-semibold text-gray-900">Available Data</h3>
+                  <div className="flex space-x-2">
+                    <button className="p-1 hover:bg-gray-100 rounded text-gray-400">
+                      <Database className="w-4 h-4" />
+                    </button>
+                    <button className="p-1 hover:bg-gray-100 rounded text-gray-400">
+                      <Eye className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
-                <div className="flex space-x-2">
-                  <button className="flex-1 px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
-                    Deploy
-                  </button>
-                  <button className="flex-1 px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
-                    Configure
-                  </button>
+                
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {/* Tables Section */}
+                  <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Tables</div>
+                  
+                  <label className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
+                    <input type="checkbox" className="mr-3" />
+                    <div className="flex-1">
+                      <span className="text-sm font-medium text-gray-900">hmda_loans</span>
+                      <p className="text-xs text-gray-500">2.1M rows • Loan application data</p>
+                    </div>
+                  </label>
+                  
+                  <label className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
+                    <input type="checkbox" className="mr-3" defaultChecked />
+                    <div className="flex-1">
+                      <span className="text-sm font-medium text-gray-900">borrower_demographics</span>
+                      <p className="text-xs text-gray-500">850K rows • Borrower information</p>
+                    </div>
+                  </label>
+                  
+                  <label className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
+                    <input type="checkbox" className="mr-3" />
+                    <div className="flex-1">
+                      <span className="text-sm font-medium text-gray-900">property_details</span>
+                      <p className="text-xs text-gray-500">1.8M rows • Property characteristics</p>
+                    </div>
+                  </label>
+                  
+                  <label className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
+                    <input type="checkbox" className="mr-3" defaultChecked />
+                    <div className="flex-1">
+                      <span className="text-sm font-medium text-gray-900">census_tracts</span>
+                      <p className="text-xs text-gray-500">74K rows • Geographic data</p>
+                    </div>
+                  </label>
+                  
+                  <label className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
+                    <input type="checkbox" className="mr-3" />
+                    <div className="flex-1">
+                      <span className="text-sm font-medium text-gray-900">loan_outcomes</span>
+                      <p className="text-xs text-gray-500">2.1M rows • Approval/denial data</p>
+                    </div>
+                  </label>
+                  
+                  {/* Views Section */}
+                  <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 mt-4">Views</div>
+                  
+                  <label className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
+                    <input type="checkbox" className="mr-3" />
+                    <div className="flex-1">
+                      <span className="text-sm font-medium text-gray-900">hmda_summary</span>
+                      <p className="text-xs text-gray-500">Aggregated loan data by year</p>
+                    </div>
+                  </label>
+                  
+                  <label className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
+                    <input type="checkbox" className="mr-3" defaultChecked />
+                    <div className="flex-1">
+                      <span className="text-sm font-medium text-gray-900">demographic_analysis</span>
+                      <p className="text-xs text-gray-500">Combined borrower and census data</p>
+                    </div>
+                  </label>
+                  
+                  <label className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
+                    <input type="checkbox" className="mr-3" />
+                    <div className="flex-1">
+                      <span className="text-sm font-medium text-gray-900">fair_lending_metrics</span>
+                      <p className="text-xs text-gray-500">Compliance and fairness indicators</p>
+                    </div>
+                  </label>
+                </div>
+                
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <span>3 of 8 items selected</span>
+                    <button className="text-blue-600 hover:text-blue-700">Select All</button>
+                  </div>
                 </div>
               </div>
 
-              {/* Property Valuation Model */}
+              {/* Model Configuration */}
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Property Valuation</h3>
-                  <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">Training</span>
+                  <h3 className="text-lg font-semibold text-gray-900">Create Model</h3>
+                  <Brain className="w-5 h-5 text-gray-400" />
                 </div>
-                <p className="text-sm text-gray-600 mb-4">Automated property valuation model using market data, comparables, and location analytics.</p>
-                <div className="space-y-2 mb-4">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-500">Accuracy:</span>
-                    <span className="font-medium">89.5%</span>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Model Name</label>
+                    <input 
+                      type="text" 
+                      placeholder="HMDA Compliance Model"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
                   </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-500">Last Updated:</span>
-                    <span className="font-medium">3 days ago</span>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <textarea 
+                      placeholder="Semantic model for HMDA compliance reporting and fair lending analysis"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      rows={3}
+                    />
                   </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-500">Training Data:</span>
-                    <span className="font-medium">950K records</span>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Primary Key</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <option>loan_id</option>
+                      <option>application_id</option>
+                      <option>borrower_id</option>
+                    </select>
                   </div>
-                </div>
-                <div className="flex space-x-2">
-                  <button className="flex-1 px-3 py-1.5 text-xs bg-gray-400 text-white rounded cursor-not-allowed">
-                    Training...
-                  </button>
-                  <button className="flex-1 px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
-                    Configure
-                  </button>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Relationships</label>
+                    <div className="space-y-2 text-xs">
+                      <div className="p-2 bg-gray-50 rounded">
+                        <span className="font-medium">borrower_demographics</span> → <span className="text-gray-600">hmda_loans.borrower_id</span>
+                      </div>
+                      <div className="p-2 bg-gray-50 rounded">
+                        <span className="font-medium">census_tracts</span> → <span className="text-gray-600">property_details.census_tract</span>
+                      </div>
+                      <div className="p-2 bg-gray-50 rounded">
+                        <span className="font-medium">demographic_analysis</span> → <span className="text-gray-600">view relationship</span>
+                      </div>
+                    </div>
+                    <button className="mt-2 text-xs text-blue-600 hover:text-blue-700">
+                      + Add Relationship
+                    </button>
+                  </div>
+                  
+                  <div className="pt-4 border-t border-gray-200">
+                    <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      Create Semantic Model
+                    </button>
+                    <button className="w-full mt-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50">
+                      Save as Draft
+                    </button>
+                  </div>
                 </div>
               </div>
-
-              {/* Fraud Detection Model */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Fraud Detection</h3>
-                  <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Active</span>
-                </div>
-                <p className="text-sm text-gray-600 mb-4">Real-time mortgage application fraud detection using behavioral patterns and document analysis.</p>
-                <div className="space-y-2 mb-4">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-500">Accuracy:</span>
-                    <span className="font-medium">97.1%</span>
+            </div>
+            
+            {/* Existing Models */}
+            <div className="mt-8">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Existing Semantic Models</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                <div className="bg-white rounded-lg border border-gray-200 p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-md font-semibold text-gray-900">HMDA Reporting Model</h4>
+                    <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Active</span>
                   </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-500">Last Updated:</span>
-                    <span className="font-medium">5 days ago</span>
+                  <p className="text-sm text-gray-600 mb-3">Complete HMDA compliance model with borrower demographics and loan outcomes</p>
+                  <div className="flex justify-between text-xs text-gray-500 mb-3">
+                    <span>5 tables • 2 views</span>
+                    <span>Updated 2 days ago</span>
                   </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-500">Training Data:</span>
-                    <span className="font-medium">1.4M records</span>
-                  </div>
-                </div>
-                <div className="flex space-x-2">
-                  <button className="flex-1 px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
-                    Deploy
-                  </button>
-                  <button className="flex-1 px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
-                    Configure
-                  </button>
-                </div>
-              </div>
-
-              {/* Income Verification Model */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Income Verification</h3>
-                  <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Active</span>
-                </div>
-                <p className="text-sm text-gray-600 mb-4">Automated income and employment verification using bank statements and payroll data analysis.</p>
-                <div className="space-y-2 mb-4">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-500">Accuracy:</span>
-                    <span className="font-medium">93.8%</span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-500">Last Updated:</span>
-                    <span className="font-medium">1 day ago</span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-500">Training Data:</span>
-                    <span className="font-medium">1.2M records</span>
+                  <div className="flex space-x-2">
+                    <button className="flex-1 px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
+                      Open
+                    </button>
+                    <button className="flex-1 px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
+                      Edit
+                    </button>
                   </div>
                 </div>
-                <div className="flex space-x-2">
-                  <button className="flex-1 px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
-                    Deploy
-                  </button>
-                  <button className="flex-1 px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
-                    Configure
-                  </button>
-                </div>
-              </div>
-
-              {/* Loan Pricing Model */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Loan Pricing Optimization</h3>
-                  <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">Scheduled</span>
-                </div>
-                <p className="text-sm text-gray-600 mb-4">Dynamic loan pricing model based on market conditions, risk factors, and competitive analysis.</p>
-                <div className="space-y-2 mb-4">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-500">Accuracy:</span>
-                    <span className="font-medium">91.6%</span>
+                
+                <div className="bg-white rounded-lg border border-gray-200 p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-md font-semibold text-gray-900">Fair Lending Analysis</h4>
+                    <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">Draft</span>
                   </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-500">Last Updated:</span>
-                    <span className="font-medium">2 weeks ago</span>
+                  <p className="text-sm text-gray-600 mb-3">Geographic and demographic analysis model for fair lending compliance</p>
+                  <div className="flex justify-between text-xs text-gray-500 mb-3">
+                    <span>3 tables • 1 view</span>
+                    <span>Updated 1 week ago</span>
                   </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-500">Training Data:</span>
-                    <span className="font-medium">800K records</span>
+                  <div className="flex space-x-2">
+                    <button className="flex-1 px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
+                      Continue
+                    </button>
+                    <button className="flex-1 px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
+                      Edit
+                    </button>
                   </div>
-                </div>
-                <div className="flex space-x-2">
-                  <button className="flex-1 px-3 py-1.5 text-xs bg-gray-400 text-white rounded cursor-not-allowed">
-                    Scheduled
-                  </button>
-                  <button className="flex-1 px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
-                    Configure
-                  </button>
                 </div>
               </div>
             </div>

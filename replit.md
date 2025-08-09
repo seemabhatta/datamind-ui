@@ -7,6 +7,8 @@ DataMind is a modern web application that provides AI-powered data analytics thr
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Left sidebar: Collapsible navigation with dashboard/studio options.
+Assistant panel: Should be minimizable/maximizable for better workspace management.
 
 ## System Architecture
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { BarChart3, MessageSquare, Home, Database } from 'lucide-react';
+import { BarChart3, MessageSquare, Home, Database, ChevronLeft, ChevronRight, Minimize2, Maximize2 } from 'lucide-react';
 
 // Type definitions for messages
 interface Message {
@@ -19,6 +19,8 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [chatInput, setChatInput] = useState('');
+  const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(false);
+  const [isAssistantMinimized, setIsAssistantMinimized] = useState(false);
   
   const userId = 'user_1';
 
@@ -124,35 +126,49 @@ export default function ChatPage() {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Left Sidebar */}
-      <div className="w-48 bg-white border-r border-gray-200 flex flex-col">
-        <div className="p-4 border-b border-gray-200">
-          <h1 className="text-lg font-semibold text-gray-900">DataMind</h1>
+      <div className={`${isLeftSidebarCollapsed ? 'w-16' : 'w-48'} bg-white border-r border-gray-200 flex flex-col transition-all duration-300`}>
+        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+          {!isLeftSidebarCollapsed && (
+            <h1 className="text-lg font-semibold text-gray-900">DataMind</h1>
+          )}
+          <button
+            onClick={() => setIsLeftSidebarCollapsed(!isLeftSidebarCollapsed)}
+            className="p-1 hover:bg-gray-100 rounded transition-colors"
+          >
+            {isLeftSidebarCollapsed ? (
+              <ChevronRight className="w-4 h-4 text-gray-600" />
+            ) : (
+              <ChevronLeft className="w-4 h-4 text-gray-600" />
+            )}
+          </button>
         </div>
         
         <nav className="flex-1 p-4">
           <div className="space-y-2">
             <button
               onClick={() => setCurrentView('dashboard')}
-              className={`w-full flex items-center space-x-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                 currentView === 'dashboard'
                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
+              title={isLeftSidebarCollapsed ? 'Dashboard' : ''}
             >
               <Home className="w-4 h-4" />
-              <span>dashboard</span>
+              {!isLeftSidebarCollapsed && <span>dashboard</span>}
             </button>
             
             <button
               onClick={() => setCurrentView('studio')}
-              className={`w-full flex items-center space-x-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                 currentView === 'studio'
                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
+              title={isLeftSidebarCollapsed ? 'Studio' : ''}
             >
               <Database className="w-4 h-4" />
-              <span>studio</span>
+              {!isLeftSidebarCollapsed && <span>studio</span>}
             </button>
           </div>
         </nav>
@@ -221,99 +237,129 @@ export default function ChatPage() {
       </div>
 
       {/* Right Assistant Sidebar */}
-      <div className="w-80 bg-white border-l border-gray-200 flex flex-col">
+      <div className={`${isAssistantMinimized ? 'w-16' : 'w-80'} bg-white border-l border-gray-200 flex flex-col transition-all duration-300`}>
         <div className="p-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">assistant</h3>
+          <div className="flex items-center justify-between mb-3">
+            {!isAssistantMinimized && (
+              <h3 className="text-lg font-semibold text-gray-900">assistant</h3>
+            )}
+            <button
+              onClick={() => setIsAssistantMinimized(!isAssistantMinimized)}
+              className="p-1 hover:bg-gray-100 rounded transition-colors"
+              title={isAssistantMinimized ? 'Maximize Assistant' : 'Minimize Assistant'}
+            >
+              {isAssistantMinimized ? (
+                <Maximize2 className="w-4 h-4 text-gray-600" />
+              ) : (
+                <Minimize2 className="w-4 h-4 text-gray-600" />
+              )}
+            </button>
+          </div>
           
-          {/* Mode Selector */}
-          <div className="space-y-2 text-sm">
-            <div className="text-gray-600 mb-2">modes -</div>
-            <button
-              onClick={() => setAgentMode('model')}
-              className={`block w-full text-left px-2 py-1 rounded transition-colors ${
-                agentMode === 'model' 
-                  ? 'text-blue-700 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-            >
-              model
-            </button>
-            <button
-              onClick={() => setAgentMode('query')}
-              className={`block w-full text-left px-2 py-1 rounded transition-colors ${
-                agentMode === 'query' 
-                  ? 'text-blue-700 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-            >
-              query
-            </button>
-            <button
-              onClick={() => setAgentMode('dashboard')}
-              className={`block w-full text-left px-2 py-1 rounded underline transition-colors ${
-                agentMode === 'dashboard' 
-                  ? 'text-blue-700 bg-blue-50' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-            >
-              dashboard
-            </button>
-          </div>
+          {!isAssistantMinimized && (
+            <>
+              {/* Mode Selector */}
+              <div className="space-y-2 text-sm">
+                <div className="text-gray-600 mb-2">modes -</div>
+                <button
+                  onClick={() => setAgentMode('model')}
+                  className={`block w-full text-left px-2 py-1 rounded transition-colors ${
+                    agentMode === 'model' 
+                      ? 'text-blue-700 bg-blue-50' 
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                >
+                  model
+                </button>
+                <button
+                  onClick={() => setAgentMode('query')}
+                  className={`block w-full text-left px-2 py-1 rounded transition-colors ${
+                    agentMode === 'query' 
+                      ? 'text-blue-700 bg-blue-50' 
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                >
+                  query
+                </button>
+                <button
+                  onClick={() => setAgentMode('dashboard')}
+                  className={`block w-full text-left px-2 py-1 rounded underline transition-colors ${
+                    agentMode === 'dashboard' 
+                      ? 'text-blue-700 bg-blue-50' 
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                >
+                  dashboard
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
-        {/* Chat Area */}
-        <div className="flex-1 flex flex-col min-h-0">
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {messages.length === 0 && (
-              <div className="text-center py-8">
-                <MessageSquare className="w-8 h-8 mx-auto text-gray-300 mb-2" />
-                <p className="text-sm text-gray-500">Start a conversation with the assistant</p>
+        {!isAssistantMinimized && (
+          <>
+            {/* Chat Area */}
+            <div className="flex-1 flex flex-col min-h-0">
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                {messages.length === 0 && (
+                  <div className="text-center py-8">
+                    <MessageSquare className="w-8 h-8 mx-auto text-gray-300 mb-2" />
+                    <p className="text-sm text-gray-500">Start a conversation with the assistant</p>
+                  </div>
+                )}
+                
+                {messages.map((message) => (
+                  <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
+                      message.role === 'user' 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-gray-100 text-gray-900'
+                    }`}>
+                      {message.content}
+                    </div>
+                  </div>
+                ))}
+                
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-gray-100 px-3 py-2 rounded-lg text-sm text-gray-600">
+                      <span className="animate-pulse">Assistant is typing...</span>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-            
-            {messages.map((message) => (
-              <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
-                  message.role === 'user' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-100 text-gray-900'
-                }`}>
-                  {message.content}
-                </div>
-              </div>
-            ))}
-            
-            {isLoading && (
-              <div className="flex justify-start">
-                <div className="bg-gray-100 px-3 py-2 rounded-lg text-sm text-gray-600">
-                  <span className="animate-pulse">Assistant is typing...</span>
-                </div>
-              </div>
-            )}
-          </div>
 
-          {/* Chat Input */}
-          <div className="border-t border-gray-200 p-4">
-            <form onSubmit={handleChatSubmit} className="flex space-x-2">
-              <input
-                type="text"
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                placeholder="Ask me anything..."
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                disabled={isLoading}
-              />
-              <button
-                type="submit"
-                disabled={!chatInput.trim() || isLoading}
-                className="px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Send
-              </button>
-            </form>
+              {/* Chat Input */}
+              <div className="border-t border-gray-200 p-4">
+                <form onSubmit={handleChatSubmit} className="flex space-x-2">
+                  <input
+                    type="text"
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    placeholder="Ask me anything..."
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="submit"
+                    disabled={!chatInput.trim() || isLoading}
+                    className="px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Send
+                  </button>
+                </form>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Minimized State - Show Chat Icon */}
+        {isAssistantMinimized && (
+          <div className="flex-1 flex items-center justify-center">
+            <MessageSquare className="w-8 h-8 text-gray-400" />
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

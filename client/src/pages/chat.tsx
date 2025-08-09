@@ -829,9 +829,9 @@ outputs:
                   title={isAssistantMinimized ? 'Expand Assistant' : 'Minimize Assistant'}
                 >
                   {isAssistantMinimized ? (
-                    <ChevronRight className="w-4 h-4 text-gray-600" />
-                  ) : (
                     <ChevronLeft className="w-4 h-4 text-gray-600" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4 text-gray-600" />
                   )}
                 </button>
                 {!isAssistantMinimized && (

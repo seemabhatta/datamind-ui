@@ -750,11 +750,20 @@ compliance:
                   <div key={session.id} className="bg-white rounded-lg border border-gray-200 p-4 hover:border-blue-200 cursor-pointer transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
-                        <h3 className="text-sm font-medium text-gray-900">
-                          Chat Session
-                        </h3>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Agent: {session.agentType || 'query'} • Created: {new Date(session.createdAt).toLocaleDateString()}
+                        <div className="flex items-center space-x-2 mb-1">
+                          <h3 className="text-sm font-medium text-gray-900">
+                            {session.agentType === 'yaml' ? 'Data Generation Chat' : 'Query Analysis Chat'}
+                          </h3>
+                          <span className={`text-xs px-2 py-0.5 rounded-full ${
+                            session.agentType === 'yaml' 
+                              ? 'bg-purple-100 text-purple-700' 
+                              : 'bg-blue-100 text-blue-700'
+                          }`}>
+                            {session.agentType || 'query'}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500">
+                          {new Date(session.createdAt).toLocaleDateString()} • {new Date(session.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                         </p>
                       </div>
                       <button

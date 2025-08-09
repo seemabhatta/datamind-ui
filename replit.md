@@ -9,7 +9,7 @@ DataMind is a modern web application that provides AI-powered data analytics thr
 Preferred communication style: Simple, everyday language.
 Left sidebar: Collapsible navigation with dashboard/studio options, integrations section (sources, connections, destinations, publish to), and trainings management.
 Assistant panel: Should be minimizable/maximizable for better workspace management. Maximize should open fullscreen overlay mode.
-Context-aware assistant: Agent modes (model/query/dashboard) are automatically detected based on user input keywords. System shows current mode as an indicator next to chat input.
+Context-aware assistant: Agent modes (model/query/dashboard) are automatically detected based on current navigation selection (dashboard/studio) combined with user input keywords. No mode indicators needed - intelligence is completely transparent.
 
 ## System Architecture
 

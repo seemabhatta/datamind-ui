@@ -102,28 +102,48 @@ export default function ChatPage() {
     }
   };
 
-  // Context-aware mode detection
+  // Context-aware mode detection based on navigation + input content
   const detectContextMode = (input: string): 'model' | 'query' | 'dashboard' => {
     const lowerInput = input.toLowerCase();
     
-    // Dashboard context - visualization, chart, graph keywords
-    if (lowerInput.includes('chart') || lowerInput.includes('graph') || 
-        lowerInput.includes('visualiz') || lowerInput.includes('dashboard') ||
-        lowerInput.includes('plot') || lowerInput.includes('bar chart') ||
-        lowerInput.includes('line chart') || lowerInput.includes('pie chart')) {
+    // First, consider the current navigation context
+    if (currentView === 'dashboard') {
+      // In dashboard view, prioritize visualization modes
+      if (lowerInput.includes('chart') || lowerInput.includes('graph') || 
+          lowerInput.includes('visualiz') || lowerInput.includes('plot') ||
+          lowerInput.includes('bar chart') || lowerInput.includes('line chart') || 
+          lowerInput.includes('pie chart') || lowerInput.includes('show me')) {
+        return 'dashboard';
+      }
+      // SQL queries in dashboard context still go to query mode
+      if (lowerInput.includes('select') || lowerInput.includes('from') ||
+          lowerInput.includes('where') || lowerInput.includes('sql') ||
+          lowerInput.includes('database') || lowerInput.includes('table')) {
+        return 'query';
+      }
+      // Default to dashboard mode when in dashboard view
       return 'dashboard';
     }
     
-    // Query context - SQL, data query keywords
-    if (lowerInput.includes('select') || lowerInput.includes('from') ||
-        lowerInput.includes('where') || lowerInput.includes('sql') ||
-        lowerInput.includes('query') || lowerInput.includes('database') ||
-        lowerInput.includes('table') || lowerInput.includes('count') ||
-        lowerInput.includes('sum') || lowerInput.includes('group by')) {
+    if (currentView === 'studio') {
+      // In studio view, prioritize query/development modes
+      if (lowerInput.includes('select') || lowerInput.includes('from') ||
+          lowerInput.includes('where') || lowerInput.includes('sql') ||
+          lowerInput.includes('query') || lowerInput.includes('database') ||
+          lowerInput.includes('table') || lowerInput.includes('count') ||
+          lowerInput.includes('sum') || lowerInput.includes('group by')) {
+        return 'query';
+      }
+      // Visualization requests in studio can still go to dashboard
+      if (lowerInput.includes('chart') || lowerInput.includes('graph') || 
+          lowerInput.includes('visualiz') || lowerInput.includes('plot')) {
+        return 'dashboard';
+      }
+      // Default to query mode when in studio view
       return 'query';
     }
     
-    // Default to model for general conversation
+    // Fallback to model for general conversation
     return 'model';
   };
 
@@ -460,40 +480,7 @@ export default function ChatPage() {
               </button>
             </div>
             
-            {/* Mode Selector for Fullscreen */}
-            <div className="flex space-x-4 text-sm">
-              <span className="text-gray-600">modes:</span>
-              <button
-                onClick={() => setAgentMode('model')}
-                className={`px-3 py-1 rounded transition-colors ${
-                  agentMode === 'model' 
-                    ? 'text-blue-700 bg-blue-50' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                model
-              </button>
-              <button
-                onClick={() => setAgentMode('query')}
-                className={`px-3 py-1 rounded transition-colors ${
-                  agentMode === 'query' 
-                    ? 'text-blue-700 bg-blue-50' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                query
-              </button>
-              <button
-                onClick={() => setAgentMode('dashboard')}
-                className={`px-3 py-1 rounded underline transition-colors ${
-                  agentMode === 'dashboard' 
-                    ? 'text-blue-700 bg-blue-50' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                dashboard
-              </button>
-            </div>
+
           </div>
 
           {/* Fullscreen Chat Area */}

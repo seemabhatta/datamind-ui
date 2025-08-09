@@ -71,7 +71,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
+    <div className="flex h-screen bg-slate-50">
       {/* Sidebar */}
       <Sidebar 
         sessions={(sessions as any[]) || []}
@@ -126,7 +126,7 @@ export default function ChatPage() {
         </header>
 
         {/* Chat Interface */}
-        <div className="flex-1 flex">
+        <div className="flex-1 flex min-h-0">
           <ChatInterface
             messages={messages}
             isLoading={isLoading}

@@ -321,7 +321,7 @@ export default function ChatPage() {
       const input = document.createElement('input');
       input.type = 'file';
       input.multiple = true;
-      input.accept = '.csv,.json,.xlsx,.txt,.pdf,.zip,.js,.ts,.tsx,.jsx,.py,.html,.css,.md';
+      input.accept = '.csv,.json,.xlsx,.txt,.pdf';
       input.onchange = (e) => {
         const target = e.target as HTMLInputElement;
         if (target.files) {

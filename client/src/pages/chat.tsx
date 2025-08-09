@@ -16,6 +16,7 @@ export default function ChatPage() {
   const [currentView, setCurrentView] = useState<'chat' | 'dashboard' | 'models' | 'chats' | 'settings'>('dashboard');
   const [agentMode, setAgentMode] = useState<'model' | 'query' | 'dashboard'>('query');
   const [currentSessionId, setCurrentSessionId] = useState<string>('');
+  const [currentSessionInfo, setCurrentSessionInfo] = useState<any>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -417,7 +418,12 @@ compliance:
         <nav className="flex-1 p-4">
           <div className="space-y-2">
             <button
-              onClick={() => setCurrentView('chat')}
+              onClick={() => {
+                setCurrentSessionInfo(null); // Clear session info for new chat
+                setMessages([]); // Clear messages
+                setCurrentSessionId(''); // Clear session ID to create new one
+                setCurrentView('chat');
+              }}
               className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                 currentView === 'chat'
                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
@@ -608,10 +614,36 @@ compliance:
           <div className="flex-1 flex flex-col">
             {/* Chat Header */}
             <div className="p-4 border-b border-gray-200">
-              <div className="mb-3">
-                <h2 className="text-2xl font-bold text-gray-900">Assistant Chat</h2>
+              <div className="mb-3 flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {currentSessionInfo 
+                      ? (currentSessionInfo.agentType === 'yaml' ? 'Data Generation Chat' : 'Query Analysis Chat')
+                      : 'Assistant Chat'
+                    }
+                  </h2>
+                  {currentSessionInfo && (
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      currentSessionInfo.agentType === 'yaml' 
+                        ? 'bg-purple-100 text-purple-700' 
+                        : 'bg-blue-100 text-blue-700'
+                    }`}>
+                      {currentSessionInfo.agentType || 'query'}
+                    </span>
+                  )}
+                </div>
+                {currentSessionInfo && (
+                  <div className="text-sm text-gray-500">
+                    {new Date(currentSessionInfo.createdAt).toLocaleDateString()} • {new Date(currentSessionInfo.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                  </div>
+                )}
               </div>
-              <p className="text-gray-600">Enhanced workspace for detailed conversations</p>
+              <p className="text-gray-600">
+                {currentSessionInfo 
+                  ? `Continue your ${currentSessionInfo.agentType === 'yaml' ? 'data generation' : 'query analysis'} conversation`
+                  : 'Enhanced workspace for detailed conversations'
+                }
+              </p>
             </div>
 
             {/* Chat Messages Area */}
@@ -779,6 +811,7 @@ compliance:
                           console.log('Opening session:', session.id);
                           setMessages([]); // Clear current messages
                           setCurrentSessionId(session.id);
+                          setCurrentSessionInfo(session); // Store session info for header
                           setCurrentView('chat');
                           
                           // Invalidate and refetch messages for this session
@@ -799,7 +832,12 @@ compliance:
                   <h4 className="text-lg font-medium text-gray-900 mb-2">No chat history</h4>
                   <p className="text-gray-500 mb-4">Start a new conversation to see your chat history here</p>
                   <button
-                    onClick={() => setCurrentView('chat')}
+                    onClick={() => {
+                      setCurrentSessionInfo(null); // Clear session info for new chat
+                      setMessages([]); // Clear messages
+                      setCurrentSessionId(''); // Clear session ID to create new one
+                      setCurrentView('chat');
+                    }}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                   >
                     Start New Chat

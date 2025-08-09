@@ -287,15 +287,8 @@ export default function ChatPage() {
           <div className="flex-1 flex flex-col">
             {/* Chat Header */}
             <div className="p-4 border-b border-gray-200">
-              <div className="flex items-center justify-between mb-3">
+              <div className="mb-3">
                 <h2 className="text-2xl font-bold text-gray-900">Assistant Chat</h2>
-                <button
-                  onClick={() => setCurrentView('dashboard')}
-                  className="p-2 hover:bg-gray-100 rounded transition-colors"
-                  title="Close Chat"
-                >
-                  <X className="w-6 h-6 text-gray-600" />
-                </button>
               </div>
               <p className="text-gray-600">Enhanced workspace for detailed conversations</p>
             </div>

@@ -12,7 +12,7 @@ interface Message {
 }
 
 export default function ChatPage() {
-  const [currentView, setCurrentView] = useState<'dashboard' | 'studio' | 'trainings' | 'settings'>('dashboard');
+  const [currentView, setCurrentView] = useState<'chat' | 'dashboard' | 'studio' | 'trainings' | 'settings'>('dashboard');
   const [agentMode, setAgentMode] = useState<'model' | 'query' | 'dashboard'>('query');
   const [currentSessionId, setCurrentSessionId] = useState<string>('');
   const [isConnected, setIsConnected] = useState(false);
@@ -40,7 +40,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (sessionMessages) {
-      setMessages(sessionMessages);
+      setMessages(sessionMessages || []);
     }
   }, [sessionMessages]);
 
@@ -214,6 +214,19 @@ export default function ChatPage() {
         <nav className="flex-1 p-4">
           <div className="space-y-2">
             <button
+              onClick={() => setCurrentView('chat')}
+              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                currentView === 'chat'
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+              title={isLeftSidebarCollapsed ? 'New Chat' : ''}
+            >
+              <MessageSquare className="w-4 h-4" />
+              {!isLeftSidebarCollapsed && <span>new chat</span>}
+            </button>
+            
+            <button
               onClick={() => setCurrentView('dashboard')}
               className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                 currentView === 'dashboard'
@@ -265,29 +278,85 @@ export default function ChatPage() {
               {!isLeftSidebarCollapsed && <span>settings</span>}
             </button>
           </div>
-          
-          {/* Separator */}
-          <div className="border-t border-gray-200 my-4"></div>
-          
-          {/* Chat Section */}
-          <div className="space-y-2">
-            <button
-              onClick={() => {
-                setIsAssistantFullscreen(true);
-                setIsAssistantMinimized(false);
-              }}
-              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50`}
-              title={isLeftSidebarCollapsed ? 'New Chat' : ''}
-            >
-              <MessageSquare className="w-4 h-4" />
-              {!isLeftSidebarCollapsed && <span>new chat</span>}
-            </button>
-          </div>
         </nav>
       </div>
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col">
-        {currentView === 'dashboard' ? (
+        {currentView === 'chat' ? (
+          /* New Chat View - Fullscreen Chat Interface */
+          <div className="flex-1 flex flex-col">
+            {/* Chat Header */}
+            <div className="p-4 border-b border-gray-200">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-2xl font-bold text-gray-900">Assistant Chat</h2>
+                <button
+                  onClick={() => setCurrentView('dashboard')}
+                  className="p-2 hover:bg-gray-100 rounded transition-colors"
+                  title="Close Chat"
+                >
+                  <X className="w-6 h-6 text-gray-600" />
+                </button>
+              </div>
+              <p className="text-gray-600">Enhanced workspace for detailed conversations</p>
+            </div>
+
+            {/* Chat Messages Area */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="max-w-4xl mx-auto space-y-4">
+                {messages.length === 0 && (
+                  <div className="text-center py-16">
+                    <MessageSquare className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+                    <h4 className="text-lg font-medium text-gray-900 mb-2">Welcome to Assistant Chat</h4>
+                    <p className="text-gray-500">Start a conversation with enhanced workspace for detailed interactions</p>
+                  </div>
+                )}
+                
+                {messages.map((message) => (
+                  <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-2xl px-4 py-3 rounded-lg ${
+                      message.role === 'user' 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-gray-100 text-gray-900'
+                    }`}>
+                      {message.content}
+                    </div>
+                  </div>
+                ))}
+                
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-gray-100 px-4 py-3 rounded-lg text-gray-600">
+                      <span className="animate-pulse">Assistant is typing...</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Chat Input */}
+            <div className="border-t border-gray-200 p-6">
+              <div className="max-w-4xl mx-auto">
+                <form onSubmit={handleChatSubmit} className="flex space-x-4">
+                  <input
+                    type="text"
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    placeholder="Ask me anything..."
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="submit"
+                    disabled={!chatInput.trim() || isLoading}
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Send
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        ) : currentView === 'dashboard' ? (
           <div className="flex-1 p-6">
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Dashboard</h2>

@@ -192,9 +192,9 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 relative">
+    <div className="flex h-screen elegant-bg relative">
       {/* Left Sidebar */}
-      <div className={`${isLeftSidebarCollapsed ? 'w-16' : 'w-48'} bg-white border-r border-gray-200 flex flex-col transition-all duration-300`}>
+      <div className={`${isLeftSidebarCollapsed ? 'w-16' : 'w-48'} elegant-card border-r border-white/20 flex flex-col transition-all duration-300 rounded-r-lg`}>
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
           {!isLeftSidebarCollapsed && (
             <h1 className="text-lg font-semibold text-gray-900">DataMind</h1>
@@ -271,40 +271,29 @@ export default function ChatPage() {
       <div className="flex-1 flex flex-col">
         {currentView === 'dashboard' ? (
           <div className="flex-1 p-6">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Dashboard</h2>
-              <p className="text-gray-600">Analytics and visualizations overview</p>
-            </div>
-            
-            {/* Dashboard Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Sample Chart 1 */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Sales Performance</h3>
-                  <BarChart3 className="w-5 h-5 text-gray-400" />
+            <div className="welcome-layout">
+              <h1 className="text-5xl font-semibold text-white mb-4">
+                Welcome to DataMind
+              </h1>
+              <p className="text-xl text-white/90 mb-12 max-w-3xl">
+                Your intelligent data analytics platform with built-in AI assistance. 
+                Explore visualizations, configure data pipelines, and get insights through natural language queries.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl">
+                <div className="elegant-card p-8 text-center">
+                  <BarChart3 className="w-12 h-12 text-blue-600 mb-4 mx-auto" />
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Dashboard</h3>
+                  <p className="text-gray-600">View interactive visualizations and key metrics from your data sources</p>
                 </div>
-                <div className="h-64 bg-gray-50 rounded-md flex items-center justify-center">
-                  <div className="text-center text-gray-500">
-                    <BarChart3 className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                    <p>Chart visualization would appear here</p>
-                    <p className="text-sm mt-1">Connect to data source to populate</p>
-                  </div>
+                <div className="elegant-card p-8 text-center">
+                  <Database className="w-12 h-12 text-purple-600 mb-4 mx-auto" />
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Studio</h3>
+                  <p className="text-gray-600">Build and configure data pipelines with our YAML editor and query tools</p>
                 </div>
-              </div>
-
-              {/* Sample Chart 2 */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Revenue Trends</h3>
-                  <BarChart3 className="w-5 h-5 text-gray-400" />
-                </div>
-                <div className="h-64 bg-gray-50 rounded-md flex items-center justify-center">
-                  <div className="text-center text-gray-500">
-                    <BarChart3 className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                    <p>Chart visualization would appear here</p>
-                    <p className="text-sm mt-1">Connect to data source to populate</p>
-                  </div>
+                <div className="elegant-card p-8 text-center">
+                  <MessageSquare className="w-12 h-12 text-green-600 mb-4 mx-auto" />
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Assistant</h3>
+                  <p className="text-gray-600">Ask questions and get AI-powered insights about your data</p>
                 </div>
               </div>
             </div>
@@ -319,7 +308,7 @@ export default function ChatPage() {
             {/* Studio Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
               {/* YAML Editor */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <div className="elegant-card rounded-lg border border-white/20 p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">YAML Editor</h3>
                   <div className="flex items-center space-x-2">
@@ -366,7 +355,7 @@ outputs:
               </div>
 
               {/* YAML Preview/Validation */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <div className="elegant-card rounded-lg border border-white/20 p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">Validation & Preview</h3>
                   <button className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700">
@@ -421,7 +410,7 @@ outputs:
               </div>
 
               {/* Data Preview */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <div className="elegant-card rounded-lg border border-white/20 p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">Data Preview</h3>
                   <button className="px-3 py-1 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
@@ -469,7 +458,7 @@ outputs:
               </div>
 
               {/* Query Builder */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <div className="elegant-card rounded-lg border border-white/20 p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">Query Builder</h3>
                   <button className="px-3 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-700">
@@ -784,7 +773,7 @@ outputs:
       </div>
       {/* Right Assistant Sidebar */}
       {!isAssistantFullscreen && (
-        <div className={`${isAssistantMinimized ? 'w-16' : 'w-80'} bg-white border-l border-gray-200 flex flex-col transition-all duration-300`}>
+        <div className={`${isAssistantMinimized ? 'w-16' : 'w-80'} elegant-card border-l border-white/20 flex flex-col transition-all duration-300 rounded-l-lg`}>
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center justify-between mb-3">
               {!isAssistantMinimized && (
@@ -853,7 +842,7 @@ outputs:
                       value={chatInput}
                       onChange={(e) => setChatInput(e.target.value)}
                       placeholder="Ask me anything..."
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="flex-1 elegant-input px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       disabled={isLoading}
                     />
                     <button

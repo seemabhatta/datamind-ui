@@ -453,7 +453,7 @@ compliance:
   return (
     <div className="flex h-screen bg-gray-50 relative">
       {/* Left Sidebar */}
-      <div className={`${isLeftSidebarCollapsed ? 'w-16' : 'w-48'} bg-white border-r border-gray-200 flex flex-col transition-all duration-300`}>
+      <div className={`${isLeftSidebarCollapsed ? 'w-16' : 'w-64 min-w-64'} bg-white border-r border-gray-200 flex flex-col transition-all duration-300 flex-shrink-0`}>
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
           {!isLeftSidebarCollapsed && (
             <h1 className="text-lg font-semibold text-gray-900">DataMind</h1>

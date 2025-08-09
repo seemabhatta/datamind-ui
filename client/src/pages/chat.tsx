@@ -479,7 +479,11 @@ compliance:
                 setCurrentSessionId(''); // Clear session ID to create new one
                 setCurrentView('chat');
               }}
-              className="w-full flex items-center justify-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50 pl-[1px] pr-[1px]"
+              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                currentView === 'chat'
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
               title={isLeftSidebarCollapsed ? 'New Chat' : ''}
             >
               <MessageSquare className="w-4 h-4" />
@@ -488,18 +492,24 @@ compliance:
             
             <button
               onClick={() => setCurrentView('dashboard')}
-              className="w-full flex items-center justify-center px-3 py-2 text-sm font-medium rounded-md transition-colors bg-blue-50 text-blue-700 border border-blue-200 pl-[1px] pr-[1px]"
+              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                currentView === 'dashboard'
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
               title={isLeftSidebarCollapsed ? 'Dashboard' : ''}
             >
               <Home className="w-4 h-4" />
               {!isLeftSidebarCollapsed && <span>dashboard</span>}
             </button>
             
-            
-
             <button
               onClick={() => setCurrentView('models')}
-              className="w-full flex items-center justify-center px-3 py-2 text-sm font-medium rounded-md transition-colors bg-blue-50 text-blue-700 border border-blue-200 pl-[1px] pr-[1px]"
+              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                currentView === 'models'
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
               title={isLeftSidebarCollapsed ? 'Models' : ''}
             >
               <Brain className="w-4 h-4" />
@@ -511,7 +521,11 @@ compliance:
 
             <button
               onClick={() => setCurrentView('chats')}
-              className="w-full flex items-center justify-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50 pl-[1px] pr-[1px]"
+              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                currentView === 'chats'
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
               title={isLeftSidebarCollapsed ? 'Chats' : ''}
             >
               <MessageSquare className="w-4 h-4" />

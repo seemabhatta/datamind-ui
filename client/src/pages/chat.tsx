@@ -828,28 +828,22 @@ outputs:
               <div className="flex items-center space-x-1">
                 {!isAssistantMinimized && (
                   <button
-                    onClick={() => setIsAssistantMinimized(true)}
+                    onClick={handleAssistantToggle}
                     className="p-1 hover:bg-gray-100 rounded transition-colors"
-                    title="Minimize Assistant"
+                    title="Maximize Assistant"
                   >
-                    <Minimize2 className="w-4 h-4 text-gray-600" />
+                    <Maximize2 className="w-4 h-4 text-gray-600" />
                   </button>
                 )}
                 <button
-                  onClick={handleAssistantToggle}
+                  onClick={() => setIsAssistantMinimized(!isAssistantMinimized)}
                   className="p-1 hover:bg-gray-100 rounded transition-colors"
-                  title={
-                    isAssistantMinimized 
-                      ? 'Expand Assistant' 
-                      : isAssistantFullscreen 
-                      ? 'Exit Fullscreen' 
-                      : 'Maximize Assistant'
-                  }
+                  title={isAssistantMinimized ? 'Expand Assistant' : 'Minimize Assistant'}
                 >
                   {isAssistantMinimized ? (
-                    <ChevronLeft className="w-4 h-4 text-gray-600" />
+                    <ChevronRight className="w-4 h-4 text-gray-600" />
                   ) : (
-                    <Maximize2 className="w-4 h-4 text-gray-600" />
+                    <ChevronLeft className="w-4 h-4 text-gray-600" />
                   )}
                 </button>
               </div>

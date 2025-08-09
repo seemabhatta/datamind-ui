@@ -270,45 +270,94 @@ export default function ChatPage() {
         </nav>
         
         {/* Profile Section */}
-        <div className="p-4 border-t border-gray-200">
-          <div className="space-y-2">
-            <button
-              onClick={() => setCurrentView('settings')}
-              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                currentView === 'settings'
-                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-              title={isLeftSidebarCollapsed ? 'Settings' : ''}
-            >
-              <Settings className="w-4 h-4" />
-              {!isLeftSidebarCollapsed && <span>settings</span>}
-            </button>
-            
-            <button
-              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50`}
-              title={isLeftSidebarCollapsed ? 'Help' : ''}
-            >
-              <BookOpen className="w-4 h-4" />
-              {!isLeftSidebarCollapsed && <span>help</span>}
-            </button>
-            
-            <button
-              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50`}
-              title={isLeftSidebarCollapsed ? 'Upgrade Plan' : ''}
-            >
-              <Zap className="w-4 h-4" />
-              {!isLeftSidebarCollapsed && <span>upgrade plan</span>}
-            </button>
-            
-            <button
-              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50`}
-              title={isLeftSidebarCollapsed ? 'Logout' : ''}
-            >
-              <X className="w-4 h-4" />
-              {!isLeftSidebarCollapsed && <span>logout</span>}
-            </button>
-          </div>
+        <div className="border-t border-gray-200">
+          {!isLeftSidebarCollapsed ? (
+            <div className="p-4">
+              {/* User Profile Header */}
+              <div className="flex items-center space-x-3 mb-4 pb-3 border-b border-gray-200">
+                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                  <span className="text-sm font-medium text-gray-600">U</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">user@datamind.com</p>
+                  <p className="text-xs text-gray-500">Free Plan</p>
+                </div>
+              </div>
+              
+              {/* Profile Actions */}
+              <div className="space-y-1">
+                <button
+                  className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
+                >
+                  <Zap className="w-4 h-4" />
+                  <span>Upgrade plan</span>
+                </button>
+                
+                <button
+                  onClick={() => setCurrentView('settings')}
+                  className={`w-full flex items-center space-x-3 px-3 py-2 text-sm rounded-md transition-colors ${
+                    currentView === 'settings'
+                      ? 'bg-blue-50 text-blue-700'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                >
+                  <Settings className="w-4 h-4" />
+                  <span>Settings</span>
+                </button>
+                
+                <button
+                  className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  <span>Help</span>
+                </button>
+                
+                <button
+                  className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                  <span>Log out</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="p-2">
+              <div className="space-y-2">
+                <button
+                  className="w-full flex items-center justify-center p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
+                  title="Upgrade Plan"
+                >
+                  <Zap className="w-4 h-4" />
+                </button>
+                
+                <button
+                  onClick={() => setCurrentView('settings')}
+                  className={`w-full flex items-center justify-center p-2 rounded-md transition-colors ${
+                    currentView === 'settings'
+                      ? 'bg-blue-50 text-blue-700'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                  title="Settings"
+                >
+                  <Settings className="w-4 h-4" />
+                </button>
+                
+                <button
+                  className="w-full flex items-center justify-center p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
+                  title="Help"
+                >
+                  <BookOpen className="w-4 h-4" />
+                </button>
+                
+                <button
+                  className="w-full flex items-center justify-center p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
+                  title="Log out"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
       {/* Main Content Area */}

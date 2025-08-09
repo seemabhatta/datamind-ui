@@ -57,7 +57,7 @@ export function ChatInterface({ messages, isLoading, onSendMessage, agentType }:
             <div className="flex-1">
               <div className="bg-slate-100 rounded-lg px-4 py-3">
                 <p className="text-sm text-slate-700">
-                  Welcome to DataMind! I'm connected to your Snowflake instance and ready to help you explore your data. I can help you:
+                  Welcome to DataMind! I'm ready to help you explore your data. I can help you:
                 </p>
                 <ul className="mt-2 text-sm text-slate-600 list-disc list-inside space-y-1">
                   <li>Query data using natural language</li>

@@ -74,7 +74,7 @@ export default function ChatPage() {
     <div className="flex h-screen overflow-hidden bg-slate-50">
       {/* Sidebar */}
       <Sidebar 
-        sessions={sessions || []}
+        sessions={(sessions as any[]) || []}
         currentSessionId={currentSessionId}
         onSessionSelect={handleSessionSelect}
         onNewSession={createNewSession}

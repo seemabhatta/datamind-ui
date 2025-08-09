@@ -11,7 +11,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
   const [showSql, setShowSql] = useState(false);
 
   // Fetch visualizations for this message
-  const { data: visualizations } = useQuery({
+  const { data: visualizations = [] } = useQuery({
     queryKey: ['/api/visualizations', message.id],
     enabled: message.role === 'assistant'
   });
@@ -46,6 +46,8 @@ export function MessageBubble({ message }: MessageBubbleProps) {
   }
 
   // Assistant message
+  const metadata = message.metadata as any || {};
+  
   return (
     <div className="flex space-x-3">
       <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
@@ -59,7 +61,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
             {message.content.split('\n').map((line, index) => {
               // Handle code blocks
               if (line.startsWith('```sql')) {
-                const sqlQuery = message.metadata?.sqlQuery;
+                const sqlQuery = metadata?.sqlQuery;
                 if (sqlQuery) {
                   return (
                     <div key={index} className="my-4">
@@ -106,11 +108,11 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           </div>
 
           {/* Data Table */}
-          {message.metadata?.rowCount > 0 && (
+          {metadata?.rowCount > 0 && (
             <div className="bg-white rounded-lg border border-slate-200 overflow-hidden my-4">
               <div className="px-4 py-2 bg-slate-50 border-b border-slate-200">
                 <h4 className="text-sm font-medium text-slate-900">
-                  Query Results ({message.metadata.rowCount} rows)
+                  Query Results ({metadata.rowCount} rows)
                 </h4>
               </div>
               <div className="overflow-x-auto max-h-64">
@@ -122,7 +124,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           )}
 
           {/* Visualizations */}
-          {visualizations && visualizations.map((viz: any) => (
+          {(visualizations as any[]).map((viz: any) => (
             <VisualizationCard 
               key={viz.id} 
               visualization={viz}
@@ -130,9 +132,9 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           ))}
 
           {/* Execution metadata */}
-          {message.metadata?.executionTime && (
+          {metadata?.executionTime && (
             <div className="mt-3 text-xs text-slate-500">
-              Query executed in {message.metadata.executionTime}ms
+              Query executed in {metadata.executionTime}ms
             </div>
           )}
         </div>

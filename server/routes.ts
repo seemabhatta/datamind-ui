@@ -59,7 +59,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     ws.on('close', () => {
       console.log('WebSocket client disconnected');
       // Remove from active sessions
-      for (const [sessionId, socket] of activeSessions.entries()) {
+      for (const [sessionId, socket] of activeSessions) {
         if (socket === ws) {
           activeSessions.delete(sessionId);
           break;

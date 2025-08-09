@@ -15,13 +15,13 @@ export function DashboardPanel({ userId, onClose }: DashboardPanelProps) {
   const queryClient = useQueryClient();
 
   // Fetch pinned visualizations
-  const { data: pinnedData, isLoading: pinnedLoading } = useQuery({
+  const { data: pinnedData = [], isLoading: pinnedLoading } = useQuery({
     queryKey: ['/api/pinned', userId],
     enabled: activeTab === 'pinned'
   });
 
   // Fetch published visualizations
-  const { data: publishedData, isLoading: publishedLoading } = useQuery({
+  const { data: publishedData = [], isLoading: publishedLoading } = useQuery({
     queryKey: ['/api/published'],
     enabled: activeTab === 'published'
   });
@@ -94,8 +94,8 @@ export function DashboardPanel({ userId, onClose }: DashboardPanelProps) {
     </div>
   );
 
-  const pinnedVisualizations = pinnedData?.map((item: any) => item.visualization) || [];
-  const publishedVisualizations = publishedData || [];
+  const pinnedVisualizations = (pinnedData as any[]).map((item: any) => item.visualization) || [];
+  const publishedVisualizations = publishedData as Visualization[] || [];
 
   return (
     <div className="w-80 bg-white border-l border-slate-200 flex flex-col">

@@ -61,11 +61,11 @@ class AgentService {
           executionTime: parsedResult.executionTime,
           rowCount: parsedResult.data?.length || 0
         },
-        visualization
+        visualization: visualization || undefined
       };
     } catch (error) {
       console.error('Query agent error:', error);
-      throw error;
+      throw new Error(error instanceof Error ? error.message : String(error));
     }
   }
 
@@ -83,7 +83,7 @@ class AgentService {
       };
     } catch (error) {
       console.error('YAML agent error:', error);
-      throw error;
+      throw new Error(error instanceof Error ? error.message : String(error));
     }
   }
 

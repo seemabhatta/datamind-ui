@@ -87,7 +87,7 @@ export function Sidebar({
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-slate-300 rounded-full"></div>
           <div className="flex-1">
-            <p className="text-sm font-medium text-slate-900">John Doe</p>
+            <p className="text-sm font-medium text-slate-900">Demo User</p>
             <p className="text-xs text-slate-500">Data Analyst</p>
           </div>
         </div>

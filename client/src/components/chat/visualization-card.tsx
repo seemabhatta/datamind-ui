@@ -8,6 +8,12 @@ interface VisualizationCardProps {
   visualization: Visualization;
 }
 
+declare global {
+  interface Window {
+    Plotly: any;
+  }
+}
+
 export function VisualizationCard({ visualization }: VisualizationCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const plotlyRef = useRef<HTMLDivElement>(null);
@@ -53,14 +59,19 @@ export function VisualizationCard({ visualization }: VisualizationCardProps) {
   });
 
   useEffect(() => {
-    if (plotlyRef.current && window.Plotly) {
-      // Render Plotly chart
-      window.Plotly.newPlot(
-        plotlyRef.current,
-        visualization.chartConfig.data,
-        visualization.chartConfig.layout,
-        visualization.chartConfig.config
-      );
+    if (plotlyRef.current && window.Plotly && visualization.chartConfig) {
+      try {
+        const config = visualization.chartConfig as any;
+        // Render Plotly chart
+        window.Plotly.newPlot(
+          plotlyRef.current,
+          config.data || [],
+          config.layout || {},
+          config.config || {}
+        );
+      } catch (error) {
+        console.error('Error rendering Plotly chart:', error);
+      }
     }
   }, [visualization.chartConfig]);
 

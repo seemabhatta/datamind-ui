@@ -30,6 +30,7 @@ export default function ChatPage() {
   const [isPlusDropdownOpen, setIsPlusDropdownOpen] = useState(false);
   const [selectedChatIds, setSelectedChatIds] = useState<string[]>([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
 
   
@@ -310,13 +311,32 @@ export default function ChatPage() {
     }
   };
 
-  const handlePlusOption = (option: 'generate' | 'query') => {
+  const handlePlusOption = (option: 'generate' | 'query' | 'upload') => {
     if (option === 'generate') {
       setChatInput('@generate ');
     } else if (option === 'query') {
       setChatInput('@query ');
+    } else if (option === 'upload') {
+      // Trigger file input
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.multiple = true;
+      input.accept = '.csv,.json,.xlsx,.txt,.pdf';
+      input.onchange = (e) => {
+        const target = e.target as HTMLInputElement;
+        if (target.files) {
+          const newFiles = Array.from(target.files);
+          setUploadedFiles(prev => [...prev, ...newFiles]);
+          setChatInput(prev => prev + `Uploaded ${newFiles.length} file(s): ${newFiles.map(f => f.name).join(', ')}. `);
+        }
+      };
+      input.click();
     }
     setIsPlusDropdownOpen(false);
+  };
+
+  const removeUploadedFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleCreateModel = () => {
@@ -766,9 +786,37 @@ compliance:
             {/* Chat Input */}
             <div className="border-t border-gray-200 p-6">
               <div className="max-w-4xl mx-auto">
+                {/* Uploaded Files Display */}
+                {uploadedFiles.length > 0 && (
+                  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-blue-900">Uploaded Files</span>
+                      <button
+                        onClick={() => setUploadedFiles([])}
+                        className="text-xs text-blue-700 hover:text-blue-900"
+                      >
+                        Clear All
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {uploadedFiles.map((file, index) => (
+                        <div key={index} className="flex items-center space-x-2 bg-white px-3 py-1 rounded-md border border-blue-200">
+                          <span className="text-sm text-gray-700">{file.name}</span>
+                          <button
+                            onClick={() => removeUploadedFile(index)}
+                            className="text-gray-400 hover:text-red-600"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <form onSubmit={handleChatSubmit} className="flex space-x-4">
-                  <div className="relative plus-dropdown-container">
-                    <button
+                  <div className="flex space-x-2">
+                    <div className="relative plus-dropdown-container">
+                      <button
                       type="button"
                       onClick={() => setIsPlusDropdownOpen(!isPlusDropdownOpen)}
                       className="px-3 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -797,8 +845,31 @@ compliance:
                           <Search className="w-4 h-4" />
                           <span>Query</span>
                         </button>
+                        <div className="border-t border-gray-100 my-1"></div>
+                        <div className="px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                          Attachments
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handlePlusOption('upload')}
+                          className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                        >
+                          <Upload className="w-4 h-4" />
+                          <span>Upload File</span>
+                        </button>
                       </div>
                     )}
+                    </div>
+                    
+                    {/* Dedicated Upload Button */}
+                    <button
+                      type="button"
+                      onClick={() => handlePlusOption('upload')}
+                      className="px-3 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      title="Upload File"
+                    >
+                      <Upload className="w-5 h-5 text-gray-600" />
+                    </button>
                   </div>
                   
                   <input

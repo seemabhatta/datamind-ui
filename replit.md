@@ -7,18 +7,19 @@ DataMind is a modern web application that provides AI-powered data analytics thr
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
-Left sidebar: Collapsible navigation with dashboard/studio options, integrations section (sources, connections, destinations, publish to), and trainings management.
+Design philosophy: Clean, simple interface - strongly rejects modern/sleek design elements like gradients, glass morphism, or complex styling.
+Left sidebar: Collapsible navigation with dashboard/studio/integrations as top-level pages, and trainings management as dropdown section.
 Assistant panel: Should be minimizable/maximizable for better workspace management. Maximize should open fullscreen overlay mode.
-Context-aware assistant: Agent modes (model/query/dashboard) are automatically detected based on current navigation selection (dashboard/studio) combined with user input keywords. No mode indicators needed - intelligence is completely transparent.
+Context-aware assistant: Agent modes (model/query/dashboard) are automatically detected based on current navigation selection (dashboard/studio/integrations) combined with user input keywords. No mode indicators needed - intelligence is completely transparent.
 
 ## System Architecture
 
 ### Frontend Architecture
 - **Framework**: React 18 with TypeScript, built using Vite for fast development and optimized production builds
 - **UI Framework**: shadcn/ui component library with Radix UI primitives for accessible, customizable components
-- **Styling**: Tailwind CSS with CSS variables for theming, Inter font family for typography
+- **Styling**: Tailwind CSS with clean, simple design - no gradients, glass morphism, or complex effects
 - **State Management**: TanStack Query (React Query) for server state management and caching
-- **Routing**: Wouter for lightweight client-side routing
+- **Navigation**: Three-column layout with collapsible left sidebar (dashboard/studio/integrations pages), main content area, and assistant panel
 - **Real-time Communication**: WebSocket integration for live chat functionality
 
 ### Backend Architecture

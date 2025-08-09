@@ -321,7 +321,7 @@ export default function ChatPage() {
               </div>
             </div>
           </div>
-        ) : (
+        ) : currentView === 'studio' ? (
           <div className="flex-1 p-6">
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Studio</h2>
@@ -334,6 +334,115 @@ export default function ChatPage() {
                   <Database className="w-12 h-12 mx-auto mb-2 opacity-50" />
                   <p>Studio workspace</p>
                   <p className="text-sm mt-1">Data exploration tools will appear here</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 p-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Integrations</h2>
+              <p className="text-gray-600">Manage data sources, connections, and destinations</p>
+            </div>
+
+            {/* Integrations Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Sources Section */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Data Sources</h3>
+                  <Cloud className="w-5 h-5 text-gray-400" />
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                    <span className="text-sm font-medium">Snowflake</span>
+                    <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Connected</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                    <span className="text-sm font-medium">AWS DynamoDB</span>
+                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Not Connected</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                    <span className="text-sm font-medium">AWS S3</span>
+                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Not Connected</span>
+                  </div>
+                  <button className="w-full mt-4 px-4 py-2 text-sm text-blue-600 border border-blue-200 rounded-md hover:bg-blue-50">
+                    Add New Source
+                  </button>
+                </div>
+              </div>
+
+              {/* Destinations Section */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Destinations</h3>
+                  <Send className="w-5 h-5 text-gray-400" />
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                    <span className="text-sm font-medium">Power BI</span>
+                    <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Active</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                    <span className="text-sm font-medium">Google Looker</span>
+                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Inactive</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                    <span className="text-sm font-medium">Data Studio</span>
+                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Inactive</span>
+                  </div>
+                  <button className="w-full mt-4 px-4 py-2 text-sm text-blue-600 border border-blue-200 rounded-md hover:bg-blue-50">
+                    Add New Destination
+                  </button>
+                </div>
+              </div>
+
+              {/* Connections Section */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Active Connections</h3>
+                  <Link className="w-5 h-5 text-gray-400" />
+                </div>
+                <div className="space-y-3">
+                  <div className="p-3 bg-gray-50 rounded-md">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Production DB</span>
+                      <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Live</span>
+                    </div>
+                    <p className="text-xs text-gray-500">Last sync: 2 minutes ago</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-md">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Analytics Warehouse</span>
+                      <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">Syncing</span>
+                    </div>
+                    <p className="text-xs text-gray-500">Last sync: 15 minutes ago</p>
+                  </div>
+                  <button className="w-full mt-4 px-4 py-2 text-sm text-blue-600 border border-blue-200 rounded-md hover:bg-blue-50">
+                    Manage Connections
+                  </button>
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
+                  <Settings className="w-5 h-5 text-gray-400" />
+                </div>
+                <div className="space-y-3">
+                  <button className="w-full p-3 text-left text-sm text-gray-700 border border-gray-200 rounded-md hover:bg-gray-50">
+                    Test All Connections
+                  </button>
+                  <button className="w-full p-3 text-left text-sm text-gray-700 border border-gray-200 rounded-md hover:bg-gray-50">
+                    Sync Data Sources
+                  </button>
+                  <button className="w-full p-3 text-left text-sm text-gray-700 border border-gray-200 rounded-md hover:bg-gray-50">
+                    Export Configuration
+                  </button>
+                  <button className="w-full p-3 text-left text-sm text-gray-700 border border-gray-200 rounded-md hover:bg-gray-50">
+                    View Integration Logs
+                  </button>
                 </div>
               </div>
             </div>

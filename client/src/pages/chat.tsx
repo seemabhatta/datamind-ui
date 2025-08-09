@@ -825,28 +825,43 @@ outputs:
               {!isAssistantMinimized && (
                 <h3 className="text-lg font-semibold text-gray-900">assistant</h3>
               )}
-              <button
-                onClick={handleAssistantToggle}
-                className="p-1 hover:bg-gray-100 rounded transition-colors"
-                title={
-                  isAssistantMinimized 
-                    ? 'Expand Assistant' 
-                    : isAssistantFullscreen 
-                    ? 'Minimize Assistant' 
-                    : 'Maximize Assistant'
-                }
-              >
-                {isAssistantMinimized ? (
-                  <ChevronLeft className="w-4 h-4 text-gray-600" />
-                ) : (
-                  <Maximize2 className="w-4 h-4 text-gray-600" />
+              <div className="flex items-center space-x-1">
+                {!isAssistantMinimized && (
+                  <button
+                    onClick={() => setIsAssistantMinimized(true)}
+                    className="p-1 hover:bg-gray-100 rounded transition-colors"
+                    title="Minimize Assistant"
+                  >
+                    <Minimize2 className="w-4 h-4 text-gray-600" />
+                  </button>
                 )}
-              </button>
+                <button
+                  onClick={handleAssistantToggle}
+                  className="p-1 hover:bg-gray-100 rounded transition-colors"
+                  title={
+                    isAssistantMinimized 
+                      ? 'Expand Assistant' 
+                      : isAssistantFullscreen 
+                      ? 'Exit Fullscreen' 
+                      : 'Maximize Assistant'
+                  }
+                >
+                  {isAssistantMinimized ? (
+                    <ChevronLeft className="w-4 h-4 text-gray-600" />
+                  ) : (
+                    <Maximize2 className="w-4 h-4 text-gray-600" />
+                  )}
+                </button>
+              </div>
             </div>
 
           </div>
 
-          {!isAssistantMinimized && (
+          {isAssistantMinimized ? (
+            <div className="flex-1 flex items-center justify-center py-4">
+              <MessageSquare className="w-6 h-6 text-gray-400" />
+            </div>
+          ) : (
             <>
               {/* Chat Area */}
               <div className="flex-1 flex flex-col min-h-0">

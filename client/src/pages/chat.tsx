@@ -215,9 +215,9 @@ export default function ChatPage() {
 
   const handlePlusOption = (option: 'generate' | 'query') => {
     if (option === 'generate') {
-      setChatInput('Generate a data dictionary for my semantic model');
+      setChatInput('@generate ');
     } else if (option === 'query') {
-      setChatInput('Query my data to show ');
+      setChatInput('@query ');
     }
     setIsPlusDropdownOpen(false);
   };

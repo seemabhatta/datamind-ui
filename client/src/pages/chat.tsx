@@ -434,18 +434,7 @@ compliance:
               {!isLeftSidebarCollapsed && <span>dashboard</span>}
             </button>
             
-            <button
-              onClick={() => setCurrentView('studio')}
-              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                currentView === 'studio'
-                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-              title={isLeftSidebarCollapsed ? 'Studio' : ''}
-            >
-              <Database className="w-4 h-4" />
-              {!isLeftSidebarCollapsed && <span>studio</span>}
-            </button>
+            
 
             <button
               onClick={() => setCurrentView('models')}

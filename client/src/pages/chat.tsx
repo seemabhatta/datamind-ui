@@ -22,7 +22,7 @@ export default function ChatPage() {
   const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(false);
   const [isAssistantMinimized, setIsAssistantMinimized] = useState(false);
   const [isAssistantFullscreen, setIsAssistantFullscreen] = useState(false);
-  const [showModeDropdown, setShowModeDropdown] = useState(false);
+
   const [showIntegrationsDropdown, setShowIntegrationsDropdown] = useState(false);
   const [showTrainingsDropdown, setShowTrainingsDropdown] = useState(false);
   
@@ -102,11 +102,41 @@ export default function ChatPage() {
     }
   };
 
+  // Context-aware mode detection
+  const detectContextMode = (input: string): 'model' | 'query' | 'dashboard' => {
+    const lowerInput = input.toLowerCase();
+    
+    // Dashboard context - visualization, chart, graph keywords
+    if (lowerInput.includes('chart') || lowerInput.includes('graph') || 
+        lowerInput.includes('visualiz') || lowerInput.includes('dashboard') ||
+        lowerInput.includes('plot') || lowerInput.includes('bar chart') ||
+        lowerInput.includes('line chart') || lowerInput.includes('pie chart')) {
+      return 'dashboard';
+    }
+    
+    // Query context - SQL, data query keywords
+    if (lowerInput.includes('select') || lowerInput.includes('from') ||
+        lowerInput.includes('where') || lowerInput.includes('sql') ||
+        lowerInput.includes('query') || lowerInput.includes('database') ||
+        lowerInput.includes('table') || lowerInput.includes('count') ||
+        lowerInput.includes('sum') || lowerInput.includes('group by')) {
+      return 'query';
+    }
+    
+    // Default to model for general conversation
+    return 'model';
+  };
+
   const handleChatSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatInput.trim() || isLoading || !currentSessionId) return;
     
     const messageContent = chatInput.trim();
+    
+    // Auto-detect context and set mode
+    const detectedMode = detectContextMode(messageContent);
+    setAgentMode(detectedMode);
+    
     setChatInput('');
     setIsLoading(true);
 
@@ -120,7 +150,7 @@ export default function ChatPage() {
         type: 'chat_message',
         sessionId: currentSessionId,
         content: messageContent,
-        agentType: agentMode === 'query' ? 'query' : 'yaml',
+        agentType: detectedMode === 'query' ? 'query' : 'yaml',
         userId: userId
       }));
       socket.close();
@@ -385,48 +415,9 @@ export default function ChatPage() {
                 {/* Chat Input */}
                 <div className="border-t border-gray-200 p-4">
                   <form onSubmit={handleChatSubmit} className="flex space-x-2">
-                    {/* Mode Selector Dropdown */}
-                    <div className="relative">
-                      <button
-                        type="button"
-                        onClick={() => setShowModeDropdown(!showModeDropdown)}
-                        className="flex items-center space-x-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-md text-sm font-medium text-gray-700 transition-colors"
-                      >
-                        <span>{agentMode}</span>
-                        <ChevronDown className={`w-4 h-4 transition-transform ${showModeDropdown ? 'rotate-180' : ''}`} />
-                      </button>
-                      
-                      {showModeDropdown && (
-                        <div className="absolute bottom-full mb-1 left-0 bg-white border border-gray-200 rounded-md shadow-lg z-10">
-                          <button
-                            type="button"
-                            onClick={() => { setAgentMode('model'); setShowModeDropdown(false); }}
-                            className={`block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 ${
-                              agentMode === 'model' ? 'text-blue-700 bg-blue-50' : 'text-gray-700'
-                            }`}
-                          >
-                            model
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => { setAgentMode('query'); setShowModeDropdown(false); }}
-                            className={`block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 ${
-                              agentMode === 'query' ? 'text-blue-700 bg-blue-50' : 'text-gray-700'
-                            }`}
-                          >
-                            query
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => { setAgentMode('dashboard'); setShowModeDropdown(false); }}
-                            className={`block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 ${
-                              agentMode === 'dashboard' ? 'text-blue-700 bg-blue-50' : 'text-gray-700'
-                            }`}
-                          >
-                            dashboard
-                          </button>
-                        </div>
-                      )}
+                    {/* Context indicator */}
+                    <div className="flex items-center px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-600 min-w-0">
+                      <span className="text-xs uppercase font-medium">{agentMode}</span>
                     </div>
                     
                     <input
@@ -549,48 +540,9 @@ export default function ChatPage() {
             <div className="border-t border-gray-200 p-6">
               <div className="max-w-4xl mx-auto">
                 <form onSubmit={handleChatSubmit} className="flex space-x-4">
-                  {/* Mode Selector for Fullscreen */}
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setShowModeDropdown(!showModeDropdown)}
-                      className="flex items-center space-x-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium text-gray-700 transition-colors"
-                    >
-                      <span>{agentMode}</span>
-                      <ChevronDown className={`w-4 h-4 transition-transform ${showModeDropdown ? 'rotate-180' : ''}`} />
-                    </button>
-                    
-                    {showModeDropdown && (
-                      <div className="absolute bottom-full mb-1 left-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                        <button
-                          type="button"
-                          onClick={() => { setAgentMode('model'); setShowModeDropdown(false); }}
-                          className={`block w-full text-left px-4 py-3 text-sm hover:bg-gray-50 first:rounded-t-lg ${
-                            agentMode === 'model' ? 'text-blue-700 bg-blue-50' : 'text-gray-700'
-                          }`}
-                        >
-                          model
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => { setAgentMode('query'); setShowModeDropdown(false); }}
-                          className={`block w-full text-left px-4 py-3 text-sm hover:bg-gray-50 ${
-                            agentMode === 'query' ? 'text-blue-700 bg-blue-50' : 'text-gray-700'
-                          }`}
-                        >
-                          query
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => { setAgentMode('dashboard'); setShowModeDropdown(false); }}
-                          className={`block w-full text-left px-4 py-3 text-sm hover:bg-gray-50 last:rounded-b-lg ${
-                            agentMode === 'dashboard' ? 'text-blue-700 bg-blue-50' : 'text-gray-700'
-                          }`}
-                        >
-                          dashboard
-                        </button>
-                      </div>
-                    )}
+                  {/* Context indicator for fullscreen */}
+                  <div className="flex items-center px-4 py-3 bg-gray-50 rounded-lg text-sm text-gray-600 min-w-0">
+                    <span className="text-xs uppercase font-medium">{agentMode}</span>
                   </div>
                   
                   <input

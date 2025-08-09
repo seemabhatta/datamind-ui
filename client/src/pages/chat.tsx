@@ -265,6 +265,24 @@ export default function ChatPage() {
               {!isLeftSidebarCollapsed && <span>settings</span>}
             </button>
           </div>
+          
+          {/* Separator */}
+          <div className="border-t border-gray-200 my-4"></div>
+          
+          {/* Chat Section */}
+          <div className="space-y-2">
+            <button
+              onClick={() => {
+                setIsAssistantFullscreen(true);
+                setIsAssistantMinimized(false);
+              }}
+              className={`w-full flex items-center ${isLeftSidebarCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50`}
+              title={isLeftSidebarCollapsed ? 'New Chat' : ''}
+            >
+              <MessageSquare className="w-4 h-4" />
+              {!isLeftSidebarCollapsed && <span>new chat</span>}
+            </button>
+          </div>
         </nav>
       </div>
       {/* Main Content Area */}

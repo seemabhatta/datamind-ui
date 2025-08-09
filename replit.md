@@ -2,7 +2,7 @@
 
 ## Overview
 
-DataMind is a modern web application that provides AI-powered data analytics through conversational interfaces. The platform allows users to interact with data using natural language queries, with AI agents that can generate SQL queries and create visualizations. Built as a full-stack application with real-time chat capabilities, it features a React frontend with shadcn/ui components and an Express.js backend with PostgreSQL database integration.
+DataMind is a modern web application that provides AI-powered data analytics through a dashboard-style interface with an integrated assistant sidebar. The platform features a three-column layout: navigation sidebar, main dashboard/studio area, and assistant chat panel. Users can explore visualizations in the dashboard view, work with data in the studio, and interact with AI agents through the right-side assistant panel with multiple modes (model, query, dashboard). Built as a full-stack application with real-time chat capabilities, it features a React frontend with shadcn/ui components and an Express.js backend with PostgreSQL database integration.
 
 ## User Preferences
 

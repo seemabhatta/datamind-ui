@@ -50,9 +50,10 @@ export class SnowflakeService {
 
       // Handle different authentication methods
       if (config.authenticator === 'PAT') {
-        connectionConfig.token = config.password; // PAT token goes in token field
+        // For PAT authentication, use password field with OAUTH authenticator
+        connectionConfig.password = config.password; // PAT token goes in password field for OAUTH
         connectionConfig.authenticator = 'OAUTH';
-        console.log('Using PAT authentication, token length:', config.password?.length);
+        console.log('Using PAT authentication with OAUTH, token length:', config.password?.length);
       } else {
         connectionConfig.password = config.password;
         connectionConfig.authenticator = config.authenticator || 'SNOWFLAKE';
@@ -93,7 +94,8 @@ export class SnowflakeService {
 
       // Handle different authentication methods
       if (config.authenticator === 'PAT') {
-        connectionConfig.token = config.password; // PAT token goes in token field
+        // For PAT authentication, use password field with OAUTH authenticator
+        connectionConfig.password = config.password; // PAT token goes in password field for OAUTH
         connectionConfig.authenticator = 'OAUTH';
       } else {
         connectionConfig.password = config.password;

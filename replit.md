@@ -15,6 +15,7 @@ Context-aware assistant: Agent modes are automatically locked based on current n
 @agents system: Implemented comprehensive @agents autocomplete with dropdown suggestions labeled as "@agents", keyboard navigation (arrow keys + Enter/Escape), clean letter-based icons (no emojis), and intelligent context switching for different agent types (@ontology, @query, @dashboards). Agent hub moved to settings. Removed plus button in favor of @agents workflow.
 Smart agent routing: Added intent-based agent detection that automatically routes messages to appropriate agents based on content keywords (SQL → Query agent, modeling → Ontology agent, visualization → Dashboard agent).
 Quick agent selection: Added clickable agent selection buttons (Q, O, D) for easy access to specialized agents without typing @mentions.
+Dynamic agent suggestions: Assistant now analyzes user messages and its own responses to intelligently suggest relevant agents contextually, replacing hardcoded buttons with smart, contextual recommendations.
 
 ## System Architecture
 

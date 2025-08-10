@@ -1094,35 +1094,7 @@ compliance:
                   </div>
                 )}
 
-                {/* Quick Agent Selection Buttons */}
-                {!selectedAgentType && !getContextualAgentMode() && (
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedAgentType('query')}
-                      className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-green-100 text-green-800 rounded-full hover:bg-green-200 transition-colors"
-                    >
-                      <span className="w-4 h-4 bg-green-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-1.5">Q</span>
-                      SQL Query
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedAgentType('ontology')}
-                      className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200 transition-colors"
-                    >
-                      <span className="w-4 h-4 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-1.5">O</span>
-                      Data Model
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedAgentType('dashboards')}
-                      className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-purple-100 text-purple-800 rounded-full hover:bg-purple-200 transition-colors"
-                    >
-                      <span className="w-4 h-4 bg-purple-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-1.5">D</span>
-                      Dashboard
-                    </button>
-                  </div>
-                )}
+
 
                 <form onSubmit={handleChatSubmit} className="flex space-x-4">
                   <div className="relative flex-1">

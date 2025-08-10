@@ -262,12 +262,16 @@ Context: You are the default assistant in the main chat interface for general co
 
       const responseContent = response.choices[0].message.content || "I'm sorry, I couldn't process your request.";
 
+      // Analyze content to suggest relevant agents
+      const suggestedAgents = this.analyzeSuggestedAgents(content, responseContent);
+
       return {
         content: responseContent,
         metadata: {
           model: "gpt-4o",
           agentType: 'general',
-          sessionId
+          sessionId,
+          suggestedAgents: suggestedAgents
         }
       };
     } catch (error) {
@@ -329,6 +333,58 @@ Context: You are the default assistant in the main chat interface for general co
       pythonProcess.stdin?.write(input + '\n');
       pythonProcess.stdin?.end();
     });
+  }
+
+  // Analyze content to suggest relevant agents based on user intent
+  private analyzeSuggestedAgents(userInput: string, assistantResponse: string): Array<{type: string, label: string, reason: string}> {
+    const suggestions: Array<{type: string, label: string, reason: string}> = [];
+    const lowerInput = userInput.toLowerCase();
+    const lowerResponse = assistantResponse.toLowerCase();
+
+    // SQL/Database related suggestions
+    if (lowerInput.includes('sql') || lowerInput.includes('query') || lowerInput.includes('database') ||
+        lowerInput.includes('table') || lowerInput.includes('select') || lowerInput.includes('data analysis') ||
+        lowerResponse.includes('sql') || lowerResponse.includes('query')) {
+      suggestions.push({
+        type: 'query',
+        label: 'SQL Query',
+        reason: 'For database queries and analysis'
+      });
+    }
+
+    // Data modeling suggestions
+    if (lowerInput.includes('model') || lowerInput.includes('schema') || lowerInput.includes('ontology') ||
+        lowerInput.includes('semantic') || lowerInput.includes('relationship') || lowerInput.includes('structure') ||
+        lowerResponse.includes('model') || lowerResponse.includes('schema')) {
+      suggestions.push({
+        type: 'ontology',
+        label: 'Data Model',
+        reason: 'For semantic modeling and data structures'
+      });
+    }
+
+    // Visualization suggestions
+    if (lowerInput.includes('chart') || lowerInput.includes('graph') || lowerInput.includes('visual') ||
+        lowerInput.includes('dashboard') || lowerInput.includes('plot') || lowerInput.includes('show me') ||
+        lowerResponse.includes('chart') || lowerResponse.includes('visualiz')) {
+      suggestions.push({
+        type: 'dashboards',
+        label: 'Dashboard',
+        reason: 'For data visualization and charts'
+      });
+    }
+
+    // General data analytics suggestions - show all if user asks about analytics
+    if (lowerInput.includes('data analytics') || lowerInput.includes('what can you do') || 
+        lowerInput.includes('capabilities') || lowerInput.includes('help')) {
+      return [
+        { type: 'query', label: 'SQL Query', reason: 'For database queries and analysis' },
+        { type: 'ontology', label: 'Data Model', reason: 'For semantic modeling and data structures' },
+        { type: 'dashboards', label: 'Dashboard', reason: 'For data visualization and charts' }
+      ];
+    }
+
+    return suggestions;
   }
 
   private parseAgentOutput(output: string, script: string): any {

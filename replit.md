@@ -11,7 +11,7 @@ Design philosophy: Clean, simple interface - strongly rejects modern/sleek desig
 Left sidebar: Collapsible navigation with new chat as default landing page, plus dashboards/query/semantic-model matching @agents system, and chat history for previous conversations. Settings moved to profile dropdown with integrations and agent hub in tabbed interface.
 Models section: Semantic data modeling interface where users select data sources (configured in settings), browse available tables/views/folders, select multiple objects, and create semantic models with relationships and configurations.
 Assistant panel: Should be minimizable/maximizable for better workspace management. Maximize should open fullscreen overlay mode.
-Context-aware assistant: Agent modes (model/query/dashboard) are automatically detected based on current navigation selection (dashboard/studio/integrations/trainings) combined with user input keywords. No mode indicators needed - intelligence is completely transparent.
+Context-aware assistant: Agent modes are automatically locked based on current navigation selection - Query section locks to @query agent, Semantic Model section locks to @semantic-model agent, Dashboard section locks to @dashboards agent. Users cannot manually switch agents in contextual views. Chat view allows manual agent selection via @mentions.
 @agents system: Implemented comprehensive @agents autocomplete with dropdown suggestions labeled as "@agents", keyboard navigation (arrow keys + Enter/Escape), clean letter-based icons (no emojis), and intelligent context switching for different agent types (@semantic-model, @query, @dashboards). Agent hub moved to settings. Removed plus button in favor of @agents workflow.
 
 ## System Architecture

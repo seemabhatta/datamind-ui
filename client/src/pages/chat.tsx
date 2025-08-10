@@ -290,7 +290,11 @@ export default function ChatPage() {
     }
     
     // Auto-detect context and set mode
-    const detectedMode = detectContextMode(messageContent);
+    // Use contextual agent mode if available, otherwise detect from input
+    const detectedMode = getContextualAgentMode() ? 
+      (getContextualAgentMode() === 'query' ? 'query' : 
+       getContextualAgentMode() === 'semantic-model' ? 'model' : 'dashboard') 
+      : detectContextMode(messageContent);
     setAgentMode(detectedMode);
     
     setChatInput('');
@@ -357,6 +361,13 @@ export default function ChatPage() {
   const handleInputChange = (value: string) => {
     setChatInput(value);
     
+    // Skip @mention detection if in contextual mode
+    if (getContextualAgentMode()) {
+      // In contextual mode, check if we need generate mode based on agent
+      setIsGenerateMode(getContextualAgentMode() === 'semantic-model' || getContextualAgentMode() === 'dashboards');
+      return;
+    }
+    
     // Check for @ symbol and show dropdown
     const lastAtIndex = value.lastIndexOf('@');
     if (lastAtIndex !== -1 && lastAtIndex === value.length - 1) {
@@ -383,7 +394,7 @@ export default function ChatPage() {
     }
     
     // Check for specific mentions to set modes
-    setIsGenerateMode(value.includes('@domain-model') || value.includes('@dashboards'));
+    setIsGenerateMode(value.includes('@semantic-model') || value.includes('@dashboards'));
   };
 
   // Filter mentions based on query
@@ -400,7 +411,7 @@ export default function ChatPage() {
     
     setChatInput(newValue);
     setShowMentionDropdown(false);
-    setIsGenerateMode(newValue.includes('@domain-model') || newValue.includes('@dashboards'));
+    setIsGenerateMode(newValue.includes('@semantic-model') || newValue.includes('@dashboards'));
   };
 
   // Handle keyboard navigation in mention dropdown
@@ -978,11 +989,15 @@ compliance:
                           : isGenerateMode ? "What would you like me to help you with?" : "Ask me anything... (Type @ for agents)"
                       }
                       className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
-                        getContextualAgentMode()
-                          ? `border-${getContextualAgentMode() === 'query' ? 'green' : getContextualAgentMode() === 'semantic-model' ? 'blue' : 'purple'}-400 bg-${getContextualAgentMode() === 'query' ? 'green' : getContextualAgentMode() === 'semantic-model' ? 'blue' : 'purple'}-50 focus:ring-${getContextualAgentMode() === 'query' ? 'green' : getContextualAgentMode() === 'semantic-model' ? 'blue' : 'purple'}-500 text-${getContextualAgentMode() === 'query' ? 'green' : getContextualAgentMode() === 'semantic-model' ? 'blue' : 'purple'}-900 placeholder-${getContextualAgentMode() === 'query' ? 'green' : getContextualAgentMode() === 'semantic-model' ? 'blue' : 'purple'}-600`
-                          : isGenerateMode 
+                        getContextualAgentMode() === 'query'
+                          ? 'border-green-400 bg-green-50 focus:ring-green-500 text-green-900 placeholder-green-600'
+                          : getContextualAgentMode() === 'semantic-model'
                             ? 'border-blue-400 bg-blue-50 focus:ring-blue-500 text-blue-900 placeholder-blue-600'
-                            : 'border-gray-300 focus:ring-blue-500'
+                            : getContextualAgentMode() === 'dashboards'
+                              ? 'border-purple-400 bg-purple-50 focus:ring-purple-500 text-purple-900 placeholder-purple-600'
+                              : isGenerateMode 
+                                ? 'border-blue-400 bg-blue-50 focus:ring-blue-500 text-blue-900 placeholder-blue-600'
+                                : 'border-gray-300 focus:ring-blue-500'
                       }`}
                       disabled={isLoading}
                     />

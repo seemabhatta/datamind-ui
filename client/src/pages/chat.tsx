@@ -608,10 +608,10 @@ compliance:
                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
-              title={isLeftSidebarCollapsed ? 'New Chat' : ''}
+              title={isLeftSidebarCollapsed ? 'Home' : ''}
             >
-              <MessageSquare className={`${isLeftSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-3'}`} />
-              {!isLeftSidebarCollapsed && <span>new chat</span>}
+              <Home className={`${isLeftSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-3'}`} />
+              {!isLeftSidebarCollapsed && <span>home</span>}
             </button>
             
             <button
@@ -822,7 +822,7 @@ compliance:
                   <h2 className="text-2xl font-bold text-gray-900">
                     {currentSessionInfo 
                       ? (currentSessionInfo.agentType === 'yaml' ? 'Data Generation Chat' : 'Query Analysis Chat')
-                      : 'Assistant Chat'
+                      : 'DataMind Assistant'
                     }
                   </h2>
                   {currentSessionInfo && (
@@ -844,7 +844,7 @@ compliance:
               <p className="text-gray-600">
                 {currentSessionInfo 
                   ? `Continue your ${currentSessionInfo.agentType === 'yaml' ? 'data generation' : 'query analysis'} conversation`
-                  : 'Enhanced workspace for detailed conversations'
+                  : 'Welcome to your AI-powered data analytics platform'
                 }
               </p>
             </div>

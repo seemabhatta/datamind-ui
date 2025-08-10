@@ -8,7 +8,7 @@ DataMind is a modern web application that provides AI-powered data analytics thr
 
 Preferred communication style: Simple, everyday language.
 Design philosophy: Clean, simple interface - strongly rejects modern/sleek design elements like gradients, glass morphism, or complex styling.
-Left sidebar: Collapsible navigation with dashboards/query/domain-model/agent-hub as top-level pages matching @agents system. Settings moved to profile dropdown with integrations in tabbed interface.
+Left sidebar: Collapsible navigation with home (new chat) as default landing page, plus dashboards/query/domain-model/agent-hub matching @agents system. Settings moved to profile dropdown with integrations in tabbed interface.
 Models section: Semantic data modeling interface where users select data sources (configured in settings), browse available tables/views/folders, select multiple objects, and create semantic models with relationships and configurations.
 Assistant panel: Should be minimizable/maximizable for better workspace management. Maximize should open fullscreen overlay mode.
 Context-aware assistant: Agent modes (model/query/dashboard) are automatically detected based on current navigation selection (dashboard/studio/integrations/trainings) combined with user input keywords. No mode indicators needed - intelligence is completely transparent.

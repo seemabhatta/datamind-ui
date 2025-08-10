@@ -1,56 +1,56 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, jsonb, boolean, integer } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer, blob } from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
 
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+export const users = sqliteTable("users", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   displayName: text("display_name"),
   role: text("role").default("analyst"),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: integer("created_at", { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });
 
-export const chatSessions = pgTable("chat_sessions", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id),
+export const chatSessions = sqliteTable("chat_sessions", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id"),
   title: text("title"),
   agentType: text("agent_type").notNull(), // 'query' or 'yaml'
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  createdAt: integer("created_at", { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });
 
-export const chatMessages = pgTable("chat_messages", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  sessionId: varchar("session_id").references(() => chatSessions.id),
+export const chatMessages = sqliteTable("chat_messages", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  sessionId: text("session_id"),
   role: text("role").notNull(), // 'user' or 'assistant' or 'system'
   content: text("content").notNull(),
-  metadata: jsonb("metadata"), // Store SQL queries, execution time, etc.
-  createdAt: timestamp("created_at").defaultNow(),
+  metadata: text("metadata", { mode: 'json' }), // Store SQL queries, execution time, etc.
+  createdAt: integer("created_at", { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });
 
-export const visualizations = pgTable("visualizations", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  messageId: varchar("message_id").references(() => chatMessages.id),
-  userId: varchar("user_id").references(() => users.id),
+export const visualizations = sqliteTable("visualizations", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  messageId: text("message_id"),
+  userId: text("user_id"),
   title: text("title").notNull(),
   description: text("description"),
   chartType: text("chart_type").notNull(), // 'bar', 'line', 'pie', etc.
-  chartConfig: jsonb("chart_config").notNull(), // Plotly config
-  data: jsonb("data").notNull(), // Chart data
+  chartConfig: text("chart_config", { mode: 'json' }).notNull(), // Plotly config
+  data: text("data", { mode: 'json' }).notNull(), // Chart data
   sqlQuery: text("sql_query"),
-  isPinned: boolean("is_pinned").default(false),
-  isPublished: boolean("is_published").default(false),
-  createdAt: timestamp("created_at").defaultNow(),
+  isPinned: integer("is_pinned", { mode: 'boolean' }).default(false),
+  isPublished: integer("is_published", { mode: 'boolean' }).default(false),
+  createdAt: integer("created_at", { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });
 
-export const pinnedVisualizations = pgTable("pinned_visualizations", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id),
-  visualizationId: varchar("visualization_id").references(() => visualizations.id),
-  pinnedAt: timestamp("pinned_at").defaultNow(),
+export const pinnedVisualizations = sqliteTable("pinned_visualizations", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id"),
+  visualizationId: text("visualization_id"),
+  pinnedAt: integer("pinned_at", { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });
 
 // Relations

@@ -1,0 +1,385 @@
+/**
+ * OpenAI Agent SDK Service - Enhanced Agent Implementation
+ * Based on CLI patterns with Agent SDK integration
+ */
+
+import { AgentContext, agentContextManager } from './agent-context';
+import { enhancedFunctionTools, getEnhancedFunctionTool } from './function-tools-enhanced';
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+// Enhanced Agent Instructions based on CLI implementation
+const QUERY_AGENT_INSTRUCTIONS = `
+You are a Snowflake Query Assistant that helps users interact with their Snowflake data using natural language.
+
+Your capabilities:
+1. Connect to Snowflake databases
+2. Browse database structures (databases, schemas, tables)
+3. Convert natural language queries to SQL
+4. Execute SQL queries and show results
+5. Generate AI summaries of query results
+6. Provide intelligent analysis and insights
+
+IMPORTANT BEHAVIORAL GUIDELINES:
+
+- Always consider the context of your previous message when interpreting user responses
+- When you present options/lists to users, remember what you just showed them
+- Be proactive in using tools when users give clear directives or selections
+- If a user gives a brief response, consider it in context of what you just presented
+- Don't ask for clarification if the user's intent is clear from context
+
+CONTEXTUAL RESPONSE EXAMPLES:
+
+Example 1:
+A: "I found 2 databases: 1. CORTES_DEMO_2 2. SNOWFLAKE. Which would you like to explore?"
+User: "1"
+A: [calls select_database("CORTES_DEMO_2") immediately]
+
+Example 2:
+A: "Here are the tables: 1. CUSTOMERS 2. ORDERS 3. PRODUCTS"
+User: "show me the first one"
+A: [calls describe_table("CUSTOMERS") immediately]
+
+Example 3:
+A: "I found 3 schemas: PUBLIC, STAGING, PROD"
+User: "public"
+A: [calls select_schema("PUBLIC") immediately]
+
+EFFICIENCY RULES:
+
+- Avoid duplicate API calls - don't verify selections that were just made
+- Use the most direct path to get to query execution
+- Don't call the same endpoint multiple times unnecessarily
+- Once connected, reuse the same connection for all operations
+- NEVER call connect_to_snowflake() more than once per session
+
+CRITICAL: QUERY EXECUTION BEHAVIOR
+
+- If user asks a data query, IMMEDIATELY use generate_sql() tool
+- Always check get_current_context() to see what data is available
+- If user asks a query that can be answered with current data, generate SQL and execute it immediately
+
+Query Execution Examples:
+
+User: "Show me the top 10 customers"
+A: [calls generate_sql() immediately, then execute_sql()]
+
+User: "What's the average order amount?"
+A: [calls generate_sql() immediately, then execute_sql()]
+
+ADVANCED FEATURES:
+
+After executing queries, you can:
+- generate_summary() - Create AI analysis of results
+- Suggest follow-up questions and analyses
+- Provide business insights from data patterns
+
+Do NOT ask for clarification or suggest loading different files if you have data that can answer the question.
+
+Use the available tools to help users accomplish their goals efficiently.
+`;
+
+export class AgentSDKService {
+  
+  async processMessage(sessionId: string, message: string, agentType: string = 'query'): Promise<{
+    content: string;
+    metadata: any;
+  }> {
+    try {
+      const context = agentContextManager.getContext(sessionId);
+      
+      // Add user message to conversation history
+      agentContextManager.addToHistory(sessionId, {
+        role: 'user',
+        content: message,
+        timestamp: new Date()
+      });
+
+      // First try enhanced function tool pattern matching
+      const enhancedResult = await this.tryEnhancedFunctionTools(context, message);
+      if (enhancedResult) {
+        return enhancedResult;
+      }
+
+      // Fall back to OpenAI Agent SDK for complex queries
+      return await this.processWithAgentSDK(context, message, agentType);
+
+    } catch (error) {
+      console.error('Error in Agent SDK service:', error);
+      return {
+        content: `I encountered an error processing your request: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        metadata: { 
+          model: "agent-sdk", 
+          agentType, 
+          sessionId, 
+          error: true 
+        }
+      };
+    }
+  }
+
+  private async tryEnhancedFunctionTools(context: AgentContext, message: string): Promise<{
+    content: string;
+    metadata: any;
+  } | null> {
+    const lowercaseContent = message.toLowerCase().trim();
+
+    // Enhanced pattern matching with more sophisticated detection
+    const patterns = [
+      { patterns: ['connect', 'connect to snowflake', 'establish connection'], tool: 'connect_to_snowflake', params: {} },
+      { patterns: ['show databases', 'list databases', 'get databases', 'databases'], tool: 'get_databases', params: {} },
+      { patterns: ['show schemas', 'list schemas', 'get schemas', 'schemas'], tool: 'get_schemas', params: {} },
+      { patterns: ['show tables', 'list tables', 'get tables', 'tables'], tool: 'get_tables', params: {} },
+      { patterns: ['current context', 'show context', 'what is my context', 'context'], tool: 'get_current_context', params: {} }
+    ];
+
+    // Check for direct pattern matches
+    for (const pattern of patterns) {
+      if (pattern.patterns.some(p => lowercaseContent === p || lowercaseContent.includes(p))) {
+        const tool = getEnhancedFunctionTool(pattern.tool);
+        if (tool) {
+          try {
+            console.log(`Executing enhanced function tool: ${pattern.tool}`);
+            const result = await tool.execute(context, pattern.params);
+            
+            // Add to conversation history
+            agentContextManager.addToHistory(context.sessionId, {
+              role: 'function',
+              content: result,
+              functionCall: pattern.tool,
+              timestamp: new Date()
+            });
+
+            return {
+              content: result,
+              metadata: {
+                model: "enhanced-function-tool",
+                agentType: "query",
+                sessionId: context.sessionId,
+                functionCall: pattern.tool
+              }
+            };
+          } catch (error) {
+            console.log(`Enhanced function tool error: ${error}`);
+            return {
+              content: `Error executing ${pattern.tool}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+              metadata: {
+                model: "enhanced-function-tool",
+                agentType: "query", 
+                sessionId: context.sessionId,
+                error: true
+              }
+            };
+          }
+        }
+      }
+    }
+
+    // Check for simple confirmations (yes, sure, ok)
+    const confirmationPatterns = ['yes', 'sure', 'ok', 'okay', 'proceed', 'go ahead', 'do it'];
+    if (confirmationPatterns.includes(lowercaseContent)) {
+      const tool = getEnhancedFunctionTool('get_tables');
+      if (tool) {
+        try {
+          console.log(`Executing enhanced function tool: get_tables (from confirmation)`);
+          const result = await tool.execute(context, {});
+          return {
+            content: result,
+            metadata: {
+              model: "enhanced-function-tool",
+              agentType: "query",
+              sessionId: context.sessionId,
+              functionCall: 'get_tables'
+            }
+          };
+        } catch (error) {
+          console.log(`Enhanced function tool error: ${error}`);
+          return {
+            content: `Error executing get_tables: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            metadata: {
+              model: "enhanced-function-tool",
+              agentType: "query", 
+              sessionId: context.sessionId,
+              error: true
+            }
+          };
+        }
+      }
+    }
+
+    // Check for database/schema/table selection patterns
+    const selectDatabaseMatch = lowercaseContent.match(/(?:use|select|choose)\s+database\s+(\w+)/);
+    if (selectDatabaseMatch) {
+      const tool = getEnhancedFunctionTool('select_database');
+      if (tool) {
+        const result = await tool.execute(context, { database_name: selectDatabaseMatch[1] });
+        return {
+          content: result,
+          metadata: { model: "enhanced-function-tool", agentType: "query", sessionId: context.sessionId, functionCall: "select_database" }
+        };
+      }
+    }
+
+    const selectSchemaMatch = lowercaseContent.match(/(?:use|select|choose)\s+schema\s+(\w+)/);
+    if (selectSchemaMatch) {
+      const tool = getEnhancedFunctionTool('select_schema');
+      if (tool) {
+        const result = await tool.execute(context, { schema_name: selectSchemaMatch[1] });
+        return {
+          content: result,
+          metadata: { model: "enhanced-function-tool", agentType: "query", sessionId: context.sessionId, functionCall: "select_schema" }
+        };
+      }
+    }
+
+    // Check for table description patterns
+    const describeTableMatch = lowercaseContent.match(/(?:describe|desc|show\s+structure\s+of|explain)\s+(?:table\s+)?(\w+)/);
+    if (describeTableMatch) {
+      const tool = getEnhancedFunctionTool('describe_table');
+      if (tool) {
+        try {
+          const result = await tool.execute(context, { table_name: describeTableMatch[1] });
+          return {
+            content: result,
+            metadata: { model: "enhanced-function-tool", agentType: "query", sessionId: context.sessionId, functionCall: "describe_table" }
+          };
+        } catch (error) {
+          return {
+            content: `Error describing table: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            metadata: { model: "enhanced-function-tool", agentType: "query", sessionId: context.sessionId, error: true }
+          };
+        }
+      }
+    }
+
+    return null;
+  }
+
+  private async processWithAgentSDK(context: AgentContext, message: string, agentType: string): Promise<{
+    content: string;
+    metadata: any;
+  }> {
+    try {
+      // Build conversation history for context
+      const messages: any[] = [
+        { role: "system", content: QUERY_AGENT_INSTRUCTIONS }
+      ];
+
+      // Add recent conversation history
+      const recentHistory = context.conversationHistory.slice(-10); // Last 10 messages
+      recentHistory.forEach(entry => {
+        if (entry.role === 'user' || entry.role === 'assistant') {
+          messages.push({
+            role: entry.role,
+            content: entry.content
+          });
+        }
+      });
+
+      // Add current context summary
+      const contextSummary = agentContextManager.getContextSummary(context);
+      const contextMessage = `Current Agent State:${contextSummary}
+
+Available tools: ${enhancedFunctionTools.map(t => t.name).join(', ')}`;
+
+      messages.push({
+        role: "system",
+        content: contextMessage
+      });
+
+      // Add current user message
+      messages.push({
+        role: "user",
+        content: message
+      });
+
+      // Convert our function tools to OpenAI format
+      const tools = enhancedFunctionTools.map(tool => ({
+        type: "function" as const,
+        function: {
+          name: tool.name,
+          description: tool.description,
+          parameters: tool.parameters
+        }
+      }));
+
+      // Call OpenAI with tools
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages,
+        tools,
+        tool_choice: "auto",
+        temperature: 0.1
+      });
+
+      const responseMessage = response.choices[0].message;
+      
+      // Handle tool calls
+      if (responseMessage.tool_calls && responseMessage.tool_calls.length > 0) {
+        let finalResult = '';
+        
+        for (const toolCall of responseMessage.tool_calls) {
+          if (toolCall.type === 'function') {
+            const tool = getEnhancedFunctionTool(toolCall.function.name);
+            if (tool) {
+              try {
+                const params = JSON.parse(toolCall.function.arguments);
+                const toolResult = await tool.execute(context, params);
+                finalResult += toolResult + '\n\n';
+                
+                // Add to conversation history
+                agentContextManager.addToHistory(context.sessionId, {
+                  role: 'function',
+                  content: toolResult,
+                  functionCall: toolCall.function.name,
+                  timestamp: new Date()
+                });
+              } catch (error) {
+                finalResult += `Error executing ${toolCall.function.name}: ${error instanceof Error ? error.message : 'Unknown error'}\n\n`;
+              }
+            }
+          }
+        }
+        
+        return {
+          content: finalResult.trim(),
+          metadata: {
+            model: "gpt-4o",
+            agentType,
+            sessionId: context.sessionId,
+            toolCalls: responseMessage.tool_calls.filter(tc => tc.type === 'function').map(tc => tc.function.name)
+          }
+        };
+      }
+
+      // Regular response without tool calls
+      const content = responseMessage.content || 'I apologize, but I did not understand your request. Please try rephrasing or ask for help.';
+      
+      // Add to conversation history
+      agentContextManager.addToHistory(context.sessionId, {
+        role: 'assistant',
+        content,
+        timestamp: new Date()
+      });
+
+      return {
+        content,
+        metadata: {
+          model: "gpt-4o",
+          agentType,
+          sessionId: context.sessionId
+        }
+      };
+
+    } catch (error) {
+      console.error('Error processing with Agent SDK:', error);
+      throw error;
+    }
+  }
+}
+
+// Export singleton instance
+export const agentSDKService = new AgentSDKService();

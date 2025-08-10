@@ -119,6 +119,45 @@ export class SnowflakeService {
   }
 
   /**
+   * Create a fresh PAT connection for agent SDK usage
+   */
+  async createFreshPATConnection(): Promise<string> {
+    const connectionId = `pat-agent-${Date.now()}`;
+    console.log('Creating fresh PAT connection for agent SDK...');
+    
+    try {
+      const connection = snowflake.createConnection({
+        account: 'KIXUIIJ-MTC00254',
+        username: 'NL2SQL_CHAT_SVC',
+        password: 'eyJraWQiOiI5MDcxMDE4MTczOTY4MzkwIiwiYWxnIjoiRVMyNTYifQ.eyJwIjoiNTQwNjc0OTgwOjEzODQxMjc1MzI4NSIsImlzcyI6IlNGOjEwNTYiLCJleHAiOjE3NTYxNDk0MjF9._1GHsThId_cGuw4WUwYCh2NZ3DPZmrviQRxbwqJ7t_uQ2FFymuJwBt3Cf6zM-2-vesNh580UeXQjdsJ8gC5pHA',
+        database: 'CORTES_DEMO_2',
+        schema: 'CORTEX_DEMO',
+        warehouse: 'CORTEX_ANALYST_WH',
+        role: 'nl2sql_service_role',
+        authenticator: 'SNOWFLAKE'
+      });
+
+      await new Promise<void>((resolve, reject) => {
+        connection.connect((err: any, conn: any) => {
+          if (err) {
+            console.error('Failed to create fresh PAT connection:', err.message);
+            reject(err);
+          } else {
+            console.log('Fresh PAT connection created successfully');
+            this.activeConnections.set(connectionId, connection);
+            resolve();
+          }
+        });
+      });
+
+      return connectionId;
+    } catch (error) {
+      console.error('Error creating fresh PAT connection:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Execute a SQL query on Snowflake
    */
   async executeQuery(connectionId: string, sqlText: string): Promise<SnowflakeQueryResult> {

@@ -78,7 +78,19 @@ class AgentService {
 
   private async processQueryAgent(content: string, sessionId: string): Promise<AgentResponse> {
     try {
-      // Get or create agent context
+      // First try the enhanced Agent SDK implementation
+      try {
+        const { agentSDKService } = await import('./agent-sdk-service');
+        const result = await agentSDKService.processMessage(sessionId, content, 'query');
+        return {
+          content: result.content,
+          metadata: result.metadata
+        };
+      } catch (error) {
+        console.error('Agent SDK service error, falling back to legacy implementation:', error);
+      }
+
+      // Fallback to legacy implementation
       const userId = '0d493db8-bfed-4dd0-ab40-ae8a3225f8a5'; // TODO: Get from session
       const context = await agentContextManager.getContext(sessionId, userId);
 

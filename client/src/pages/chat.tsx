@@ -42,6 +42,23 @@ export default function ChatPage() {
     'dashboards': true
   });
 
+  // Get context-aware agent mode based on current view
+  const getContextualAgentMode = () => {
+    switch (currentView) {
+      case 'query':
+        return 'query';
+      case 'domain-model':
+        return 'semantic-model';
+      case 'dashboards':
+        return 'dashboards';
+      default:
+        return null; // Allow user selection in chat view
+    }
+  };
+
+  // Check if user can manually select agent (only in general chat view)
+  const canSelectAgent = currentView === 'chat';
+
 
   
   const userId = '0d493db8-bfed-4dd0-ab40-ae8a3225f8a5';
@@ -828,18 +845,38 @@ compliance:
               <div className="mb-3 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <h2 className="text-2xl font-bold text-gray-900">
-                    {currentSessionInfo 
-                      ? (currentSessionInfo.agentType === 'yaml' ? 'Data Generation Chat' : 'Query Analysis Chat')
-                      : 'DataMind Assistant'
+                    {getContextualAgentMode() 
+                      ? `${getContextualAgentMode() === 'query' ? 'Query' : getContextualAgentMode() === 'semantic-model' ? 'Semantic Model' : 'Dashboard'} Assistant`
+                      : currentSessionInfo 
+                        ? (currentSessionInfo.agentType === 'yaml' ? 'Data Generation Chat' : 'Query Analysis Chat')
+                        : 'DataMind Assistant'
                     }
                   </h2>
-                  {currentSessionInfo && (
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      currentSessionInfo.agentType === 'yaml' 
-                        ? 'bg-purple-100 text-purple-700' 
-                        : 'bg-blue-100 text-blue-700'
+                  {(getContextualAgentMode() || currentSessionInfo) && (
+                    <span className={`text-xs px-2 py-1 rounded-full flex items-center space-x-1 ${
+                      getContextualAgentMode() === 'query' || currentSessionInfo?.agentType === 'query'
+                        ? 'bg-green-100 text-green-700'
+                        : getContextualAgentMode() === 'semantic-model' || currentSessionInfo?.agentType === 'yaml' 
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-purple-100 text-purple-700'
                     }`}>
-                      {currentSessionInfo.agentType || 'query'}
+                      <div className={`w-3 h-3 rounded-full flex items-center justify-center text-xs font-medium text-white ${
+                        getContextualAgentMode() === 'query' || currentSessionInfo?.agentType === 'query'
+                          ? 'bg-green-600'
+                          : getContextualAgentMode() === 'semantic-model' || currentSessionInfo?.agentType === 'yaml'
+                            ? 'bg-blue-600'
+                            : 'bg-purple-600'
+                      }`}>
+                        {getContextualAgentMode() === 'query' || currentSessionInfo?.agentType === 'query' ? 'Q' : 
+                         getContextualAgentMode() === 'semantic-model' || currentSessionInfo?.agentType === 'yaml' ? 'S' : 'B'}
+                      </div>
+                      <span>
+                        {getContextualAgentMode() 
+                          ? (getContextualAgentMode() === 'query' ? 'Query Agent' : 
+                             getContextualAgentMode() === 'semantic-model' ? 'Semantic Agent' : 'Dashboard Agent')
+                          : (currentSessionInfo?.agentType || 'query')
+                        }
+                      </span>
                     </span>
                   )}
                 </div>
@@ -862,8 +899,18 @@ compliance:
                 {messages.length === 0 && (
                   <div className="text-center py-16">
                     <MessageSquare className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                    <h4 className="text-lg font-medium text-gray-900 mb-2">Welcome to DataMind</h4>
-                    <p className="text-gray-500">Start by typing @ to explore our AI agents for data analysis, modeling, and visualization</p>
+                    <h4 className="text-lg font-medium text-gray-900 mb-2">
+                      {getContextualAgentMode() 
+                        ? `${getContextualAgentMode() === 'query' ? 'Query' : getContextualAgentMode() === 'semantic-model' ? 'Semantic Model' : 'Dashboard'} Assistant Ready`
+                        : 'Welcome to DataMind'
+                      }
+                    </h4>
+                    <p className="text-gray-500">
+                      {getContextualAgentMode()
+                        ? `You're in ${getContextualAgentMode() === 'query' ? 'Query' : getContextualAgentMode() === 'semantic-model' ? 'Semantic Model' : 'Dashboard'} mode. Ask questions specific to ${getContextualAgentMode() === 'query' ? 'data queries and analysis' : getContextualAgentMode() === 'semantic-model' ? 'data modeling and relationships' : 'dashboards and visualizations'}.`
+                        : 'Start by typing @ to explore our AI agents for data analysis, modeling, and visualization'
+                      }
+                    </p>
                   </div>
                 )}
                 
@@ -925,17 +972,23 @@ compliance:
                       value={chatInput}
                       onChange={(e) => handleInputChange(e.target.value)}
                       onKeyDown={handleKeyDown}
-                      placeholder={isGenerateMode ? "What would you like me to help you with?" : "Ask me anything... (Type @ for agents)"}
+                      placeholder={
+                        getContextualAgentMode() 
+                          ? `Ask the ${getContextualAgentMode() === 'query' ? 'Query' : getContextualAgentMode() === 'semantic-model' ? 'Semantic Model' : 'Dashboard'} agent anything...`
+                          : isGenerateMode ? "What would you like me to help you with?" : "Ask me anything... (Type @ for agents)"
+                      }
                       className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
-                        isGenerateMode 
-                          ? 'border-blue-400 bg-blue-50 focus:ring-blue-500 text-blue-900 placeholder-blue-600'
-                          : 'border-gray-300 focus:ring-blue-500'
+                        getContextualAgentMode()
+                          ? `border-${getContextualAgentMode() === 'query' ? 'green' : getContextualAgentMode() === 'semantic-model' ? 'blue' : 'purple'}-400 bg-${getContextualAgentMode() === 'query' ? 'green' : getContextualAgentMode() === 'semantic-model' ? 'blue' : 'purple'}-50 focus:ring-${getContextualAgentMode() === 'query' ? 'green' : getContextualAgentMode() === 'semantic-model' ? 'blue' : 'purple'}-500 text-${getContextualAgentMode() === 'query' ? 'green' : getContextualAgentMode() === 'semantic-model' ? 'blue' : 'purple'}-900 placeholder-${getContextualAgentMode() === 'query' ? 'green' : getContextualAgentMode() === 'semantic-model' ? 'blue' : 'purple'}-600`
+                          : isGenerateMode 
+                            ? 'border-blue-400 bg-blue-50 focus:ring-blue-500 text-blue-900 placeholder-blue-600'
+                            : 'border-gray-300 focus:ring-blue-500'
                       }`}
                       disabled={isLoading}
                     />
                     
-                    {/* @mention Autocomplete Dropdown */}
-                    {showMentionDropdown && filteredMentions.length > 0 && (
+                    {/* @mention Autocomplete Dropdown - only show if not in contextual mode */}
+                    {!getContextualAgentMode() && showMentionDropdown && filteredMentions.length > 0 && (
                       <div className="absolute bottom-full mb-2 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto z-50">
                         <div className="px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide border-b border-gray-100">
                           @agents

@@ -127,13 +127,21 @@ export class AgentSDKService {
   } | null> {
     const lowercaseContent = message.toLowerCase().trim();
 
-    // Enhanced pattern matching with more sophisticated detection
+    // Enhanced pattern matching with CLI-based sophistication
     const patterns = [
       { patterns: ['connect', 'connect to snowflake', 'establish connection'], tool: 'connect_to_snowflake', params: {} },
       { patterns: ['show databases', 'list databases', 'get databases', 'databases'], tool: 'get_databases', params: {} },
       { patterns: ['show schemas', 'list schemas', 'get schemas', 'schemas'], tool: 'get_schemas', params: {} },
       { patterns: ['show tables', 'list tables', 'get tables', 'tables'], tool: 'get_tables', params: {} },
-      { patterns: ['current context', 'show context', 'what is my context', 'context'], tool: 'get_current_context', params: {} }
+      { patterns: ['show stages', 'list stages', 'get stages', 'stages'], tool: 'get_stages', params: {} },
+      { patterns: ['current context', 'show context', 'what is my context', 'context'], tool: 'get_current_context', params: {} },
+      { patterns: ['yaml files', 'list yaml', 'get yaml files', 'show yaml'], tool: 'get_yaml_files', params: {} },
+      { patterns: ['yaml content', 'show yaml content', 'get yaml content'], tool: 'get_yaml_content', params: {} },
+      { patterns: ['generate sql', 'create sql', 'write sql'], tool: 'generate_sql', params: {} },
+      { patterns: ['execute sql', 'run sql', 'run query'], tool: 'execute_sql', params: {} },
+      { patterns: ['create summary', 'generate summary', 'summarize'], tool: 'generate_summary', params: {} },
+      { patterns: ['visualize', 'create chart', 'create visualization', 'chart', 'show chart'], tool: 'visualize_data', params: {} },
+      { patterns: ['visualization suggestions', 'chart suggestions', 'suggest charts'], tool: 'get_visualization_suggestions', params: {} }
     ];
 
     // Check for direct pattern matches
@@ -252,6 +260,76 @@ export class AgentSDKService {
             metadata: { model: "enhanced-function-tool", agentType: "query", sessionId: context.sessionId, error: true }
           };
         }
+      }
+    }
+
+    // Check for stage selection patterns
+    const selectStageMatch = lowercaseContent.match(/(?:use|select|choose)\s+stage\s+(\w+)/);
+    if (selectStageMatch) {
+      const tool = getEnhancedFunctionTool('select_stage');
+      if (tool) {
+        const result = await tool.execute(context, { stage_name: selectStageMatch[1] });
+        return {
+          content: result,
+          metadata: { model: "enhanced-function-tool", agentType: "query", sessionId: context.sessionId, functionCall: "select_stage" }
+        };
+      }
+    }
+
+    // Check for YAML file loading patterns
+    const loadYamlMatch = lowercaseContent.match(/(?:load|open|get)\s+(?:yaml\s+)?(?:file\s+)?(\w+\.ya?ml)/);
+    if (loadYamlMatch) {
+      const tool = getEnhancedFunctionTool('load_yaml_file');
+      if (tool) {
+        const result = await tool.execute(context, { filename: loadYamlMatch[1] });
+        return {
+          content: result,
+          metadata: { model: "enhanced-function-tool", agentType: "query", sessionId: context.sessionId, functionCall: "load_yaml_file" }
+        };
+      }
+    }
+
+    // Check for natural language query patterns (CLI-style)
+    const queryIndicators = [
+      'show me', 'list all', 'count', 'how many', 'what is', 'find all', 
+      'get all', 'select all', 'top 10', 'average', 'sum of', 'total'
+    ];
+    
+    const isNaturalQuery = queryIndicators.some(indicator => lowercaseContent.includes(indicator));
+    if (isNaturalQuery && context.tables && context.tables.length > 0) {
+      const tool = getEnhancedFunctionTool('generate_sql');
+      if (tool) {
+        const result = await tool.execute(context, { query: message });
+        return {
+          content: result,
+          metadata: { model: "enhanced-function-tool", agentType: "query", sessionId: context.sessionId, functionCall: "generate_sql" }
+        };
+      }
+    }
+
+    // Check for SQL execution patterns
+    const sqlPattern = /(?:execute|run)\s+(?:this\s+)?(?:sql|query)/;
+    if (sqlPattern.test(lowercaseContent) && context.lastQuerySql) {
+      const tool = getEnhancedFunctionTool('execute_sql');
+      if (tool) {
+        const result = await tool.execute(context, { sql: context.lastQuerySql });
+        return {
+          content: result,
+          metadata: { model: "enhanced-function-tool", agentType: "query", sessionId: context.sessionId, functionCall: "execute_sql" }
+        };
+      }
+    }
+
+    // Check for visualization patterns
+    const visualizationPattern = /(?:create|make|show|generate)\s+(?:a\s+)?(?:chart|graph|visualization|plot)/;
+    if (visualizationPattern.test(lowercaseContent) && context.lastQueryResults) {
+      const tool = getEnhancedFunctionTool('visualize_data');
+      if (tool) {
+        const result = await tool.execute(context, { user_request: message });
+        return {
+          content: result,
+          metadata: { model: "enhanced-function-tool", agentType: "query", sessionId: context.sessionId, functionCall: "visualize_data" }
+        };
       }
     }
 

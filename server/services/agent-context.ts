@@ -10,11 +10,18 @@ export interface AgentContext {
   currentSchema?: string;
   currentStage?: string;
   yamlContent?: string;
+  yamlFilename?: string;
   yamlData?: any;
   tables: Array<{
     name: string;
     schema: string;
     database: string;
+  }>;
+  stages?: Array<{
+    name: string;
+    database: string;
+    schema: string;
+    type: string;
   }>;
   lastQueryResults?: any[];
   lastQueryColumns?: string[];

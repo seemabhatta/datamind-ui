@@ -35,6 +35,7 @@ export default function ChatPage() {
   const [showMentionDropdown, setShowMentionDropdown] = useState(false);
   const [mentionPosition, setMentionPosition] = useState(0);
   const [currentMentionQuery, setCurrentMentionQuery] = useState('');
+  const [activeSettingsTab, setActiveSettingsTab] = useState<'integrations' | 'general' | 'security' | 'agent-hub'>('integrations');
 
 
   
@@ -1171,13 +1172,44 @@ compliance:
             <div className="mb-6">
               <div className="border-b border-gray-200">
                 <nav className="-mb-px flex space-x-8">
-                  <button className="border-transparent text-blue-600 border-b-2 border-blue-600 py-2 px-1 text-sm font-medium">
+                  <button 
+                    onClick={() => setActiveSettingsTab('integrations')}
+                    className={`border-transparent py-2 px-1 text-sm font-medium border-b-2 ${
+                      activeSettingsTab === 'integrations' 
+                        ? 'text-blue-600 border-blue-600' 
+                        : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
                     Integrations
                   </button>
-                  <button className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2 py-2 px-1 text-sm font-medium">
+                  <button 
+                    onClick={() => setActiveSettingsTab('agent-hub')}
+                    className={`border-transparent py-2 px-1 text-sm font-medium border-b-2 ${
+                      activeSettingsTab === 'agent-hub' 
+                        ? 'text-blue-600 border-blue-600' 
+                        : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    Agent Hub
+                  </button>
+                  <button 
+                    onClick={() => setActiveSettingsTab('general')}
+                    className={`border-transparent py-2 px-1 text-sm font-medium border-b-2 ${
+                      activeSettingsTab === 'general' 
+                        ? 'text-blue-600 border-blue-600' 
+                        : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
                     General
                   </button>
-                  <button className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2 py-2 px-1 text-sm font-medium">
+                  <button 
+                    onClick={() => setActiveSettingsTab('security')}
+                    className={`border-transparent py-2 px-1 text-sm font-medium border-b-2 ${
+                      activeSettingsTab === 'security' 
+                        ? 'text-blue-600 border-blue-600' 
+                        : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
                     Security
                   </button>
                 </nav>
@@ -1185,6 +1217,7 @@ compliance:
             </div>
 
             {/* Integrations Content */}
+            {activeSettingsTab === 'integrations' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Data Sources */}
               <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -1303,6 +1336,151 @@ compliance:
                 </div>
               </div>
             </div>
+            )}
+
+            {/* Agent Hub Content */}
+            {activeSettingsTab === 'agent-hub' && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Available Agents */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Available Agents</h3>
+                  <Bot className="w-5 h-5 text-gray-400" />
+                </div>
+                <div className="space-y-3">
+                  <div className="p-3 bg-gray-50 rounded-md">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-medium">D</div>
+                        <span className="text-sm font-medium">Domain-Model Agent</span>
+                      </div>
+                      <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Active</span>
+                    </div>
+                    <p className="text-xs text-gray-500">Semantic data modeling and relationships</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-md">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-medium">Q</div>
+                        <span className="text-sm font-medium">Query Agent</span>
+                      </div>
+                      <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Active</span>
+                    </div>
+                    <p className="text-xs text-gray-500">SQL queries and data analysis</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-md">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-medium">B</div>
+                        <span className="text-sm font-medium">Dashboard Agent</span>
+                      </div>
+                      <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Active</span>
+                    </div>
+                    <p className="text-xs text-gray-500">Interactive dashboards and visualizations</p>
+                  </div>
+                  <button className="w-full mt-4 px-4 py-2 text-sm text-blue-600 border border-blue-200 rounded-md hover:bg-blue-50">
+                    Deploy New Agent
+                  </button>
+                </div>
+              </div>
+
+              {/* Agent Performance */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Agent Performance</h3>
+                  <BarChart3 className="w-5 h-5 text-gray-400" />
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-gray-600">Domain-Model Agent</span>
+                      <span className="text-sm font-medium">95.2%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-blue-500 h-2 rounded-full" style={{width: '95.2%'}}></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-gray-600">Query Agent</span>
+                      <span className="text-sm font-medium">88.7%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-green-500 h-2 rounded-full" style={{width: '88.7%'}}></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-gray-600">Dashboard Agent</span>
+                      <span className="text-sm font-medium">92.1%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-purple-500 h-2 rounded-full" style={{width: '92.1%'}}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Agent Configuration */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Agent Configuration</h3>
+                  <Settings className="w-5 h-5 text-gray-400" />
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                    <div>
+                      <span className="text-sm font-medium block">Auto-detect Context</span>
+                      <span className="text-xs text-gray-500">Automatically switch agents based on conversation</span>
+                    </div>
+                    <div className="w-10 h-6 bg-blue-600 rounded-full relative cursor-pointer">
+                      <div className="w-4 h-4 bg-white rounded-full absolute top-1 right-1"></div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                    <div>
+                      <span className="text-sm font-medium block">Response Streaming</span>
+                      <span className="text-xs text-gray-500">Stream agent responses in real-time</span>
+                    </div>
+                    <div className="w-10 h-6 bg-blue-600 rounded-full relative cursor-pointer">
+                      <div className="w-4 h-4 bg-white rounded-full absolute top-1 right-1"></div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                    <div>
+                      <span className="text-sm font-medium block">Agent Collaboration</span>
+                      <span className="text-xs text-gray-500">Allow agents to work together on complex tasks</span>
+                    </div>
+                    <div className="w-10 h-6 bg-gray-300 rounded-full relative cursor-pointer">
+                      <div className="w-4 h-4 bg-white rounded-full absolute top-1 left-1"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Agent Actions */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Agent Actions</h3>
+                  <Zap className="w-5 h-5 text-gray-400" />
+                </div>
+                <div className="space-y-2">
+                  <button className="w-full p-3 text-left text-sm text-gray-700 border border-gray-200 rounded-md hover:bg-gray-50">
+                    Train All Agents
+                  </button>
+                  <button className="w-full p-3 text-left text-sm text-gray-700 border border-gray-200 rounded-md hover:bg-gray-50">
+                    Reset Agent Memory
+                  </button>
+                  <button className="w-full p-3 text-left text-sm text-gray-700 border border-gray-200 rounded-md hover:bg-gray-50">
+                    Export Agent Configs
+                  </button>
+                  <button className="w-full p-3 text-left text-sm text-gray-700 border border-gray-200 rounded-md hover:bg-gray-50">
+                    View Agent Logs
+                  </button>
+                </div>
+              </div>
+            </div>
+            )}
           </div>
         ) : currentView === 'models' ? (
           <div className="flex-1 p-6">

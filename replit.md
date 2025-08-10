@@ -13,6 +13,8 @@ Models section: Ontology data modeling interface where users select data sources
 Assistant panel: Should be minimizable/maximizable for better workspace management. Maximize should open fullscreen overlay mode.
 Context-aware assistant: Agent modes are automatically locked based on current navigation selection - Query section locks to @query agent, Ontology section locks to @ontology agent, Dashboard section locks to @dashboards agent. Users cannot manually switch agents in contextual views. Chat view allows manual agent selection via @mentions.
 @agents system: Implemented comprehensive @agents autocomplete with dropdown suggestions labeled as "@agents", keyboard navigation (arrow keys + Enter/Escape), clean letter-based icons (no emojis), and intelligent context switching for different agent types (@ontology, @query, @dashboards). Agent hub moved to settings. Removed plus button in favor of @agents workflow.
+Smart agent routing: Added intent-based agent detection that automatically routes messages to appropriate agents based on content keywords (SQL → Query agent, modeling → Ontology agent, visualization → Dashboard agent).
+Quick agent selection: Added clickable agent selection buttons (Q, O, D) for easy access to specialized agents without typing @mentions.
 
 ## System Architecture
 

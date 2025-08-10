@@ -216,49 +216,39 @@ export default function ChatPage() {
     }
   };
 
-  // Context-aware mode detection based on navigation + input content
-  const detectContextMode = (input: string): 'model' | 'query' | 'dashboard' => {
+  // Smart intent detection to automatically route to appropriate agents
+  const detectIntentBasedAgent = (input: string): 'general' | 'query' | 'model' | 'dashboard' => {
     const lowerInput = input.toLowerCase();
     
-    // First, consider the current navigation context
-    if (currentView === 'dashboard') {
-      // In dashboard view, prioritize visualization modes
-      if (lowerInput.includes('chart') || lowerInput.includes('graph') || 
-          lowerInput.includes('visualiz') || lowerInput.includes('plot') ||
-          lowerInput.includes('bar chart') || lowerInput.includes('line chart') || 
-          lowerInput.includes('pie chart') || lowerInput.includes('show me')) {
-        return 'dashboard';
-      }
-      // SQL queries in dashboard context still go to query mode
-      if (lowerInput.includes('select') || lowerInput.includes('from') ||
-          lowerInput.includes('where') || lowerInput.includes('sql') ||
-          lowerInput.includes('database') || lowerInput.includes('table')) {
-        return 'query';
-      }
-      // Default to dashboard mode when in dashboard view
-      return 'dashboard';
-    }
-    
-    if (currentView === 'studio') {
-      // In studio view, prioritize query/development modes
-      if (lowerInput.includes('select') || lowerInput.includes('from') ||
-          lowerInput.includes('where') || lowerInput.includes('sql') ||
-          lowerInput.includes('query') || lowerInput.includes('database') ||
-          lowerInput.includes('table') || lowerInput.includes('count') ||
-          lowerInput.includes('sum') || lowerInput.includes('group by')) {
-        return 'query';
-      }
-      // Visualization requests in studio can still go to dashboard
-      if (lowerInput.includes('chart') || lowerInput.includes('graph') || 
-          lowerInput.includes('visualiz') || lowerInput.includes('plot')) {
-        return 'dashboard';
-      }
-      // Default to query mode when in studio view
+    // SQL and database queries
+    if (lowerInput.includes('select') || lowerInput.includes('from') ||
+        lowerInput.includes('where') || lowerInput.includes('sql') ||
+        lowerInput.includes('query') || lowerInput.includes('database') ||
+        lowerInput.includes('table') || lowerInput.includes('count') ||
+        lowerInput.includes('sum') || lowerInput.includes('group by') ||
+        lowerInput.includes('join') || lowerInput.includes('order by')) {
       return 'query';
     }
     
-    // Fallback to model for general conversation
-    return 'model';
+    // Data modeling and semantic modeling
+    if (lowerInput.includes('model') || lowerInput.includes('schema') ||
+        lowerInput.includes('ontology') || lowerInput.includes('semantic') ||
+        lowerInput.includes('relationship') || lowerInput.includes('entity') ||
+        lowerInput.includes('yaml') || lowerInput.includes('data structure')) {
+      return 'model';
+    }
+    
+    // Visualization and dashboards
+    if (lowerInput.includes('chart') || lowerInput.includes('graph') || 
+        lowerInput.includes('visualiz') || lowerInput.includes('plot') ||
+        lowerInput.includes('dashboard') || lowerInput.includes('bar chart') || 
+        lowerInput.includes('line chart') || lowerInput.includes('pie chart') ||
+        lowerInput.includes('show me') || lowerInput.includes('display')) {
+      return 'dashboard';
+    }
+    
+    // Default to general for conversational queries
+    return 'general';
   };
 
   const handleChatSubmit = async (e: React.FormEvent) => {
@@ -290,8 +280,7 @@ export default function ChatPage() {
       }
     }
     
-    // Auto-detect context and set mode
-    // Use contextual agent mode, selected agent, or default to general
+    // Smart agent selection: contextual > selected > intent-based > general
     const detectedMode = getContextualAgentMode() ? 
       (getContextualAgentMode() === 'query' ? 'query' : 
        getContextualAgentMode() === 'semantic-model' ? 'model' : 
@@ -300,7 +289,7 @@ export default function ChatPage() {
         (selectedAgentType === 'query' ? 'query' :
          selectedAgentType === 'ontology' ? 'model' : 
          selectedAgentType === 'dashboards' ? 'dashboard' : 'general')
-      : 'general'; // Default to general assistant for all chat conversations
+      : detectIntentBasedAgent(messageContent); // Auto-detect intent from message content
     setAgentMode(detectedMode);
     
     setChatInput('');
@@ -1102,6 +1091,36 @@ compliance:
                         <X className="w-4 h-4" />
                       </button>
                     )}
+                  </div>
+                )}
+
+                {/* Quick Agent Selection Buttons */}
+                {!selectedAgentType && !getContextualAgentMode() && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedAgentType('query')}
+                      className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-green-100 text-green-800 rounded-full hover:bg-green-200 transition-colors"
+                    >
+                      <span className="w-4 h-4 bg-green-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-1.5">Q</span>
+                      SQL Query
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedAgentType('ontology')}
+                      className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200 transition-colors"
+                    >
+                      <span className="w-4 h-4 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-1.5">O</span>
+                      Data Model
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedAgentType('dashboards')}
+                      className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-purple-100 text-purple-800 rounded-full hover:bg-purple-200 transition-colors"
+                    >
+                      <span className="w-4 h-4 bg-purple-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-1.5">D</span>
+                      Dashboard
+                    </button>
                   </div>
                 )}
 

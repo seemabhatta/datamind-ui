@@ -240,7 +240,6 @@ export class SnowflakeService {
    */
   async executeQueryWithConfig(config: any, sqlText: string): Promise<any> {
     return new Promise((resolve, reject) => {
-      const snowflake = require('snowflake-sdk');
       const connection = snowflake.createConnection({
         account: config.account,
         username: config.username,

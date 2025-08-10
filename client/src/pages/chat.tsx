@@ -195,21 +195,27 @@ export default function ChatPage() {
 
   // Create initial session
   useEffect(() => {
-    if (!currentSessionId && userId) {
+    if (!currentSessionId && userId && currentView === 'chat') {
       createNewSession();
     }
-  }, [userId]);
+  }, [userId, currentSessionId, currentView]);
 
   const createNewSession = async () => {
     try {
       const response = await fetch('/api/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, agentType: 'query' })
+        body: JSON.stringify({ userId, agentType: 'general' }) // Start with general agent for new chats
       });
       if (response.ok) {
         const session = await response.json();
         setCurrentSessionId(session.id);
+        // Set session info for the new chat
+        setCurrentSessionInfo({
+          id: session.id,
+          agentType: 'general',
+          createdAt: new Date().toISOString()
+        });
       }
     } catch (error) {
       console.error('Failed to create session:', error);
@@ -669,9 +675,17 @@ compliance:
           <div className="space-y-2">
             <button
               onClick={() => {
-                setCurrentSessionInfo(null); // Clear session info for new chat
-                setMessages([]); // Clear messages
-                setCurrentSessionId(''); // Clear session ID to create new one
+                // Clear all chat state for a fresh start
+                setCurrentSessionInfo(null);
+                setMessages([]);
+                setCurrentSessionId('');
+                setSelectedAgentType(null);
+                setAgentMode('general');
+                setIsLoading(false);
+                setIsGenerateMode(false);
+                setChatInput('');
+                setUploadedFiles([]);
+                setShowMentionDropdown(false);
                 setCurrentView('chat');
               }}
               className={`w-full flex items-center justify-start ${isLeftSidebarCollapsed ? 'px-2 py-3 justify-center' : 'px-3 py-2'} text-sm font-medium rounded-md transition-colors ${

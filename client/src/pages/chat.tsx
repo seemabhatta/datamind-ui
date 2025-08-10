@@ -31,6 +31,7 @@ export default function ChatPage() {
   const [selectedChatIds, setSelectedChatIds] = useState<string[]>([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [isGenerateMode, setIsGenerateMode] = useState(false);
 
 
   
@@ -311,11 +312,18 @@ export default function ChatPage() {
     }
   };
 
+  // Check if input contains @generate to enable blue theme
+  useEffect(() => {
+    setIsGenerateMode(chatInput.startsWith('@generate'));
+  }, [chatInput]);
+
   const handlePlusOption = (option: 'generate' | 'query' | 'upload') => {
     if (option === 'generate') {
       setChatInput('@generate ');
+      setIsGenerateMode(true);
     } else if (option === 'query') {
       setChatInput('@query ');
+      setIsGenerateMode(false);
     } else if (option === 'upload') {
       // Trigger file input
       const input = document.createElement('input');

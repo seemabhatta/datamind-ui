@@ -883,9 +883,13 @@ compliance:
                   <button
                     type="submit"
                     disabled={!chatInput.trim() || isLoading}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className={`px-6 py-3 text-white rounded-lg font-medium focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
+                      isGenerateMode
+                        ? 'bg-blue-700 hover:bg-blue-800 focus:ring-blue-600'
+                        : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
+                    }`}
                   >
-                    Send
+                    {isGenerateMode ? 'Generate' : 'Send'}
                   </button>
                 </form>
               </div>

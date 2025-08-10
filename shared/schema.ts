@@ -60,12 +60,12 @@ export const snowflakeConnections = sqliteTable("snowflake_connections", {
   name: text("name").notNull(), // User-friendly name for the connection
   account: text("account").notNull(), // Snowflake account identifier
   username: text("username").notNull(),
-  password: text("password"), // Encrypted password
+  password: text("password"), // Encrypted password or PAT token
   database: text("database"),
   schema: text("schema"),
   warehouse: text("warehouse"),
   role: text("role"),
-  authenticator: text("authenticator").default("SNOWFLAKE"), // SNOWFLAKE, EXTERNALBROWSER, etc.
+  authenticator: text("authenticator").default("SNOWFLAKE"), // SNOWFLAKE, OAUTH, PAT
   isDefault: integer("is_default", { mode: 'boolean' }).default(false),
   isActive: integer("is_active", { mode: 'boolean' }).default(true),
   lastConnected: integer("last_connected", { mode: 'timestamp' }),

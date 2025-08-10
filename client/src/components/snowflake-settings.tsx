@@ -15,7 +15,7 @@ import { insertSnowflakeConnectionSchema, type SnowflakeConnection } from '@shar
 
 // Form schema for Snowflake connection
 const snowflakeConnectionFormSchema = insertSnowflakeConnectionSchema.extend({
-  password: z.string().min(1, 'Password is required'),
+  password: z.string().min(1, 'Password or PAT token is required'),
 });
 
 type SnowflakeConnectionForm = z.infer<typeof snowflakeConnectionFormSchema>;
@@ -264,6 +264,33 @@ export function SnowflakeSettings({ userId }: SnowflakeSettingsProps) {
                   <p>{connection.role || 'Not specified'}</p>
                 </div>
                 <div>
+                  <Label className="text-muted-foreground">Authentication</Label>
+                  <p className="flex items-center gap-2">
+                    {connection.authenticator === 'PAT' ? (
+                      <>
+                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                          PAT
+                        </span>
+                        Personal Access Token
+                      </>
+                    ) : connection.authenticator === 'USERNAME_PASSWORD_MFA' ? (
+                      <>
+                        <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
+                          MFA
+                        </span>
+                        Multi-Factor Auth
+                      </>
+                    ) : (
+                      <>
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                          PWD
+                        </span>
+                        Username/Password
+                      </>
+                    )}
+                  </p>
+                </div>
+                <div>
                   <Label className="text-muted-foreground">Last Connected</Label>
                   <p>
                     {connection.lastConnected 
@@ -364,6 +391,24 @@ export function SnowflakeSettings({ userId }: SnowflakeSettingsProps) {
                 </div>
               </div>
 
+              <div>
+                <Label htmlFor="authenticator">Authentication Method *</Label>
+                <Select 
+                  value={form.watch('authenticator') || 'SNOWFLAKE'} 
+                  onValueChange={(value) => form.setValue('authenticator', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="SNOWFLAKE">Username/Password</SelectItem>
+                    <SelectItem value="USERNAME_PASSWORD_MFA">Multi-Factor Authentication</SelectItem>
+                    <SelectItem value="PAT">Personal Access Token (PAT)</SelectItem>
+                    <SelectItem value="EXTERNALBROWSER">SSO/Browser</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="username">Username *</Label>
@@ -377,15 +422,29 @@ export function SnowflakeSettings({ userId }: SnowflakeSettingsProps) {
                   )}
                 </div>
                 <div>
-                  <Label htmlFor="password">Password *</Label>
+                  <Label htmlFor="password">
+                    {form.watch('authenticator') === 'PAT' 
+                      ? 'Personal Access Token *' 
+                      : 'Password *'
+                    }
+                  </Label>
                   <Input
                     id="password"
                     type="password"
-                    placeholder="your_password"
+                    placeholder={
+                      form.watch('authenticator') === 'PAT' 
+                        ? 'pat_XXXXXXXXXXXXXXXX...' 
+                        : 'your_password'
+                    }
                     {...form.register('password')}
                   />
                   {form.formState.errors.password && (
                     <p className="text-sm text-red-600">{form.formState.errors.password.message}</p>
+                  )}
+                  {form.watch('authenticator') === 'PAT' && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      PAT tokens bypass MFA and provide secure authentication for automated connections.
+                    </p>
                   )}
                 </div>
               </div>
@@ -428,22 +487,7 @@ export function SnowflakeSettings({ userId }: SnowflakeSettingsProps) {
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="authenticator">Authentication Method</Label>
-                <Select 
-                  value={form.watch('authenticator') || 'SNOWFLAKE'} 
-                  onValueChange={(value) => form.setValue('authenticator', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="SNOWFLAKE">Username/Password</SelectItem>
-                    <SelectItem value="EXTERNALBROWSER">SSO/Browser</SelectItem>
-                    <SelectItem value="USERNAME_PASSWORD_MFA">Multi-Factor Authentication</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+
 
               <div className="flex items-center space-x-2">
                 <Switch

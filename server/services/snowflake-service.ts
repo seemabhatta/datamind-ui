@@ -30,16 +30,26 @@ export class SnowflakeService {
    */
   async testConnection(config: SnowflakeConnectionConfig): Promise<boolean> {
     return new Promise((resolve) => {
-      const connection = snowflake.createConnection({
+      // Configure authentication based on type
+      const connectionConfig: any = {
         account: config.account,
         username: config.username,
-        password: config.password,
         database: config.database,
         schema: config.schema,
         warehouse: config.warehouse,
         role: config.role,
-        authenticator: config.authenticator || 'SNOWFLAKE',
-      });
+      };
+
+      // Handle different authentication methods
+      if (config.authenticator === 'PAT') {
+        connectionConfig.token = config.password; // PAT token goes in token field
+        connectionConfig.authenticator = 'OAUTH';
+      } else {
+        connectionConfig.password = config.password;
+        connectionConfig.authenticator = config.authenticator || 'SNOWFLAKE';
+      }
+
+      const connection = snowflake.createConnection(connectionConfig);
 
       connection.connect((err, conn) => {
         // Clean up connection immediately
@@ -61,16 +71,26 @@ export class SnowflakeService {
    */
   async createConnection(connectionId: string, config: SnowflakeConnectionConfig): Promise<boolean> {
     return new Promise((resolve) => {
-      const connection = snowflake.createConnection({
+      // Configure authentication based on type
+      const connectionConfig: any = {
         account: config.account,
         username: config.username,
-        password: config.password,
         database: config.database,
         schema: config.schema,
         warehouse: config.warehouse,
         role: config.role,
-        authenticator: config.authenticator || 'SNOWFLAKE',
-      });
+      };
+
+      // Handle different authentication methods
+      if (config.authenticator === 'PAT') {
+        connectionConfig.token = config.password; // PAT token goes in token field
+        connectionConfig.authenticator = 'OAUTH';
+      } else {
+        connectionConfig.password = config.password;
+        connectionConfig.authenticator = config.authenticator || 'SNOWFLAKE';
+      }
+
+      const connection = snowflake.createConnection(connectionConfig);
 
       connection.connect((err, conn) => {
         if (err) {

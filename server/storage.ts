@@ -1,8 +1,9 @@
 import { 
-  users, chatSessions, chatMessages, visualizations, pinnedVisualizations,
+  users, chatSessions, chatMessages, visualizations, pinnedVisualizations, snowflakeConnections,
   type User, type InsertUser, type ChatSession, type InsertChatSession,
   type ChatMessage, type InsertChatMessage, type Visualization, type InsertVisualization,
-  type PinnedVisualization, type InsertPinnedVisualization
+  type PinnedVisualization, type InsertPinnedVisualization,
+  type SnowflakeConnection, type InsertSnowflakeConnection
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, inArray } from "drizzle-orm";
@@ -39,6 +40,15 @@ export interface IStorage {
 
   // Published visualizations
   getPublishedVisualizations(): Promise<Visualization[]>;
+
+  // Snowflake connection methods
+  getSnowflakeConnections(userId: string): Promise<SnowflakeConnection[]>;
+  getSnowflakeConnection(id: string): Promise<SnowflakeConnection | undefined>;
+  getDefaultSnowflakeConnection(userId: string): Promise<SnowflakeConnection | undefined>;
+  createSnowflakeConnection(connection: InsertSnowflakeConnection): Promise<SnowflakeConnection>;
+  updateSnowflakeConnection(id: string, updates: Partial<SnowflakeConnection>): Promise<SnowflakeConnection>;
+  deleteSnowflakeConnection(id: string): Promise<void>;
+  setDefaultSnowflakeConnection(userId: string, connectionId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -198,6 +208,70 @@ export class DatabaseStorage implements IStorage {
       .from(visualizations)
       .where(eq(visualizations.isPublished, true))
       .orderBy(desc(visualizations.createdAt));
+  }
+
+  // Snowflake connection methods
+  async getSnowflakeConnections(userId: string): Promise<SnowflakeConnection[]> {
+    return await db
+      .select()
+      .from(snowflakeConnections)
+      .where(eq(snowflakeConnections.userId, userId))
+      .orderBy(desc(snowflakeConnections.isDefault), desc(snowflakeConnections.updatedAt));
+  }
+
+  async getSnowflakeConnection(id: string): Promise<SnowflakeConnection | undefined> {
+    const [connection] = await db
+      .select()
+      .from(snowflakeConnections)
+      .where(eq(snowflakeConnections.id, id));
+    return connection || undefined;
+  }
+
+  async getDefaultSnowflakeConnection(userId: string): Promise<SnowflakeConnection | undefined> {
+    const [connection] = await db
+      .select()
+      .from(snowflakeConnections)
+      .where(and(
+        eq(snowflakeConnections.userId, userId),
+        eq(snowflakeConnections.isDefault, true),
+        eq(snowflakeConnections.isActive, true)
+      ));
+    return connection || undefined;
+  }
+
+  async createSnowflakeConnection(connection: InsertSnowflakeConnection): Promise<SnowflakeConnection> {
+    const [newConnection] = await db
+      .insert(snowflakeConnections)
+      .values(connection)
+      .returning();
+    return newConnection;
+  }
+
+  async updateSnowflakeConnection(id: string, updates: Partial<SnowflakeConnection>): Promise<SnowflakeConnection> {
+    const [updated] = await db
+      .update(snowflakeConnections)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(snowflakeConnections.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteSnowflakeConnection(id: string): Promise<void> {
+    await db.delete(snowflakeConnections).where(eq(snowflakeConnections.id, id));
+  }
+
+  async setDefaultSnowflakeConnection(userId: string, connectionId: string): Promise<void> {
+    // First, unset all other default connections for this user
+    await db
+      .update(snowflakeConnections)
+      .set({ isDefault: false })
+      .where(eq(snowflakeConnections.userId, userId));
+
+    // Then set the specified connection as default
+    await db
+      .update(snowflakeConnections)
+      .set({ isDefault: true })
+      .where(eq(snowflakeConnections.id, connectionId));
   }
 }
 

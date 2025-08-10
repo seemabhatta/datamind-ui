@@ -2,6 +2,8 @@ import { spawn, ChildProcess } from 'child_process';
 import path from 'path';
 import { visualizationService } from './visualization-service';
 import OpenAI from 'openai';
+import { storage } from '../storage';
+import { snowflakeService } from './snowflake-service';
 
 interface AgentResponse {
   content: string;
@@ -74,6 +76,35 @@ class AgentService {
 
   private async processQueryAgent(content: string, sessionId: string): Promise<AgentResponse> {
     try {
+      // Check if this looks like a SQL query and we have a Snowflake connection
+      const sqlQueryPattern = /\b(SELECT|WITH|SHOW|DESCRIBE|DESC)\b/i;
+      const isDirectSQLQuery = sqlQueryPattern.test(content.trim());
+      
+      if (isDirectSQLQuery) {
+        // Try to execute on Snowflake if available
+        try {
+          const connections = await storage.getSnowflakeConnections(sessionId); // Using sessionId as placeholder for userId
+          const defaultConnection = connections.find(c => c.isDefault && c.isActive);
+          
+          if (defaultConnection) {
+            // Execute the query on Snowflake
+            const result = await this.executeSnowflakeQuery(defaultConnection.id, content);
+            
+            return {
+              content: `Successfully executed your Snowflake query!\n\n**Query:** \`\`\`sql\n${content}\n\`\`\`\n\n**Results:** ${result.rows?.length || 0} rows returned\n\nFirst few rows:\n${this.formatQueryResults(result)}`,
+              metadata: {
+                model: "snowflake-execution",
+                agentType: "query",
+                sessionId,
+                queryResult: result
+              }
+            };
+          }
+        } catch (snowflakeError) {
+          console.log('Snowflake execution failed, falling back to AI assistant');
+        }
+      }
+
       // Use OpenAI to process the query
       const response = await this.openai.chat.completions.create({
         model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
@@ -83,18 +114,20 @@ class AgentService {
             content: `You are a Query Agent for DataMind, a data analytics platform. Your role is to help users with SQL queries and data analysis. 
 
 You can:
-- Help write SQL queries
-- Explain query results
-- Suggest optimizations
-- Provide insights about data
+- Help write SQL queries for various databases (PostgreSQL, MySQL, Snowflake, etc.)
+- Explain query results and concepts
+- Suggest query optimizations
+- Provide insights about data analysis patterns
+- Generate SQL from natural language descriptions
 
 When responding:
 - Be conversational and helpful
-- Explain your reasoning
+- Explain your reasoning clearly
 - Provide practical SQL examples when relevant
-- If asked about data you cannot access, suggest general approaches
+- If generating SQL, make it compatible with Snowflake syntax
+- Consider common data warehouse patterns
 
-Context: You are in a chat interface where users can ask questions about their data and SQL queries.`
+Context: You are in a chat interface where users can ask questions about their data and SQL queries. Users may have Snowflake connections configured.`
           },
           {
             role: "user", 
@@ -120,6 +153,61 @@ Context: You are in a chat interface where users can ask questions about their d
       // Return fallback response if OpenAI fails
       return this.getFallbackResponse('query', content);
     }
+  }
+
+  private async executeSnowflakeQuery(connectionId: string, sqlText: string): Promise<any> {
+    const connection = await storage.getSnowflakeConnection(connectionId);
+    if (!connection) {
+      throw new Error('Connection not found');
+    }
+
+    // Ensure Snowflake connection exists
+    const hasActiveConnection = snowflakeService.hasActiveConnection(connectionId);
+    if (!hasActiveConnection) {
+      const connected = await snowflakeService.createConnection(connectionId, {
+        account: connection.account,
+        username: connection.username,
+        password: connection.password || '',
+        database: connection.database || undefined,
+        schema: connection.schema || undefined,
+        warehouse: connection.warehouse || undefined,
+        role: connection.role || undefined,
+        authenticator: connection.authenticator || undefined,
+      });
+
+      if (!connected) {
+        throw new Error('Failed to establish Snowflake connection');
+      }
+    }
+
+    return await snowflakeService.executeQuery(connectionId, sqlText);
+  }
+
+  private formatQueryResults(result: any): string {
+    if (!result.rows || result.rows.length === 0) {
+      return "No results returned.";
+    }
+
+    const maxRows = 5;
+    const displayRows = result.rows.slice(0, maxRows);
+    
+    // Create a simple table format
+    if (result.columns && result.columns.length > 0) {
+      let formatted = "| " + result.columns.map((col: any) => col.name).join(" | ") + " |\n";
+      formatted += "|" + result.columns.map(() => "---").join("|") + "|\n";
+      
+      displayRows.forEach((row: any) => {
+        formatted += "| " + Object.values(row).join(" | ") + " |\n";
+      });
+      
+      if (result.rows.length > maxRows) {
+        formatted += `\n... and ${result.rows.length - maxRows} more rows.`;
+      }
+      
+      return formatted;
+    }
+    
+    return JSON.stringify(displayRows, null, 2);
   }
 
   private async processYamlAgent(content: string, sessionId: string): Promise<AgentResponse> {

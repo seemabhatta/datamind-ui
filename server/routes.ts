@@ -6,8 +6,9 @@ import { agentService } from "./services/agent-service";
 import { visualizationService } from "./services/visualization-service";
 import { 
   insertChatSessionSchema, insertChatMessageSchema, insertVisualizationSchema,
-  insertPinnedVisualizationSchema
+  insertPinnedVisualizationSchema, insertSnowflakeConnectionSchema
 } from "@shared/schema";
+import { snowflakeService } from "./services/snowflake-service";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
@@ -272,6 +273,168 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching published visualizations:', error);
       res.status(500).json({ message: 'Failed to fetch published visualizations' });
+    }
+  });
+
+  // Snowflake connections
+  app.get('/api/snowflake/connections/:userId', async (req, res) => {
+    try {
+      const connections = await storage.getSnowflakeConnections(req.params.userId);
+      // Don't return passwords in the response
+      const safeConnections = connections.map(conn => ({
+        ...conn,
+        password: undefined
+      }));
+      res.json(safeConnections);
+    } catch (error) {
+      console.error('Error fetching Snowflake connections:', error);
+      res.status(500).json({ message: 'Failed to fetch Snowflake connections' });
+    }
+  });
+
+  app.post('/api/snowflake/connections', async (req, res) => {
+    try {
+      const connectionData = insertSnowflakeConnectionSchema.parse(req.body);
+      const connection = await storage.createSnowflakeConnection(connectionData);
+      
+      // Don't return password in response
+      const safeConnection = { ...connection, password: undefined };
+      res.json(safeConnection);
+    } catch (error) {
+      console.error('Error creating Snowflake connection:', error);
+      res.status(500).json({ message: 'Failed to create Snowflake connection' });
+    }
+  });
+
+  app.post('/api/snowflake/connections/:id/test', async (req, res) => {
+    try {
+      const connection = await storage.getSnowflakeConnection(req.params.id);
+      
+      if (!connection) {
+        return res.status(404).json({ message: 'Connection not found' });
+      }
+
+      const isValid = await snowflakeService.testConnection({
+        account: connection.account,
+        username: connection.username,
+        password: connection.password || '',
+        database: connection.database || undefined,
+        schema: connection.schema || undefined,
+        warehouse: connection.warehouse || undefined,
+        role: connection.role || undefined,
+        authenticator: connection.authenticator || undefined,
+      });
+
+      if (isValid) {
+        // Update last connected timestamp
+        await storage.updateSnowflakeConnection(connection.id, {
+          lastConnected: new Date()
+        });
+      }
+
+      res.json({ success: isValid });
+    } catch (error) {
+      console.error('Error testing Snowflake connection:', error);
+      res.status(500).json({ message: 'Failed to test Snowflake connection' });
+    }
+  });
+
+  app.post('/api/snowflake/connections/:id/execute', async (req, res) => {
+    try {
+      const { sqlText } = req.body;
+      const connection = await storage.getSnowflakeConnection(req.params.id);
+      
+      if (!connection) {
+        return res.status(404).json({ message: 'Connection not found' });
+      }
+
+      // Create Snowflake connection if not exists
+      const hasActiveConnection = snowflakeService.hasActiveConnection(connection.id);
+      if (!hasActiveConnection) {
+        const connected = await snowflakeService.createConnection(connection.id, {
+          account: connection.account,
+          username: connection.username,
+          password: connection.password || '',
+          database: connection.database || undefined,
+          schema: connection.schema || undefined,
+          warehouse: connection.warehouse || undefined,
+          role: connection.role || undefined,
+          authenticator: connection.authenticator || undefined,
+        });
+
+        if (!connected) {
+          return res.status(500).json({ message: 'Failed to establish Snowflake connection' });
+        }
+      }
+
+      const result = await snowflakeService.executeQuery(connection.id, sqlText);
+      
+      // Update last connected timestamp
+      await storage.updateSnowflakeConnection(connection.id, {
+        lastConnected: new Date()
+      });
+
+      res.json(result);
+    } catch (error) {
+      console.error('Error executing Snowflake query:', error);
+      res.status(500).json({ message: 'Failed to execute query: ' + (error instanceof Error ? error.message : 'Unknown error') });
+    }
+  });
+
+  app.get('/api/snowflake/connections/:id/schema', async (req, res) => {
+    try {
+      const connection = await storage.getSnowflakeConnection(req.params.id);
+      
+      if (!connection) {
+        return res.status(404).json({ message: 'Connection not found' });
+      }
+
+      // Ensure connection exists
+      const hasActiveConnection = snowflakeService.hasActiveConnection(connection.id);
+      if (!hasActiveConnection) {
+        const connected = await snowflakeService.createConnection(connection.id, {
+          account: connection.account,
+          username: connection.username,
+          password: connection.password || '',
+          database: connection.database || undefined,
+          schema: connection.schema || undefined,
+          warehouse: connection.warehouse || undefined,
+          role: connection.role || undefined,
+          authenticator: connection.authenticator || undefined,
+        });
+
+        if (!connected) {
+          return res.status(500).json({ message: 'Failed to establish Snowflake connection' });
+        }
+      }
+
+      const schemaInfo = await snowflakeService.getSchemaInfo(connection.id);
+      res.json(schemaInfo);
+    } catch (error) {
+      console.error('Error fetching Snowflake schema info:', error);
+      res.status(500).json({ message: 'Failed to fetch schema info: ' + (error instanceof Error ? error.message : 'Unknown error') });
+    }
+  });
+
+  app.delete('/api/snowflake/connections/:id', async (req, res) => {
+    try {
+      await snowflakeService.closeConnection(req.params.id);
+      await storage.deleteSnowflakeConnection(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting Snowflake connection:', error);
+      res.status(500).json({ message: 'Failed to delete Snowflake connection' });
+    }
+  });
+
+  app.put('/api/snowflake/connections/:id/default', async (req, res) => {
+    try {
+      const { userId } = req.body;
+      await storage.setDefaultSnowflakeConnection(userId, req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error setting default Snowflake connection:', error);
+      res.status(500).json({ message: 'Failed to set default connection' });
     }
   });
 

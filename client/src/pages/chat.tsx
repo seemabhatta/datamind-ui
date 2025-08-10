@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { BarChart3, MessageSquare, Home, Database, ChevronLeft, ChevronRight, Minimize2, Maximize2, X, Zap, BookOpen, Settings, Cloud, Link, Send, GraduationCap, ChevronDown, Upload, Plus, Play, Save, Eye, Edit3, Brain, Search, Trash2, Check, Square, Bot } from 'lucide-react';
+import { SnowflakeSettings } from '@/components/snowflake-settings';
 
 // Type definitions for messages
 interface Message {
@@ -1432,40 +1433,44 @@ compliance:
 
             {/* Integrations Content */}
             {activeSettingsTab === 'integrations' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Data Sources */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Data Sources</h3>
-                  <Database className="w-5 h-5 text-gray-400" />
+            <div className="space-y-6">
+              {/* Snowflake Configuration */}
+              <SnowflakeSettings userId={userId} />
+              
+              {/* Other Data Sources */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Other Data Sources</h3>
+                    <Database className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <div className="space-y-3">
+                    <div className="p-3 bg-gray-50 rounded-md">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">PostgreSQL</span>
+                        <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Connected</span>
+                      </div>
+                      <p className="text-xs text-gray-500">Primary database • 47 tables</p>
+                    </div>
+                    <div className="p-3 bg-gray-50 rounded-md">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">MongoDB</span>
+                        <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">Setup Required</span>
+                      </div>
+                      <p className="text-xs text-gray-500">Document store • Not configured</p>
+                    </div>
+                    <div className="p-3 bg-gray-50 rounded-md">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">Redis</span>
+                        <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Connected</span>
+                      </div>
+                      <p className="text-xs text-gray-500">Cache layer • 1.2M keys</p>
+                    </div>
+                    <button className="w-full mt-4 px-4 py-2 text-sm text-blue-600 border border-blue-200 rounded-md hover:bg-blue-50">
+                      Add Data Source
+                    </button>
+                  </div>
                 </div>
-                <div className="space-y-3">
-                  <div className="p-3 bg-gray-50 rounded-md">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">PostgreSQL</span>
-                      <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Connected</span>
-                    </div>
-                    <p className="text-xs text-gray-500">Primary database • 47 tables</p>
-                  </div>
-                  <div className="p-3 bg-gray-50 rounded-md">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">MongoDB</span>
-                      <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">Setup Required</span>
-                    </div>
-                    <p className="text-xs text-gray-500">Document store • Not configured</p>
-                  </div>
-                  <div className="p-3 bg-gray-50 rounded-md">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">Redis</span>
-                      <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Connected</span>
-                    </div>
-                    <p className="text-xs text-gray-500">Cache layer • 1.2M keys</p>
-                  </div>
-                  <button className="w-full mt-4 px-4 py-2 text-sm text-blue-600 border border-blue-200 rounded-md hover:bg-blue-50">
-                    Add Data Source
-                  </button>
-                </div>
-              </div>
 
               {/* Destinations */}
               <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -1484,9 +1489,9 @@ compliance:
                   <div className="p-3 bg-gray-50 rounded-md">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium">Snowflake</span>
-                      <span className="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded-full">Inactive</span>
+                      <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">Available</span>
                     </div>
-                    <p className="text-xs text-gray-500">Data warehouse • Needs credentials</p>
+                    <p className="text-xs text-gray-500">Data warehouse • Configure connections below</p>
                   </div>
                   <div className="p-3 bg-gray-50 rounded-md">
                     <div className="flex items-center justify-between mb-2">
@@ -1548,6 +1553,7 @@ compliance:
                     View Integration Logs
                   </button>
                 </div>
+              </div>
               </div>
             </div>
             )}

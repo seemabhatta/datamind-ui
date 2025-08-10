@@ -53,11 +53,32 @@ export const pinnedVisualizations = sqliteTable("pinned_visualizations", {
   pinnedAt: integer("pinned_at", { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });
 
+// Snowflake connections
+export const snowflakeConnections = sqliteTable("snowflake_connections", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id").notNull(),
+  name: text("name").notNull(), // User-friendly name for the connection
+  account: text("account").notNull(), // Snowflake account identifier
+  username: text("username").notNull(),
+  password: text("password"), // Encrypted password
+  database: text("database"),
+  schema: text("schema"),
+  warehouse: text("warehouse"),
+  role: text("role"),
+  authenticator: text("authenticator").default("SNOWFLAKE"), // SNOWFLAKE, EXTERNALBROWSER, etc.
+  isDefault: integer("is_default", { mode: 'boolean' }).default(false),
+  isActive: integer("is_active", { mode: 'boolean' }).default(true),
+  lastConnected: integer("last_connected", { mode: 'timestamp' }),
+  createdAt: integer("created_at", { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: 'timestamp' }).$defaultFn(() => new Date()),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   chatSessions: many(chatSessions),
   visualizations: many(visualizations),
   pinnedVisualizations: many(pinnedVisualizations),
+  snowflakeConnections: many(snowflakeConnections),
 }));
 
 export const chatSessionsRelations = relations(chatSessions, ({ one, many }) => ({
@@ -96,6 +117,13 @@ export const pinnedVisualizationsRelations = relations(pinnedVisualizations, ({ 
   visualization: one(visualizations, {
     fields: [pinnedVisualizations.visualizationId],
     references: [visualizations.id],
+  }),
+}));
+
+export const snowflakeConnectionsRelations = relations(snowflakeConnections, ({ one }) => ({
+  user: one(users, {
+    fields: [snowflakeConnections.userId],
+    references: [users.id],
   }),
 }));
 
@@ -153,3 +181,21 @@ export type Visualization = typeof visualizations.$inferSelect;
 
 export type InsertPinnedVisualization = z.infer<typeof insertPinnedVisualizationSchema>;
 export type PinnedVisualization = typeof pinnedVisualizations.$inferSelect;
+
+export const insertSnowflakeConnectionSchema = createInsertSchema(snowflakeConnections).pick({
+  userId: true,
+  name: true,
+  account: true,
+  username: true,
+  password: true,
+  database: true,
+  schema: true,
+  warehouse: true,
+  role: true,
+  authenticator: true,
+  isDefault: true,
+  isActive: true,
+});
+
+export type InsertSnowflakeConnection = z.infer<typeof insertSnowflakeConnectionSchema>;
+export type SnowflakeConnection = typeof snowflakeConnections.$inferSelect;

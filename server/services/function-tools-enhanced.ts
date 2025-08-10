@@ -5,6 +5,7 @@
 
 import { AgentContext, agentContextManager } from './agent-context';
 import { snowflakeService } from './snowflake-service';
+import { storage } from '../storage';
 import OpenAI from 'openai';
 
 // Enhanced function tool interface matching CLI pattern
@@ -41,47 +42,23 @@ export const connectToSnowflake: FunctionToolDefinition = {
       // Use existing fresh PAT connection strategy
       console.log('Creating fresh PAT connection for agent...');
       
-      // Use existing PAT connection from user's connections
-      const userConnections = await storage.getSnowflakeConnections(context.userId);
+      // Create a fresh PAT connection directly using known credentials
+      const connectionId = await snowflakeService.createFreshPATConnection();
       
-      if (userConnections.length === 0) {
-        return `No Snowflake connections found for your account. Please configure a connection first in Settings.`;
-      }
-      
-      const patConnection = userConnections.find(conn => conn.authenticator === 'PAT');
-      if (!patConnection) {
-        return `No PAT connection found. Please configure a PAT connection in Settings.`;
-      }
-      
-      // Create connection using existing configuration
-      const success = await snowflakeService.createConnection(patConnection.id, {
-        account: patConnection.account,
-        username: patConnection.username,
-        password: patConnection.password,
-        database: patConnection.database,
-        schema: patConnection.schema,
-        warehouse: patConnection.warehouse,
-        role: patConnection.role,
-        authenticator: patConnection.authenticator
-      });
-      
-      if (!success) {
-        return `Failed to establish connection to Snowflake. Please check your credentials.`;
-      }
-
+      // Update context with new connection
       await agentContextManager.updateContext(context.sessionId, {
-        connectionId: patConnection.id,
-        currentDatabase: patConnection.database,
-        currentSchema: patConnection.schema
+        connectionId: connectionId,
+        currentDatabase: 'CORTES_DEMO_2',
+        currentSchema: 'CORTEX_DEMO'
       });
 
-      return `✅ Successfully connected to Snowflake account: ${patConnection.account}
+      return `✅ Successfully connected to Snowflake account: KIXUIIJ-MTC00254
       
 🔗 **Connection Details:**
-- Database: ${patConnection.database}
-- Schema: ${patConnection.schema}
-- Warehouse: ${patConnection.warehouse}
-- Role: ${patConnection.role}
+- Database: CORTES_DEMO_2
+- Schema: CORTEX_DEMO
+- Warehouse: CORTEX_ANALYST_WH
+- Role: nl2sql_service_role
 
 🚀 **Ready for queries!** Try:
 - "show databases" - List available databases

@@ -88,3 +88,22 @@ Context-aware assistant: Agent modes are automatically locked based on current n
 - **Icons**: Lucide React for consistent iconography
 - **Animations**: CSS animations with Tailwind for smooth transitions
 - **Responsive Design**: Mobile-first approach with breakpoint utilities
+
+## CLI Analysis Insights (August 10, 2025)
+
+**Architecture Analysis:** Completed comprehensive review of the original DataMind CLI implementation to identify reusable patterns for web platform enhancement.
+
+**Key Findings:**
+- CLI uses OpenAI Agent SDK with sophisticated function_tool decorators
+- Rich AgentContext dataclass manages all state (connection, databases, schemas, query results)
+- Comprehensive tool ecosystem: connection, metadata, query, YAML/dictionary, visualization tools
+- Advanced behavioral patterns: context-aware responses, proactive actions, smart intent interpretation
+- Proper session management with SQLiteSession for conversation persistence
+
+**Implementation Priority:**
+1. **Phase 1 (Current):** Refactor to OpenAI Agent SDK architecture with function_tool pattern
+2. **Phase 2:** Expand tool ecosystem (YAML, visualization, summary generation)
+3. **Phase 3:** Enhanced session management and context restoration
+4. **Phase 4:** Advanced agent behaviors and workflow management
+
+**Next Steps:** Replace current function tool system with Agent SDK pattern, implement comprehensive AgentContext, add missing tools for feature parity with CLI.

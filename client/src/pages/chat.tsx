@@ -13,7 +13,7 @@ interface Message {
 }
 
 export default function ChatPage() {
-  const [currentView, setCurrentView] = useState<'chat' | 'dashboards' | 'query' | 'domain-model' | 'agent-hub' | 'chats' | 'settings'>('chat');
+  const [currentView, setCurrentView] = useState<'chat' | 'dashboards' | 'query' | 'domain-model' | 'chats' | 'settings'>('chat');
   const [agentMode, setAgentMode] = useState<'model' | 'query' | 'dashboard'>('query');
   const [currentSessionId, setCurrentSessionId] = useState<string>('');
   const [currentSessionInfo, setCurrentSessionInfo] = useState<any>(null);
@@ -319,7 +319,6 @@ export default function ChatPage() {
   const availableMentions = [
     { id: 'domain-model', label: 'Domain-Model', description: 'Semantic data modeling and relationships', icon: 'D', type: 'agent' },
     { id: 'query', label: 'Query', description: 'SQL queries and data analysis', icon: 'Q', type: 'agent' },
-    { id: 'agent-hub', label: 'Agent-Hub', description: 'Central agent management and coordination', icon: 'A', type: 'agent' },
     { id: 'dashboards', label: 'Dashboards', description: 'Interactive dashboards and visualizations', icon: 'B', type: 'agent' }
   ];
 
@@ -653,18 +652,7 @@ compliance:
               {!isLeftSidebarCollapsed && <span>domain model</span>}
             </button>
             
-            <button
-              onClick={() => setCurrentView('agent-hub')}
-              className={`w-full flex items-center justify-start ${isLeftSidebarCollapsed ? 'px-2 py-3 justify-center' : 'px-3 py-2'} text-sm font-medium rounded-md transition-colors ${
-                currentView === 'agent-hub'
-                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-              title={isLeftSidebarCollapsed ? 'Agent Hub' : ''}
-            >
-              <Bot className={`${isLeftSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-3'}`} />
-              {!isLeftSidebarCollapsed && <span>agent hub</span>}
-            </button>
+
 
             {/* Separator */}
             <div className="border-t border-gray-200 my-2"></div>

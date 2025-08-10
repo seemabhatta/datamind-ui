@@ -191,14 +191,48 @@ Respond naturally but mention when function tools would help accomplish their go
   private async processFunctionCall(content: string, context: AgentContext): Promise<AgentResponse | null> {
     const lowercaseContent = content.toLowerCase().trim();
     
-    // Simple command detection - can be enhanced with NLP
+    // Enhanced command detection with simple patterns and confirmations
     const commandMap = [
       { patterns: ['connect', 'connect to snowflake', 'establish connection'], tool: 'connect_to_snowflake', params: {} },
-      { patterns: ['show databases', 'list databases', 'get databases'], tool: 'get_databases', params: {} },
-      { patterns: ['show schemas', 'list schemas', 'get schemas'], tool: 'get_schemas', params: {} },
-      { patterns: ['show tables', 'list tables', 'get tables'], tool: 'get_tables', params: {} },
+      { patterns: ['show databases', 'list databases', 'get databases', 'databases'], tool: 'get_databases', params: {} },
+      { patterns: ['show schemas', 'list schemas', 'get schemas', 'schemas'], tool: 'get_schemas', params: {} },
+      { patterns: ['show tables', 'list tables', 'get tables', 'tables'], tool: 'get_tables', params: {} },
       { patterns: ['current context', 'show context', 'what is my context'], tool: 'get_current_context', params: {} }
     ];
+
+    // For simple confirmations, assume user wants to see tables if they just said "sure" or "yes"
+    // This is a simple heuristic that can be improved later with context tracking
+    const confirmationPatterns = ['yes', 'sure', 'ok', 'okay', 'proceed', 'go ahead', 'do it'];
+    if (confirmationPatterns.includes(lowercaseContent)) {
+      // Default to showing tables for confirmations (most common request)
+      const tool = getFunctionTool('get_tables');
+      if (tool) {
+        try {
+          console.log(`Executing function tool: get_tables (from confirmation)`);
+          const result = await tool.execute(context, {});
+          return {
+            content: result,
+            metadata: {
+              model: "function-tool",
+              agentType: "query",
+              sessionId: context.sessionId,
+              functionCall: 'get_tables'
+            }
+          };
+        } catch (error) {
+          console.log(`Function tool error: ${error}`);
+          return {
+            content: `Error executing get_tables: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            metadata: {
+              model: "function-tool",
+              agentType: "query", 
+              sessionId: context.sessionId,
+              error: true
+            }
+          };
+        }
+      }
+    }
 
     for (const command of commandMap) {
       if (command.patterns.some(pattern => lowercaseContent.includes(pattern))) {
@@ -263,6 +297,26 @@ Respond naturally but mention when function tools would help accomplish their go
           content: result,
           metadata: { model: "function-tool", agentType: "query", sessionId: context.sessionId, functionCall: "select_schema" }
         };
+      }
+    }
+
+    // Check for table description patterns
+    const describeTableMatch = lowercaseContent.match(/(?:describe|desc|show\s+structure\s+of|explain)\s+(?:table\s+)?(\w+)/);
+    if (describeTableMatch) {
+      const tool = getFunctionTool('describe_table');
+      if (tool) {
+        try {
+          const result = await tool.execute(context, { table_name: describeTableMatch[1] });
+          return {
+            content: result,
+            metadata: { model: "function-tool", agentType: "query", sessionId: context.sessionId, functionCall: "describe_table" }
+          };
+        } catch (error) {
+          return {
+            content: `Error describing table: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            metadata: { model: "function-tool", agentType: "query", sessionId: context.sessionId, error: true }
+          };
+        }
       }
     }
 

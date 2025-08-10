@@ -37,6 +37,7 @@ export const connectToSnowflake: FunctionTool = {
       }
 
       // Test and establish connection
+      console.log('Testing Snowflake connection...');
       const isConnected = await snowflakeService.testConnection({
         account: defaultConnection.account,
         username: defaultConnection.username,
@@ -47,6 +48,7 @@ export const connectToSnowflake: FunctionTool = {
         role: defaultConnection.role || undefined,
         authenticator: defaultConnection.authenticator || undefined,
       });
+      console.log('Connection test result:', isConnected);
 
       if (!isConnected) {
         return 'Failed to connect to Snowflake. Please check your credentials.';

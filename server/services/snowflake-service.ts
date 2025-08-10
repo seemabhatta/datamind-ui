@@ -52,6 +52,7 @@ export class SnowflakeService {
         connection.execute({
           sqlText: 'SELECT CURRENT_VERSION() as version',
           complete: (queryErr: any, stmt: any, rows: any[] | undefined) => {
+            console.log('Test query complete - Error:', queryErr, 'Rows:', rows);
             // Clean up connection
             connection.destroy(() => {});
             

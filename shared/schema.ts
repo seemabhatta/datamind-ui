@@ -1,37 +1,37 @@
 import { sql } from "drizzle-orm";
-import { sqliteTable, text, integer, blob } from "drizzle-orm/sqlite-core";
+import { pgTable, text, integer, timestamp, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
 
-export const users = sqliteTable("users", {
+export const users = pgTable("users", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   displayName: text("display_name"),
   role: text("role").default("analyst"),
-  createdAt: integer("created_at", { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  createdAt: timestamp("created_at").$defaultFn(() => new Date()),
 });
 
-export const chatSessions = sqliteTable("chat_sessions", {
+export const chatSessions = pgTable("chat_sessions", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   userId: text("user_id"),
   title: text("title"),
   agentType: text("agent_type").notNull(), // 'query' or 'yaml'
-  createdAt: integer("created_at", { mode: 'timestamp' }).$defaultFn(() => new Date()),
-  updatedAt: integer("updated_at", { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  createdAt: timestamp("created_at").$defaultFn(() => new Date()),
+  updatedAt: timestamp("updated_at").$defaultFn(() => new Date()),
 });
 
-export const chatMessages = sqliteTable("chat_messages", {
+export const chatMessages = pgTable("chat_messages", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   sessionId: text("session_id"),
   role: text("role").notNull(), // 'user' or 'assistant' or 'system'
   content: text("content").notNull(),
   metadata: text("metadata", { mode: 'json' }), // Store SQL queries, execution time, etc.
-  createdAt: integer("created_at", { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  createdAt: timestamp("created_at").$defaultFn(() => new Date()),
 });
 
-export const visualizations = sqliteTable("visualizations", {
+export const visualizations = pgTable("visualizations", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   messageId: text("message_id"),
   userId: text("user_id"),
@@ -41,9 +41,9 @@ export const visualizations = sqliteTable("visualizations", {
   chartConfig: text("chart_config", { mode: 'json' }).notNull(), // Plotly config
   data: text("data", { mode: 'json' }).notNull(), // Chart data
   sqlQuery: text("sql_query"),
-  isPinned: integer("is_pinned", { mode: 'boolean' }).default(false),
-  isPublished: integer("is_published", { mode: 'boolean' }).default(false),
-  createdAt: integer("created_at", { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  isPinned: boolean("is_pinned").default(false),
+  isPublished: boolean("is_published").default(false),
+  createdAt: timestamp("created_at").$defaultFn(() => new Date()),
 });
 
 export const pinnedVisualizations = sqliteTable("pinned_visualizations", {

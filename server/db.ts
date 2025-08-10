@@ -15,7 +15,7 @@ if (!existsSync(dbDir)) {
 
 const sqlite = new Database(dbPath);
 sqlite.pragma('journal_mode = WAL');
-sqlite.pragma('foreign_keys = OFF');
+sqlite.pragma('foreign_keys = ON');
 
 export const db = drizzle({ client: sqlite, schema });
 
@@ -25,39 +25,40 @@ export function initializeDatabase() {
     // Disable foreign key constraints during initialization
     sqlite.pragma('foreign_keys = OFF');
     
-    // Create tables manually since we can't use migrations with the current setup
-    sqlite.exec(`
-      CREATE TABLE IF NOT EXISTS users (
+    console.log('Creating database tables...');
+    
+    // Create tables one by one for better error handling
+    const createTableSQL = [
+      `CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
         username TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL,
         display_name TEXT,
         role TEXT DEFAULT 'analyst',
         created_at INTEGER
-      );
-
-      CREATE TABLE IF NOT EXISTS chat_sessions (
+      )`,
+      `CREATE TABLE IF NOT EXISTS chat_sessions (
         id TEXT PRIMARY KEY,
-        user_id TEXT REFERENCES users(id),
+        user_id TEXT,
         title TEXT,
         agent_type TEXT NOT NULL,
         created_at INTEGER,
-        updated_at INTEGER
-      );
-
-      CREATE TABLE IF NOT EXISTS chat_messages (
+        updated_at INTEGER,
+        FOREIGN KEY(user_id) REFERENCES users(id)
+      )`,
+      `CREATE TABLE IF NOT EXISTS chat_messages (
         id TEXT PRIMARY KEY,
-        session_id TEXT REFERENCES chat_sessions(id),
+        session_id TEXT,
         role TEXT NOT NULL,
         content TEXT NOT NULL,
         metadata TEXT,
-        created_at INTEGER
-      );
-
-      CREATE TABLE IF NOT EXISTS visualizations (
+        created_at INTEGER,
+        FOREIGN KEY(session_id) REFERENCES chat_sessions(id)
+      )`,
+      `CREATE TABLE IF NOT EXISTS visualizations (
         id TEXT PRIMARY KEY,
-        message_id TEXT REFERENCES chat_messages(id),
-        user_id TEXT REFERENCES users(id),
+        message_id TEXT,
+        user_id TEXT,
         title TEXT NOT NULL,
         description TEXT,
         chart_type TEXT NOT NULL,
@@ -66,16 +67,32 @@ export function initializeDatabase() {
         sql_query TEXT,
         is_pinned INTEGER DEFAULT 0,
         is_published INTEGER DEFAULT 0,
-        created_at INTEGER
-      );
-
-      CREATE TABLE IF NOT EXISTS pinned_visualizations (
+        created_at INTEGER,
+        FOREIGN KEY(message_id) REFERENCES chat_messages(id),
+        FOREIGN KEY(user_id) REFERENCES users(id)
+      )`,
+      `CREATE TABLE IF NOT EXISTS pinned_visualizations (
         id TEXT PRIMARY KEY,
-        user_id TEXT REFERENCES users(id),
-        visualization_id TEXT REFERENCES visualizations(id),
-        pinned_at INTEGER
-      );
-    `);
+        user_id TEXT,
+        visualization_id TEXT,
+        pinned_at INTEGER,
+        FOREIGN KEY(user_id) REFERENCES users(id),
+        FOREIGN KEY(visualization_id) REFERENCES visualizations(id)
+      )`
+    ];
+
+    for (const sql of createTableSQL) {
+      try {
+        sqlite.exec(sql);
+        console.log('Table created:', sql.substring(32, sql.indexOf(' (')));
+      } catch (error) {
+        console.error('Error creating table:', error);
+        console.error('SQL:', sql);
+        throw error;
+      }
+    }
+    
+    console.log('Tables created successfully');
     
     // Create a default user if none exists
     const userExists = sqlite.prepare('SELECT id FROM users WHERE username = ?').get('user_1');
@@ -87,13 +104,16 @@ export function initializeDatabase() {
         VALUES (?, ?, ?, ?, ?, ?)
       `).run(userId, 'user_1', 'password', 'Default User', 'analyst', now);
       console.log('Created default user:', userId);
+    } else {
+      console.log('Default user already exists');
     }
     
-    // Re-enable foreign key constraints
+    // Ensure foreign key constraints are enabled
     sqlite.pragma('foreign_keys = ON');
     
     console.log('Database initialized successfully');
   } catch (error) {
     console.error('Error initializing database:', error);
+    throw error;
   }
 }

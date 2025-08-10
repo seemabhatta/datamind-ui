@@ -2,7 +2,7 @@
 
 ## Overview
 
-DataMind is a modern web application that provides AI-powered data analytics through a dashboard-style interface with an integrated assistant sidebar. The platform features a three-column layout: navigation sidebar, main dashboard/studio area, and assistant chat panel. Users can explore visualizations in the dashboard view, work with data in the studio, create semantic data models from connected sources in the models section, and interact with AI agents through the right-side assistant panel with multiple modes (model, query, dashboard). Built as a full-stack application with real-time chat capabilities, it features a React frontend with shadcn/ui components and an Express.js backend with PostgreSQL database integration.
+DataMind is a comprehensive analytics platform that replicates and enhances CLI-based data analysis capabilities through a modern web interface. The platform provides AI-powered data analytics with natural language querying, semantic data modeling, and real-time visualization capabilities. Core functionality includes Snowflake connectivity, enhanced agent framework with function tools, SQL query generation and execution, automatic visualization creation, and dashboard management. Built as a full-stack application with SQLite database and real-time WebSocket communication, featuring React frontend with shadcn/ui components and Express.js backend with integrated Snowflake service.
 
 ## User Preferences
 
@@ -32,20 +32,24 @@ Context-aware assistant: Agent modes are automatically locked based on current n
 - **Build System**: esbuild for fast server-side bundling
 
 ### Database Design
-- **Primary Database**: PostgreSQL with Neon serverless driver for scalable connections
-- **Schema Management**: Drizzle Kit for migrations and schema management
+- **Primary Database**: SQLite with better-sqlite3 for local storage and fast operations
+- **Schema Management**: Direct SQL table creation with proper foreign key constraints
 - **Core Tables**:
   - Users: Authentication and user profiles
   - Chat Sessions: Conversation management with agent type tracking
   - Chat Messages: Message history with metadata storage
   - Visualizations: Chart configurations and data storage
   - Pinned Visualizations: User dashboard customization
+  - Snowflake Connections: External data source configurations and credentials
 
 ### AI Agent System
-- **Dual Agent Architecture**: 
-  - Query Agent: Processes natural language and generates SQL queries
-  - YAML Agent: Handles structured data configuration tasks
-- **Agent Service**: Centralized service for processing messages and generating responses
+- **Enhanced Agent Framework**: 
+  - Query Agent: Natural language to SQL processing with Snowflake integration
+  - Ontology Agent: Semantic data model creation and relationship mapping
+  - Dashboard Agent: Visualization management and dashboard creation
+- **Function Tool System**: Advanced pattern matching and context-aware command execution
+- **Agent Context Manager**: Persistent session state and intelligent context restoration
+- **Snowflake Service**: Direct database connectivity with real-time query execution
 - **Visualization Service**: Automatic chart generation from query results using Plotly
 
 ### Real-time Communication
@@ -57,7 +61,8 @@ Context-aware assistant: Agent modes are automatically locked based on current n
 ## External Dependencies
 
 ### Core Infrastructure
-- **Database**: Neon PostgreSQL serverless database with connection pooling
+- **Database**: SQLite with better-sqlite3 for local data persistence
+- **External Data**: Snowflake integration with snowflake-sdk for enterprise data access
 - **Development Platform**: Replit integration with custom development tooling
 
 ### Frontend Libraries
@@ -67,8 +72,9 @@ Context-aware assistant: Agent modes are automatically locked based on current n
 - **Date Handling**: date-fns for date manipulation utilities
 
 ### Backend Services
-- **Database Driver**: @neondatabase/serverless for PostgreSQL connectivity
-- **Session Storage**: connect-pg-simple for PostgreSQL-backed session storage
+- **Database Driver**: better-sqlite3 for local SQLite operations
+- **Snowflake Integration**: snowflake-sdk for enterprise data warehouse connectivity
+- **Session Storage**: memorystore for in-memory session management
 - **WebSocket**: ws library for WebSocket server implementation
 
 ### Development Tools

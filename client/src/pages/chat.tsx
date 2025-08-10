@@ -2214,8 +2214,37 @@ compliance:
                 <div className="flex-1 overflow-y-auto p-4 space-y-3">
                   {messages.length === 0 && (
                     <div className="text-center py-8">
-                      <MessageSquare className="w-8 h-8 mx-auto text-gray-300 mb-2" />
-                      <p className="text-sm text-gray-500">Start a conversation with the assistant</p>
+                      {getContextualAgentMode() ? (
+                        <>
+                          <div className={`w-8 h-8 mx-auto mb-2 rounded-full flex items-center justify-center text-white text-sm font-bold ${
+                            getContextualAgentMode() === 'query'
+                              ? 'bg-green-500'
+                              : getContextualAgentMode() === 'semantic-model'
+                                ? 'bg-blue-500'
+                                : 'bg-purple-500'
+                          }`}>
+                            {getContextualAgentMode() === 'query'
+                              ? 'Q'
+                              : getContextualAgentMode() === 'semantic-model'
+                                ? 'O'
+                                : 'D'
+                            }
+                          </div>
+                          <p className="text-sm text-gray-500">
+                            {getContextualAgentMode() === 'query'
+                              ? 'Start a query with the Query Agent'
+                              : getContextualAgentMode() === 'semantic-model'
+                                ? 'Start modeling with the Ontology Agent'
+                                : 'Start creating with the Dashboard Agent'
+                            }
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <MessageSquare className="w-8 h-8 mx-auto text-gray-300 mb-2" />
+                          <p className="text-sm text-gray-500">Start a conversation with the assistant</p>
+                        </>
+                      )}
                     </div>
                   )}
                   
@@ -2291,9 +2320,46 @@ compliance:
               <div className="max-w-4xl mx-auto space-y-4">
                 {messages.length === 0 && (
                   <div className="text-center py-16">
-                    <MessageSquare className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                    <h4 className="text-lg font-medium text-gray-900 mb-2">Welcome to Assistant Fullscreen Mode</h4>
-                    <p className="text-gray-500">Start a conversation with enhanced workspace for detailed interactions</p>
+                    {getContextualAgentMode() ? (
+                      <>
+                        <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center text-white text-2xl font-bold ${
+                          getContextualAgentMode() === 'query'
+                            ? 'bg-green-500'
+                            : getContextualAgentMode() === 'semantic-model'
+                              ? 'bg-blue-500'
+                              : 'bg-purple-500'
+                        }`}>
+                          {getContextualAgentMode() === 'query'
+                            ? 'Q'
+                            : getContextualAgentMode() === 'semantic-model'
+                              ? 'O'
+                              : 'D'
+                          }
+                        </div>
+                        <h4 className="text-lg font-medium text-gray-900 mb-2">
+                          {getContextualAgentMode() === 'query'
+                            ? 'Query Agent'
+                            : getContextualAgentMode() === 'semantic-model'
+                              ? 'Ontology Agent'
+                              : 'Dashboard Agent'
+                          } Ready
+                        </h4>
+                        <p className="text-gray-500">
+                          {getContextualAgentMode() === 'query'
+                            ? 'Ask questions about your data and get SQL queries'
+                            : getContextualAgentMode() === 'semantic-model'
+                              ? 'Create and manage semantic data models'
+                              : 'Build interactive dashboards and visualizations'
+                          }
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <MessageSquare className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+                        <h4 className="text-lg font-medium text-gray-900 mb-2">Welcome to Assistant Fullscreen Mode</h4>
+                        <p className="text-gray-500">Start a conversation with enhanced workspace for detailed interactions</p>
+                      </>
+                    )}
                   </div>
                 )}
                 

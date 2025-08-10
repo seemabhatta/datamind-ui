@@ -1,6 +1,7 @@
 import { spawn, ChildProcess } from 'child_process';
 import path from 'path';
 import { visualizationService } from './visualization-service';
+import OpenAI from 'openai';
 
 interface AgentResponse {
   content: string;
@@ -18,13 +19,26 @@ interface AgentResponse {
 class AgentService {
   private queryAgentSessions = new Map<string, any>();
   private yamlAgentSessions = new Map<string, any>();
+  private openai: OpenAI;
 
-  async processMessage(content: string, agentType: 'query' | 'yaml', sessionId: string): Promise<AgentResponse> {
+  constructor() {
+    // Initialize OpenAI client
+    this.openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+
+  async processMessage(content: string, agentType: 'query' | 'yaml' | 'dashboards' | 'general', sessionId: string): Promise<AgentResponse> {
     try {
-      if (agentType === 'query') {
-        return await this.processQueryAgent(content, sessionId);
-      } else {
-        return await this.processYamlAgent(content, sessionId);
+      switch (agentType) {
+        case 'query':
+          return await this.processQueryAgent(content, sessionId);
+        case 'yaml':
+          return await this.processYamlAgent(content, sessionId);
+        case 'dashboards':
+          return await this.processDashboardAgent(content, sessionId);
+        default:
+          return await this.processGeneralAgent(content, sessionId);
       }
     } catch (error) {
       console.error('Error processing agent message:', error);
@@ -37,31 +51,46 @@ class AgentService {
 
   private async processQueryAgent(content: string, sessionId: string): Promise<AgentResponse> {
     try {
-      // Simulate the agentic_query_cli.py functionality
-      // In a real implementation, you would spawn the Python process
-      const result = await this.runPythonAgent('agentic_query_cli.py', content, sessionId);
-      
-      // Parse the result to extract SQL, data, and visualization info
-      const parsedResult = this.parseQueryResult(result);
-      
-      let visualization;
-      if (parsedResult.data && parsedResult.data.length > 0) {
-        // Create visualization from the query results
-        visualization = await visualizationService.createVisualizationFromData(
-          parsedResult.data,
-          parsedResult.sqlQuery,
-          content
-        );
-      }
+      // Use OpenAI to process the query
+      const response = await this.openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "system",
+            content: `You are a Query Agent for DataMind, a data analytics platform. Your role is to help users with SQL queries and data analysis. 
+
+You can:
+- Help write SQL queries
+- Explain query results
+- Suggest optimizations
+- Provide insights about data
+
+When responding:
+- Be conversational and helpful
+- Explain your reasoning
+- Provide practical SQL examples when relevant
+- If asked about data you cannot access, suggest general approaches
+
+Context: You are in a chat interface where users can ask questions about their data and SQL queries.`
+          },
+          {
+            role: "user", 
+            content: content
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1000
+      });
+
+      const responseContent = response.choices[0].message.content || "I'm sorry, I couldn't process your request.";
 
       return {
-        content: this.formatQueryResponse(parsedResult),
+        content: responseContent,
         metadata: {
-          sqlQuery: parsedResult.sqlQuery,
-          executionTime: parsedResult.executionTime,
-          rowCount: parsedResult.data?.length || 0
-        },
-        visualization: visualization || undefined
+          model: "gpt-4o",
+          agentType: "query",
+          sessionId
+        }
       };
     } catch (error) {
       console.error('Query agent error:', error);
@@ -71,18 +100,150 @@ class AgentService {
 
   private async processYamlAgent(content: string, sessionId: string): Promise<AgentResponse> {
     try {
-      // Simulate the agentic_generate_yaml_cli.py functionality
-      const result = await this.runPythonAgent('agentic_generate_yaml_cli.py', content, sessionId);
-      
+      // Use OpenAI to process ontology/semantic modeling requests
+      const response = await this.openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "system",
+            content: `You are an Ontology Agent for DataMind, a data analytics platform. Your role is to help users with semantic data modeling, ontology design, and data relationships.
+
+You can:
+- Help design semantic models and ontologies
+- Explain data relationships and hierarchies
+- Suggest data modeling best practices
+- Generate YAML configurations for data models
+- Provide guidance on schema design
+
+When responding:
+- Be technical but clear
+- Provide structured examples when helpful
+- Focus on data modeling concepts
+- Suggest best practices for data organization
+
+Context: You are working with users who need to create semantic models and ontologies for their data.`
+          },
+          {
+            role: "user",
+            content: content
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1000
+      });
+
+      const responseContent = response.choices[0].message.content || "I'm sorry, I couldn't process your ontology request.";
+
       return {
-        content: this.formatYamlResponse(result),
+        content: responseContent,
         metadata: {
+          model: "gpt-4o",
           agentType: 'yaml',
-          generatedFiles: result.generatedFiles || []
+          sessionId
         }
       };
     } catch (error) {
       console.error('YAML agent error:', error);
+      throw new Error(error instanceof Error ? error.message : String(error));
+    }
+  }
+
+  private async processDashboardAgent(content: string, sessionId: string): Promise<AgentResponse> {
+    try {
+      // Use OpenAI to process dashboard/visualization requests
+      const response = await this.openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "system",
+            content: `You are a Dashboard Agent for DataMind, a data analytics platform. Your role is to help users create interactive dashboards and data visualizations.
+
+You can:
+- Help design dashboard layouts and components
+- Suggest appropriate chart types for different data
+- Provide guidance on data visualization best practices
+- Help create interactive dashboard elements
+- Suggest KPIs and metrics to track
+
+When responding:
+- Focus on practical visualization advice
+- Suggest specific chart types and layouts
+- Consider user experience and clarity
+- Provide actionable dashboard design guidance
+
+Context: You are helping users build effective dashboards and visualizations for their data analytics needs.`
+          },
+          {
+            role: "user",
+            content: content
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1000
+      });
+
+      const responseContent = response.choices[0].message.content || "I'm sorry, I couldn't process your dashboard request.";
+
+      return {
+        content: responseContent,
+        metadata: {
+          model: "gpt-4o",
+          agentType: 'dashboards',
+          sessionId
+        }
+      };
+    } catch (error) {
+      console.error('Dashboard agent error:', error);
+      throw new Error(error instanceof Error ? error.message : String(error));
+    }
+  }
+
+  private async processGeneralAgent(content: string, sessionId: string): Promise<AgentResponse> {
+    try {
+      // Use OpenAI for general assistant conversations
+      const response = await this.openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "system",
+            content: `You are the DataMind Assistant, a helpful AI for a data analytics platform. You provide general assistance and can help users understand how to use the platform.
+
+You can:
+- Answer general questions about data analytics
+- Help users navigate the DataMind platform
+- Provide guidance on when to use different agents (Query, Ontology, Dashboard)
+- Explain data concepts in simple terms
+- Direct users to appropriate specialized agents when needed
+
+When responding:
+- Be friendly and helpful
+- Keep explanations clear and simple
+- Suggest using specific agents when appropriate (e.g., "For SQL queries, try the Query agent")
+- Focus on being helpful and educational
+
+Context: You are in the main chat interface where users can ask general questions about data analytics and the platform.`
+          },
+          {
+            role: "user",
+            content: content
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1000
+      });
+
+      const responseContent = response.choices[0].message.content || "I'm sorry, I couldn't process your request.";
+
+      return {
+        content: responseContent,
+        metadata: {
+          model: "gpt-4o",
+          agentType: 'general',
+          sessionId
+        }
+      };
+    } catch (error) {
+      console.error('General agent error:', error);
       throw new Error(error instanceof Error ? error.message : String(error));
     }
   }

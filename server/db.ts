@@ -5,8 +5,8 @@ import * as schema from "@shared/schema";
 import { existsSync, mkdirSync } from 'fs';
 import { dirname } from 'path';
 
-// Ensure data directory exists
-const dbPath = process.env.DATABASE_URL || './data/datamind.db';
+// Use local SQLite database for standalone mode
+const dbPath = './data/datamind.db';
 const dbDir = dirname(dbPath);
 
 if (!existsSync(dbDir)) {
@@ -95,17 +95,19 @@ export function initializeDatabase() {
     console.log('Tables created successfully');
     
     // Create a default user if none exists
-    const userExists = sqlite.prepare('SELECT id FROM users WHERE username = ?').get('user_1');
+    const userCheck = sqlite.prepare('SELECT id FROM users WHERE username = ?');
+    const userExists = userCheck.get('user_1');
     if (!userExists) {
       const userId = crypto.randomUUID();
       const now = Date.now();
-      sqlite.prepare(`
+      const insertUser = sqlite.prepare(`
         INSERT INTO users (id, username, password, display_name, role, created_at)
         VALUES (?, ?, ?, ?, ?, ?)
-      `).run(userId, 'user_1', 'password', 'Default User', 'analyst', now);
+      `);
+      insertUser.run(userId, 'user_1', 'password', 'Default User', 'analyst', now);
       console.log('Created default user:', userId);
     } else {
-      console.log('Default user already exists');
+      console.log('Default user already exists:', (userExists as any).id);
     }
     
     // Ensure foreign key constraints are enabled

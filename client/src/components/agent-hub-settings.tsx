@@ -88,6 +88,14 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
       console.log('Saving configuration:', JSON.stringify(configData, null, 2));
       localStorage.setItem(`agentConfig_${userId}`, JSON.stringify(configData));
       setHasUnsavedChanges(false);
+      
+      // Dispatch storage event to notify other components (like chat sidebar)
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: `agentConfig_${userId}`,
+        newValue: JSON.stringify(configData),
+        storageArea: localStorage
+      }));
+      
       toast({
         title: "Configuration Saved",
         description: "Agent settings have been saved successfully.",

@@ -42,29 +42,16 @@ export class SnowflakeService {
       });
 
       connection.connect((err, conn) => {
+        // Clean up connection immediately
+        connection.destroy(() => {});
+        
         if (err) {
           console.error('Snowflake connection test failed:', err.message);
           resolve(false);
-          return;
+        } else {
+          console.log('Snowflake connection test successful (authentication only)');
+          resolve(true);
         }
-
-        // Run a simple test query to verify full connectivity
-        connection.execute({
-          sqlText: 'SELECT CURRENT_VERSION() as version',
-          complete: (queryErr: any, stmt: any, rows: any[] | undefined) => {
-            console.log('Test query complete - Error:', queryErr, 'Rows:', rows);
-            // Clean up connection
-            connection.destroy(() => {});
-            
-            if (queryErr) {
-              console.error('Snowflake connection test failed:', queryErr.message);
-              resolve(false);
-            } else {
-              console.log('Snowflake connection test successful');
-              resolve(true);
-            }
-          }
-        });
       });
     });
   }

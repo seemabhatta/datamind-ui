@@ -76,7 +76,18 @@ export const connectToSnowflake: FunctionTool = {
         currentSchema: defaultConnection.schema || undefined
       });
 
-      return `Successfully connected to Snowflake account: ${defaultConnection.account}`;
+      return `✅ Successfully connected to Snowflake account: ${defaultConnection.account}
+      
+🔗 **Connection Details:**
+- Database: ${defaultConnection.database}
+- Schema: ${defaultConnection.schema}
+- Warehouse: ${defaultConnection.warehouse}
+- Role: ${defaultConnection.role}
+
+🚀 **Ready for queries!** Try:
+- "show databases" - List available databases
+- "show tables" - List tables in current schema
+- "SELECT * FROM table_name" - Run SQL directly`;
     } catch (error) {
       return `Error connecting to Snowflake: ${error instanceof Error ? error.message : 'Unknown error'}`;
     }

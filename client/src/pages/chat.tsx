@@ -353,16 +353,23 @@ export default function ChatPage() {
 
   // Available mentions for autocomplete - filtered by active agents
   const availableMentions = [
-    // Query agents
-    { id: 'nl2gpt', label: 'nl2gpt', description: 'Natural language to SQL conversion', icon: '🗃️', type: 'agent', active: agentStatuses['query'], category: 'query' },
-    { id: 'sql-intent', label: 'SQL Intent Identifier', description: 'Identify SQL query patterns and intents', icon: '🔍', type: 'agent', active: agentStatuses['query'], category: 'query' },
-    // Semantic model agents  
-    { id: 'data-dictionary', label: 'Data Dictionary Builder', description: 'Build comprehensive data dictionaries', icon: '📚', type: 'agent', active: agentStatuses['semantic-model'], category: 'semantic-model' },
-    { id: 'profile-matcher', label: 'Profile Matcher Recruiter', description: 'Match data profiles and patterns', icon: '👥', type: 'agent', active: agentStatuses['semantic-model'], category: 'semantic-model' },
-    // Dashboard agents
-    { id: 'astrology-birth-chart', label: 'Astrology Birth Chart CDT', description: 'Generate astrological data visualizations', icon: '🌟', type: 'agent', active: agentStatuses['dashboards'], category: 'dashboards' },
-    { id: 'chart-generator', label: 'Chart Generator Pro', description: 'Create advanced data visualizations', icon: '📊', type: 'agent', active: agentStatuses['dashboards'], category: 'dashboards' }
+    { id: 'semantic-model', label: 'Semantic-Model', description: 'Semantic data modeling and relationships', icon: 'S', type: 'agent', active: agentStatuses['semantic-model'] },
+    { id: 'query', label: 'Query', description: 'SQL queries and data analysis', icon: 'Q', type: 'agent', active: agentStatuses['query'] },
+    { id: 'dashboards', label: 'Dashboards', description: 'Interactive dashboards and visualizations', icon: 'D', type: 'agent', active: agentStatuses['dashboards'] }
   ].filter(mention => mention.active);
+
+  // Specific agent names for display when selected
+  const agentDisplayNames = {
+    'semantic-model': 'Data Dictionary Builder',
+    'query': 'nl2gpt', 
+    'dashboards': 'Chart Generator Pro'
+  };
+
+  const agentDisplayIcons = {
+    'semantic-model': '📚',
+    'query': '🗃️',
+    'dashboards': '📊'
+  };
 
   // Handle @mention input detection and autocomplete
   const handleInputChange = (value: string) => {
@@ -416,13 +423,18 @@ export default function ChatPage() {
     setSelectedAgent(mention.id);
     setChatInput(''); // Clear input
     setShowMentionDropdown(false);
-    setIsGenerateMode(mention.category === 'semantic-model' || mention.category === 'dashboards');
+    setIsGenerateMode(mention.id === 'semantic-model' || mention.id === 'dashboards');
   };
 
-  // Get selected agent details
+  // Get selected agent details with specific display names
   const getSelectedAgentDetails = () => {
     if (!selectedAgent) return null;
-    return availableMentions.find(agent => agent.id === selectedAgent);
+    return {
+      id: selectedAgent,
+      label: agentDisplayNames[selectedAgent as keyof typeof agentDisplayNames] || selectedAgent,
+      icon: agentDisplayIcons[selectedAgent as keyof typeof agentDisplayIcons] || 'A',
+      description: availableMentions.find(agent => agent.id === selectedAgent)?.description || ''
+    };
   };
 
   // Handle keyboard navigation in mention dropdown
@@ -945,7 +957,9 @@ compliance:
                       {getSelectedAgentDetails()?.label} Ready
                     </h4>
                     <p className="text-gray-500">
-                      {getSelectedAgentDetails()?.description}
+                      {selectedAgent === 'query' && 'Natural language to SQL conversion and data analysis'}
+                      {selectedAgent === 'semantic-model' && 'Build comprehensive data dictionaries and semantic models'}  
+                      {selectedAgent === 'dashboards' && 'Create advanced data visualizations and dashboards'}
                     </p>
                   </div>
                 )}

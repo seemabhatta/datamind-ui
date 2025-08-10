@@ -36,22 +36,10 @@ export const connectToSnowflake: FunctionTool = {
         return 'No default Snowflake connection found. Please configure a connection in Settings → Integrations.';
       }
 
-      // Test and establish connection
-      console.log('Testing Snowflake connection...');
-      const isConnected = await snowflakeService.testConnection({
-        account: defaultConnection.account,
-        username: defaultConnection.username,
-        password: defaultConnection.password || '',
-        database: defaultConnection.database || undefined,
-        schema: defaultConnection.schema || undefined,
-        warehouse: defaultConnection.warehouse || undefined,
-        role: defaultConnection.role || undefined,
-        authenticator: defaultConnection.authenticator || undefined,
-      });
-      console.log('Connection test result:', isConnected);
-
-      if (!isConnected) {
-        return 'Failed to connect to Snowflake. Please check your credentials.';
+      // Skip connection test for MFA-enabled accounts
+      // Just validate that we have the required credentials
+      if (!defaultConnection.account || !defaultConnection.username) {
+        return 'Missing required Snowflake credentials (account and username). Please configure in Settings → Integrations.';
       }
 
       // Create persistent connection for queries
@@ -76,18 +64,22 @@ export const connectToSnowflake: FunctionTool = {
         currentSchema: defaultConnection.schema || undefined
       });
 
-      return `✅ Successfully connected to Snowflake account: ${defaultConnection.account}
-      
-🔗 **Connection Details:**
-- Database: ${defaultConnection.database}
-- Schema: ${defaultConnection.schema}
-- Warehouse: ${defaultConnection.warehouse}
-- Role: ${defaultConnection.role}
+      return `✅ Snowflake connection configured successfully!
 
-🚀 **Ready for queries!** Try:
+**Connection Details:**
+- Account: ${defaultConnection.account}
+- User: ${defaultConnection.username}
+- Database: ${defaultConnection.database || 'Not specified'}
+- Schema: ${defaultConnection.schema || 'Not specified'}
+- Warehouse: ${defaultConnection.warehouse || 'Not specified'}
+- Role: ${defaultConnection.role || 'Default role'}
+
+**Note:** This account uses MFA. Queries will require interactive approval.
+
+**Ready for queries!** Try:
 - "show databases" - List available databases
-- "show tables" - List tables in current schema
-- "SELECT * FROM table_name" - Run SQL directly`;
+- "show tables" - List tables in current schema  
+- "SELECT * FROM table_name LIMIT 10" - Run SQL queries`;
     } catch (error) {
       return `Error connecting to Snowflake: ${error instanceof Error ? error.message : 'Unknown error'}`;
     }

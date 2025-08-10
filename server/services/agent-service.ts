@@ -28,6 +28,29 @@ class AgentService {
     });
   }
 
+  private getFallbackResponse(agentType: string, content: string): AgentResponse {
+    const responses = {
+      'query': {
+        content: `I'm a Query Agent for DataMind. I help with SQL queries and data analysis. Your message: "${content}"\n\nTo enable full AI responses, please provide a valid OpenAI API key. I can help you with:\n- Writing SQL queries\n- Data analysis guidance\n- Query optimization tips\n- Database best practices`,
+        metadata: { agentType: 'query', fallback: true }
+      },
+      'yaml': {
+        content: `I'm an Ontology Agent for DataMind. I help with semantic data modeling and ontology design. Your message: "${content}"\n\nTo enable full AI responses, please provide a valid OpenAI API key. I can help you with:\n- Semantic model design\n- Data relationships\n- Ontology best practices\n- YAML configurations`,
+        metadata: { agentType: 'yaml', fallback: true }
+      },
+      'dashboards': {
+        content: `I'm a Dashboard Agent for DataMind. I help create interactive dashboards and visualizations. Your message: "${content}"\n\nTo enable full AI responses, please provide a valid OpenAI API key. I can help you with:\n- Dashboard design\n- Chart recommendations\n- Visualization best practices\n- Interactive components`,
+        metadata: { agentType: 'dashboards', fallback: true }
+      },
+      'general': {
+        content: `Hello! I'm the DataMind Assistant. Your message: "${content}"\n\nTo enable full AI responses, please provide a valid OpenAI API key. I can help you with:\n- General data analytics questions\n- Platform navigation\n- Directing you to specialized agents\n- Data concepts explanation`,
+        metadata: { agentType: 'general', fallback: true }
+      }
+    };
+    
+    return responses[agentType] || responses['general'];
+  }
+
   async processMessage(content: string, agentType: 'query' | 'yaml' | 'dashboards' | 'general', sessionId: string): Promise<AgentResponse> {
     try {
       switch (agentType) {
@@ -94,7 +117,8 @@ Context: You are in a chat interface where users can ask questions about their d
       };
     } catch (error) {
       console.error('Query agent error:', error);
-      throw new Error(error instanceof Error ? error.message : String(error));
+      // Return fallback response if OpenAI fails
+      return this.getFallbackResponse('query', content);
     }
   }
 
@@ -144,7 +168,8 @@ Context: You are working with users who need to create semantic models and ontol
       };
     } catch (error) {
       console.error('YAML agent error:', error);
-      throw new Error(error instanceof Error ? error.message : String(error));
+      // Return fallback response if OpenAI fails
+      return this.getFallbackResponse('yaml', content);
     }
   }
 
@@ -194,7 +219,8 @@ Context: You are helping users build effective dashboards and visualizations for
       };
     } catch (error) {
       console.error('Dashboard agent error:', error);
-      throw new Error(error instanceof Error ? error.message : String(error));
+      // Return fallback response if OpenAI fails
+      return this.getFallbackResponse('dashboards', content);
     }
   }
 
@@ -244,7 +270,8 @@ Context: You are in the main chat interface where users can ask general question
       };
     } catch (error) {
       console.error('General agent error:', error);
-      throw new Error(error instanceof Error ? error.message : String(error));
+      // Return fallback response if OpenAI fails
+      return this.getFallbackResponse('general', content);
     }
   }
 

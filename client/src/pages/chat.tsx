@@ -318,7 +318,7 @@ export default function ChatPage() {
 
   // Available mentions for autocomplete
   const availableMentions = [
-    { id: 'domain-model', label: 'Domain-Model', description: 'Semantic data modeling and relationships', icon: 'D', type: 'agent' },
+    { id: 'domain-model', label: 'Semantic-Model', description: 'Semantic data modeling and relationships', icon: 'S', type: 'agent' },
     { id: 'query', label: 'Query', description: 'SQL queries and data analysis', icon: 'Q', type: 'agent' },
     { id: 'dashboards', label: 'Dashboards', description: 'Interactive dashboards and visualizations', icon: 'B', type: 'agent' }
   ];
@@ -647,10 +647,10 @@ compliance:
                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
-              title={isLeftSidebarCollapsed ? 'Domain Model' : ''}
+              title={isLeftSidebarCollapsed ? 'Semantic Model' : ''}
             >
               <Database className={`${isLeftSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-3'}`} />
-              {!isLeftSidebarCollapsed && <span>domain model</span>}
+              {!isLeftSidebarCollapsed && <span>semantic model</span>}
             </button>
             
 
@@ -1351,8 +1351,8 @@ compliance:
                   <div className="p-3 bg-gray-50 rounded-md">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-medium">D</div>
-                        <span className="text-sm font-medium">Domain-Model Agent</span>
+                        <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-medium">S</div>
+                        <span className="text-sm font-medium">Semantic-Model Agent</span>
                       </div>
                       <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Active</span>
                     </div>
@@ -1393,7 +1393,7 @@ compliance:
                 <div className="space-y-4">
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-gray-600">Domain-Model Agent</span>
+                      <span className="text-sm text-gray-600">Semantic-Model Agent</span>
                       <span className="text-sm font-medium">95.2%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">

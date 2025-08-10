@@ -36,6 +36,11 @@ export default function ChatPage() {
   const [mentionPosition, setMentionPosition] = useState(0);
   const [currentMentionQuery, setCurrentMentionQuery] = useState('');
   const [activeSettingsTab, setActiveSettingsTab] = useState<'integrations' | 'general' | 'security' | 'agent-hub'>('integrations');
+  const [agentStatuses, setAgentStatuses] = useState({
+    'semantic-model': true,
+    'query': true,
+    'dashboards': true
+  });
 
 
   
@@ -316,12 +321,20 @@ export default function ChatPage() {
     }
   };
 
-  // Available mentions for autocomplete
+  // Toggle agent status
+  const toggleAgentStatus = (agentId: string) => {
+    setAgentStatuses(prev => ({
+      ...prev,
+      [agentId]: !prev[agentId]
+    }));
+  };
+
+  // Available mentions for autocomplete - filtered by active agents
   const availableMentions = [
-    { id: 'domain-model', label: 'Semantic-Model', description: 'Semantic data modeling and relationships', icon: 'S', type: 'agent' },
-    { id: 'query', label: 'Query', description: 'SQL queries and data analysis', icon: 'Q', type: 'agent' },
-    { id: 'dashboards', label: 'Dashboards', description: 'Interactive dashboards and visualizations', icon: 'B', type: 'agent' }
-  ];
+    { id: 'domain-model', label: 'Semantic-Model', description: 'Semantic data modeling and relationships', icon: 'S', type: 'agent', active: agentStatuses['semantic-model'] },
+    { id: 'query', label: 'Query', description: 'SQL queries and data analysis', icon: 'Q', type: 'agent', active: agentStatuses['query'] },
+    { id: 'dashboards', label: 'Dashboards', description: 'Interactive dashboards and visualizations', icon: 'B', type: 'agent', active: agentStatuses['dashboards'] }
+  ].filter(mention => mention.active);
 
   // Handle @mention input detection and autocomplete
   const handleInputChange = (value: string) => {
@@ -614,6 +627,7 @@ compliance:
               {!isLeftSidebarCollapsed && <span>new chat</span>}
             </button>
             
+            {agentStatuses['dashboards'] && (
             <button
               onClick={() => setCurrentView('dashboards')}
               className={`w-full flex items-center justify-start ${isLeftSidebarCollapsed ? 'px-2 py-3 justify-center' : 'px-3 py-2'} text-sm font-medium rounded-md transition-colors ${
@@ -626,7 +640,9 @@ compliance:
               <BarChart3 className={`${isLeftSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-3'}`} />
               {!isLeftSidebarCollapsed && <span>dashboards</span>}
             </button>
+            )}
             
+            {agentStatuses['query'] && (
             <button
               onClick={() => setCurrentView('query')}
               className={`w-full flex items-center justify-start ${isLeftSidebarCollapsed ? 'px-2 py-3 justify-center' : 'px-3 py-2'} text-sm font-medium rounded-md transition-colors ${
@@ -639,7 +655,9 @@ compliance:
               <Search className={`${isLeftSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-3'}`} />
               {!isLeftSidebarCollapsed && <span>query</span>}
             </button>
+            )}
             
+            {agentStatuses['semantic-model'] && (
             <button
               onClick={() => setCurrentView('domain-model')}
               className={`w-full flex items-center justify-start ${isLeftSidebarCollapsed ? 'px-2 py-3 justify-center' : 'px-3 py-2'} text-sm font-medium rounded-md transition-colors ${
@@ -652,6 +670,7 @@ compliance:
               <Database className={`${isLeftSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-3'}`} />
               {!isLeftSidebarCollapsed && <span>semantic model</span>}
             </button>
+            )}
             
 
 
@@ -1354,7 +1373,16 @@ compliance:
                         <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-medium">S</div>
                         <span className="text-sm font-medium">Semantic-Model Agent</span>
                       </div>
-                      <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Active</span>
+                      <button
+                        onClick={() => toggleAgentStatus('semantic-model')}
+                        className={`text-xs px-2 py-1 rounded-full cursor-pointer ${
+                          agentStatuses['semantic-model'] 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        {agentStatuses['semantic-model'] ? 'Active' : 'Inactive'}
+                      </button>
                     </div>
                     <p className="text-xs text-gray-500">Semantic data modeling and relationships</p>
                   </div>
@@ -1364,7 +1392,16 @@ compliance:
                         <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-medium">Q</div>
                         <span className="text-sm font-medium">Query Agent</span>
                       </div>
-                      <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Active</span>
+                      <button
+                        onClick={() => toggleAgentStatus('query')}
+                        className={`text-xs px-2 py-1 rounded-full cursor-pointer ${
+                          agentStatuses['query'] 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        {agentStatuses['query'] ? 'Active' : 'Inactive'}
+                      </button>
                     </div>
                     <p className="text-xs text-gray-500">SQL queries and data analysis</p>
                   </div>
@@ -1374,7 +1411,16 @@ compliance:
                         <div className="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-medium">B</div>
                         <span className="text-sm font-medium">Dashboard Agent</span>
                       </div>
-                      <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Active</span>
+                      <button
+                        onClick={() => toggleAgentStatus('dashboards')}
+                        className={`text-xs px-2 py-1 rounded-full cursor-pointer ${
+                          agentStatuses['dashboards'] 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        {agentStatuses['dashboards'] ? 'Active' : 'Inactive'}
+                      </button>
                     </div>
                     <p className="text-xs text-gray-500">Interactive dashboards and visualizations</p>
                   </div>
@@ -1391,6 +1437,7 @@ compliance:
                   <BarChart3 className="w-5 h-5 text-gray-400" />
                 </div>
                 <div className="space-y-4">
+                  {agentStatuses['semantic-model'] && (
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm text-gray-600">Semantic-Model Agent</span>
@@ -1400,6 +1447,8 @@ compliance:
                       <div className="bg-blue-500 h-2 rounded-full" style={{width: '95.2%'}}></div>
                     </div>
                   </div>
+                  )}
+                  {agentStatuses['query'] && (
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm text-gray-600">Query Agent</span>
@@ -1409,6 +1458,8 @@ compliance:
                       <div className="bg-green-500 h-2 rounded-full" style={{width: '88.7%'}}></div>
                     </div>
                   </div>
+                  )}
+                  {agentStatuses['dashboards'] && (
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm text-gray-600">Dashboard Agent</span>
@@ -1418,6 +1469,12 @@ compliance:
                       <div className="bg-purple-500 h-2 rounded-full" style={{width: '92.1%'}}></div>
                     </div>
                   </div>
+                  )}
+                  {!agentStatuses['semantic-model'] && !agentStatuses['query'] && !agentStatuses['dashboards'] && (
+                    <div className="text-center py-4">
+                      <p className="text-sm text-gray-500">No active agents to display performance data</p>
+                    </div>
+                  )}
                 </div>
               </div>
 

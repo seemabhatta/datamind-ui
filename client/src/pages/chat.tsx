@@ -1652,7 +1652,7 @@ compliance:
 
             {/* Agent Hub Content */}
             {activeSettingsTab === 'agent-hub' && (
-              <AgentHubSettings userId="user-123" />
+              <AgentHubSettings userId={userId} />
             )}
           </div>
         ) : currentView === 'models' ? (

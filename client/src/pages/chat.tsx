@@ -424,19 +424,11 @@ export default function ChatPage() {
     try {
       const configKey = `agentConfig_${userId}`;
       const savedConfig = localStorage.getItem(configKey);
-      console.log(`Reading config for ${agentType}:`, savedConfig ? 'Found' : 'Not found');
-      
       if (savedConfig) {
         const config = JSON.parse(savedConfig);
-        console.log('Parsed config:', config);
-        
         const agent = config.agents?.find((a: any) => a.agentType === agentType);
-        console.log(`Agent ${agentType} config:`, agent);
-        
         if (agent) {
-          const toolCount = agent.tools?.length || 0;
-          console.log(`${agentType} tool count: ${toolCount}`);
-          return toolCount;
+          return agent.tools?.length || 0;
         }
       }
     } catch (error) {
@@ -445,9 +437,7 @@ export default function ChatPage() {
     
     // Fallback to default counts if no saved config
     const defaults = { query: 18, ontology: 15, dashboards: 8, general: 6 };
-    const defaultCount = defaults[agentType as keyof typeof defaults] || 0;
-    console.log(`Using default count for ${agentType}: ${defaultCount}`);
-    return defaultCount;
+    return defaults[agentType as keyof typeof defaults] || 0;
   };
 
   // Agent definitions that sync with Agent Hub Configuration
@@ -1652,7 +1642,7 @@ compliance:
 
             {/* Agent Hub Content */}
             {activeSettingsTab === 'agent-hub' && (
-              <AgentHubSettings userId={userId} />
+              <AgentHubSettings userId="user-123" />
             )}
           </div>
         ) : currentView === 'models' ? (

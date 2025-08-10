@@ -56,8 +56,6 @@ interface AgentHubSettingsProps {
 }
 
 export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
-  console.log('AgentHubSettings rendering with userId:', userId);
-  
   const [activeTab, setActiveTab] = useState<'tools' | 'prompts' | 'agents' | 'mentions'>('tools');
   const [editingTool, setEditingTool] = useState<string | null>(null);
   const [editingPrompt, setEditingPrompt] = useState<string | null>(null);
@@ -65,11 +63,6 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  // Early error handling
-  if (!userId) {
-    return <div className="p-4 text-red-600">Error: No user ID provided</div>;
-  }
 
   // Save configuration to localStorage
   const saveConfiguration = () => {
@@ -95,14 +88,6 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
       console.log('Saving configuration:', JSON.stringify(configData, null, 2));
       localStorage.setItem(`agentConfig_${userId}`, JSON.stringify(configData));
       setHasUnsavedChanges(false);
-      
-      // Dispatch storage event to notify other components (like chat sidebar)
-      window.dispatchEvent(new StorageEvent('storage', {
-        key: `agentConfig_${userId}`,
-        newValue: JSON.stringify(configData),
-        storageArea: localStorage
-      }));
-      
       toast({
         title: "Configuration Saved",
         description: "Agent settings have been saved successfully.",

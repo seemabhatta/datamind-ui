@@ -666,20 +666,14 @@ compliance:
               <MessageSquare className={`${isLeftSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-3'}`} />
               {!isLeftSidebarCollapsed && <span>new chat</span>}
             </button>
-            
-            {agentStatuses['dashboards'] && (
-            <button
-              onClick={() => setCurrentView('dashboards')}
-              className={`w-full flex items-center justify-start ${isLeftSidebarCollapsed ? 'px-2 py-3 justify-center' : 'px-3 py-2'} text-sm font-medium rounded-md transition-colors ${
-                currentView === 'dashboards'
-                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-              title={isLeftSidebarCollapsed ? 'Dashboards' : ''}
-            >
-              <BarChart3 className={`${isLeftSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-3'}`} />
-              {!isLeftSidebarCollapsed && <span>dashboards</span>}
-            </button>
+
+            {/* Agents Section */}
+            {!isLeftSidebarCollapsed && (
+              <div className="pt-4 pb-2">
+                <div className="px-3 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  Agents
+                </div>
+              </div>
             )}
             
             {agentStatuses['query'] && (
@@ -687,13 +681,23 @@ compliance:
               onClick={() => setCurrentView('query')}
               className={`w-full flex items-center justify-start ${isLeftSidebarCollapsed ? 'px-2 py-3 justify-center' : 'px-3 py-2'} text-sm font-medium rounded-md transition-colors ${
                 currentView === 'query'
-                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                  ? 'bg-green-50 text-green-700 border border-green-200'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
               title={isLeftSidebarCollapsed ? 'Query' : ''}
             >
-              <Search className={`${isLeftSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-3'}`} />
-              {!isLeftSidebarCollapsed && <span>query</span>}
+              {isLeftSidebarCollapsed ? (
+                <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                  <span className="text-xs font-bold text-white">Q</span>
+                </div>
+              ) : (
+                <>
+                  <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center mr-3">
+                    <span className="text-xs font-bold text-white">Q</span>
+                  </div>
+                  <span>query</span>
+                </>
+              )}
             </button>
             )}
             
@@ -707,8 +711,43 @@ compliance:
               }`}
               title={isLeftSidebarCollapsed ? 'Semantic Model' : ''}
             >
-              <Database className={`${isLeftSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-3'}`} />
-              {!isLeftSidebarCollapsed && <span>semantic model</span>}
+              {isLeftSidebarCollapsed ? (
+                <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
+                  <span className="text-xs font-bold text-white">S</span>
+                </div>
+              ) : (
+                <>
+                  <div className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center mr-3">
+                    <span className="text-xs font-bold text-white">S</span>
+                  </div>
+                  <span>semantic model</span>
+                </>
+              )}
+            </button>
+            )}
+
+            {agentStatuses['dashboards'] && (
+            <button
+              onClick={() => setCurrentView('dashboards')}
+              className={`w-full flex items-center justify-start ${isLeftSidebarCollapsed ? 'px-2 py-3 justify-center' : 'px-3 py-2'} text-sm font-medium rounded-md transition-colors ${
+                currentView === 'dashboards'
+                  ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+              title={isLeftSidebarCollapsed ? 'Dashboards' : ''}
+            >
+              {isLeftSidebarCollapsed ? (
+                <div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center">
+                  <span className="text-xs font-bold text-white">D</span>
+                </div>
+              ) : (
+                <>
+                  <div className="w-4 h-4 rounded-full bg-purple-500 flex items-center justify-center mr-3">
+                    <span className="text-xs font-bold text-white">D</span>
+                  </div>
+                  <span>dashboard</span>
+                </>
+              )}
             </button>
             )}
             

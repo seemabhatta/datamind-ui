@@ -51,6 +51,50 @@ class AgentService {
     return responses[agentType] || responses['general'];
   }
 
+  // Generate conversation summary for chat history
+  async generateConversationSummary(messages: Array<{role: string, content: string}>): Promise<{title: string, summary: string}> {
+    try {
+      const conversationText = messages
+        .map(msg => `${msg.role}: ${msg.content}`)
+        .join('\n');
+
+      const response = await this.openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `You are a conversation summarizer. Generate a short title (3-6 words) and a brief summary (1-2 sentences) for this chat conversation.
+
+Response format:
+{
+  "title": "Brief conversation title",
+  "summary": "One or two sentence summary of the conversation"
+}`
+          },
+          {
+            role: "user",
+            content: `Summarize this conversation:\n${conversationText}`
+          }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.3,
+        max_tokens: 200
+      });
+
+      const result = JSON.parse(response.choices[0].message.content || '{}');
+      return {
+        title: result.title || 'Chat Conversation',
+        summary: result.summary || 'General conversation'
+      };
+    } catch (error) {
+      console.error('Failed to generate conversation summary:', error);
+      return {
+        title: 'Chat Conversation',
+        summary: 'General conversation'
+      };
+    }
+  }
+
   async processMessage(content: string, agentType: 'query' | 'yaml' | 'dashboards' | 'general', sessionId: string): Promise<AgentResponse> {
     try {
       switch (agentType) {

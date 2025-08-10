@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { BarChart3, MessageSquare, Home, Database, ChevronLeft, ChevronRight, Minimize2, Maximize2, X, Zap, BookOpen, Settings, Cloud, Link, Send, GraduationCap, ChevronDown, Upload, Plus, Play, Save, Eye, Edit3, Brain, Search, Trash2, Check, Square, Bot } from 'lucide-react';
+import { ChatHistory } from '@/components/ChatHistory';
 
 // Type definitions for messages
 interface Message {
@@ -22,6 +23,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(false);
+  const [isChatHistoryCollapsed, setIsChatHistoryCollapsed] = useState(false);
   const [isAssistantMinimized, setIsAssistantMinimized] = useState(false);
   const [isAssistantFullscreen, setIsAssistantFullscreen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -2194,10 +2196,113 @@ compliance:
             </div>
           </div>
         ) : (
-          <div className="flex-1 p-6">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome</h2>
-              <p className="text-gray-600">Select a section from the navigation to get started</p>
+          // Main Chat Interface with History Sidebar
+          <div className="flex flex-1">
+            {/* Chat History Sidebar */}
+            <ChatHistory
+              userId={userId}
+              currentSessionId={currentSessionId}
+              onSessionSelect={(sessionId) => {
+                setMessages([]);
+                setCurrentSessionId(sessionId);
+                setCurrentView('chat');
+                queryClient.invalidateQueries({
+                  queryKey: ['/api/sessions', sessionId, 'messages']
+                });
+              }}
+              onNewChat={handleNewChat}
+              isCollapsed={isChatHistoryCollapsed}
+              onToggleCollapse={() => setIsChatHistoryCollapsed(!isChatHistoryCollapsed)}
+            />
+            
+            {/* Main Chat Area */}
+            <div className="flex-1 flex flex-col">
+              {/* Chat Header */}
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-1">
+                      {currentSessionInfo?.title || 'New Chat'}
+                    </h2>
+                    <p className="text-gray-600">
+                      {currentSessionInfo?.summary || 'Have a conversation with your AI assistant'}
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {currentSessionInfo && (
+                      <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        currentSessionInfo.agentType === 'query' 
+                          ? 'bg-green-100 text-green-800'
+                          : currentSessionInfo.agentType === 'yaml'
+                            ? 'bg-purple-100 text-purple-800'
+                            : currentSessionInfo.agentType === 'dashboards'
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {currentSessionInfo.agentType === 'yaml' ? 'Ontology' : currentSessionInfo.agentType}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Messages Area */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                {messages.length === 0 ? (
+                  <div className="text-center py-16">
+                    <MessageSquare className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Start a conversation</h3>
+                    <p className="text-gray-500 max-w-md mx-auto">
+                      Ask questions, analyze data, or get help with your projects. The assistant will automatically use the right agent for your needs.
+                    </p>
+                  </div>
+                ) : (
+                  messages.map((message) => (
+                    <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-2xl px-4 py-3 rounded-lg ${
+                        message.role === 'user' 
+                          ? 'bg-blue-600 text-white' 
+                          : 'bg-gray-100 text-gray-900'
+                      }`}>
+                        <div className="text-sm whitespace-pre-wrap">{message.content}</div>
+                      </div>
+                    </div>
+                  ))
+                )}
+                
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-gray-100 px-4 py-3 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-400 border-t-transparent"></div>
+                        <span className="text-sm text-gray-600">Assistant is thinking...</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Chat Input */}
+              <div className="border-t border-gray-200 p-6">
+                <form onSubmit={handleChatSubmit} className="flex space-x-3">
+                  <input
+                    type="text"
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    placeholder="Type your message..."
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="submit"
+                    disabled={!chatInput.trim() || isLoading}
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                  >
+                    <Send className="w-4 h-4" />
+                    <span>Send</span>
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
         )}

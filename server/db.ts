@@ -38,7 +38,7 @@ export function initializeDatabase() {
 
       CREATE TABLE IF NOT EXISTS chat_sessions (
         id TEXT PRIMARY KEY,
-        user_id TEXT,
+        user_id TEXT REFERENCES users(id),
         title TEXT,
         agent_type TEXT NOT NULL,
         created_at INTEGER,
@@ -47,7 +47,7 @@ export function initializeDatabase() {
 
       CREATE TABLE IF NOT EXISTS chat_messages (
         id TEXT PRIMARY KEY,
-        session_id TEXT,
+        session_id TEXT REFERENCES chat_sessions(id),
         role TEXT NOT NULL,
         content TEXT NOT NULL,
         metadata TEXT,
@@ -56,8 +56,8 @@ export function initializeDatabase() {
 
       CREATE TABLE IF NOT EXISTS visualizations (
         id TEXT PRIMARY KEY,
-        message_id TEXT,
-        user_id TEXT,
+        message_id TEXT REFERENCES chat_messages(id),
+        user_id TEXT REFERENCES users(id),
         title TEXT NOT NULL,
         description TEXT,
         chart_type TEXT NOT NULL,
@@ -71,8 +71,8 @@ export function initializeDatabase() {
 
       CREATE TABLE IF NOT EXISTS pinned_visualizations (
         id TEXT PRIMARY KEY,
-        user_id TEXT,
-        visualization_id TEXT,
+        user_id TEXT REFERENCES users(id),
+        visualization_id TEXT REFERENCES visualizations(id),
         pinned_at INTEGER
       );
     `);

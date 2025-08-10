@@ -294,10 +294,12 @@ export default function ChatPage() {
     // Use contextual agent mode, selected agent, or detect from input
     const detectedMode = getContextualAgentMode() ? 
       (getContextualAgentMode() === 'query' ? 'query' : 
-       getContextualAgentMode() === 'semantic-model' ? 'model' : 'dashboard') 
+       getContextualAgentMode() === 'semantic-model' ? 'model' : 
+       getContextualAgentMode() === 'dashboards' ? 'dashboard' : 'general') 
       : selectedAgentType ?
         (selectedAgentType === 'query' ? 'query' :
-         selectedAgentType === 'semantic-model' ? 'model' : 'dashboard')
+         selectedAgentType === 'ontology' ? 'model' : 
+         selectedAgentType === 'dashboards' ? 'dashboard' : 'general')
       : detectContextMode(messageContent);
     setAgentMode(detectedMode);
     
@@ -317,7 +319,9 @@ export default function ChatPage() {
           type: 'chat_message',
           sessionId: sessionId,
           content: messageContent,
-          agentType: detectedMode === 'query' ? 'query' : 'yaml',
+          agentType: detectedMode === 'query' ? 'query' : 
+                    detectedMode === 'model' ? 'yaml' :
+                    detectedMode === 'dashboard' ? 'dashboards' : 'general',
           userId: userId
         }));
         socket.close();

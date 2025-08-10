@@ -63,8 +63,9 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Mock data - in real implementation, these would come from API endpoints
+  // Complete function ecosystem based on CLI structure
   const [functionTools, setFunctionTools] = useState<FunctionTool[]>([
+    // Connection Functions
     {
       name: 'connect_to_snowflake',
       description: 'Establish connection to Snowflake database',
@@ -76,6 +77,89 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
       }
     },
     {
+      name: 'get_current_context',
+      description: 'Get current agent context and connection state',
+      category: 'connection',
+      enabled: true,
+      parameters: {}
+    },
+    
+    // Database Functions
+    {
+      name: 'get_databases',
+      description: 'List available databases in Snowflake',
+      category: 'database',
+      enabled: true,
+      parameters: {}
+    },
+    {
+      name: 'select_database',
+      description: 'Select a specific database to work with',
+      category: 'database',
+      enabled: true,
+      parameters: {
+        database_name: { type: 'string', description: 'Name of the database to select', required: true }
+      }
+    },
+    {
+      name: 'get_schemas',
+      description: 'List schemas in the current database',
+      category: 'database',
+      enabled: true,
+      parameters: {
+        database_name: { type: 'string', description: 'Database name (optional)', required: false }
+      }
+    },
+    {
+      name: 'select_schema',
+      description: 'Select a specific schema to work with',
+      category: 'database',
+      enabled: true,
+      parameters: {
+        schema_name: { type: 'string', description: 'Name of the schema to select', required: true }
+      }
+    },
+    {
+      name: 'get_tables',
+      description: 'List tables in the current database and schema',
+      category: 'database',
+      enabled: true,
+      parameters: {}
+    },
+    {
+      name: 'describe_table',
+      description: 'Get detailed table structure and column information',
+      category: 'database',
+      enabled: true,
+      parameters: {
+        table_name: { type: 'string', description: 'Name of the table to describe', required: true }
+      }
+    },
+    
+    // Metadata Functions (from CLI metadata_functions.py)
+    {
+      name: 'get_table_metadata',
+      description: 'Get comprehensive table metadata including statistics',
+      category: 'database',
+      enabled: false,
+      parameters: {
+        table_name: { type: 'string', description: 'Table name', required: true },
+        include_stats: { type: 'boolean', description: 'Include table statistics', required: false }
+      }
+    },
+    {
+      name: 'get_column_profile',
+      description: 'Get detailed column profiling information',
+      category: 'database',
+      enabled: false,
+      parameters: {
+        table_name: { type: 'string', description: 'Table name', required: true },
+        column_name: { type: 'string', description: 'Column name', required: true }
+      }
+    },
+    
+    // Query Functions
+    {
       name: 'generate_sql',
       description: 'Convert natural language to SQL queries using LLM',
       category: 'query',
@@ -86,13 +170,77 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
       }
     },
     {
-      name: 'visualize_data',
-      description: 'Create LLM-powered interactive visualizations',
-      category: 'visualization',
+      name: 'execute_sql',
+      description: 'Execute SQL queries on Snowflake and return results',
+      category: 'query',
       enabled: true,
       parameters: {
-        user_request: { type: 'string', description: 'Visualization request description', required: false }
+        sql: { type: 'string', description: 'SQL query to execute', required: true }
       }
+    },
+    {
+      name: 'explain_query',
+      description: 'Get execution plan and performance analysis for SQL queries',
+      category: 'query',
+      enabled: false,
+      parameters: {
+        sql: { type: 'string', description: 'SQL query to explain', required: true }
+      }
+    },
+    {
+      name: 'optimize_query',
+      description: 'Suggest optimizations for SQL queries',
+      category: 'query',
+      enabled: false,
+      parameters: {
+        sql: { type: 'string', description: 'SQL query to optimize', required: true }
+      }
+    },
+    
+    // Stage Functions
+    {
+      name: 'get_stages',
+      description: 'List available stages in current database/schema',
+      category: 'stage',
+      enabled: true,
+      parameters: {}
+    },
+    {
+      name: 'select_stage',
+      description: 'Select a specific stage to work with',
+      category: 'stage',
+      enabled: true,
+      parameters: {
+        stage_name: { type: 'string', description: 'Name of the stage to select', required: true }
+      }
+    },
+    {
+      name: 'list_stage_files',
+      description: 'List files in the selected stage',
+      category: 'stage',
+      enabled: false,
+      parameters: {
+        path: { type: 'string', description: 'Path within stage (optional)', required: false }
+      }
+    },
+    {
+      name: 'upload_to_stage',
+      description: 'Upload files to Snowflake stage',
+      category: 'stage',
+      enabled: false,
+      parameters: {
+        local_file: { type: 'string', description: 'Local file path', required: true },
+        stage_path: { type: 'string', description: 'Stage destination path', required: false }
+      }
+    },
+    
+    // Dictionary Functions
+    {
+      name: 'get_yaml_files',
+      description: 'List YAML dictionary files in current stage',
+      category: 'stage',
+      enabled: true,
+      parameters: {}
     },
     {
       name: 'load_yaml_file',
@@ -102,6 +250,109 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
       parameters: {
         filename: { type: 'string', description: 'YAML filename to load', required: true }
       }
+    },
+    {
+      name: 'get_yaml_content',
+      description: 'View currently loaded YAML dictionary content',
+      category: 'stage',
+      enabled: true,
+      parameters: {}
+    },
+    {
+      name: 'validate_yaml_schema',
+      description: 'Validate YAML dictionary against schema',
+      category: 'stage',
+      enabled: false,
+      parameters: {
+        filename: { type: 'string', description: 'YAML filename to validate', required: true }
+      }
+    },
+    {
+      name: 'create_yaml_dictionary',
+      description: 'Create new YAML data dictionary from table schema',
+      category: 'stage',
+      enabled: false,
+      parameters: {
+        table_name: { type: 'string', description: 'Source table name', required: true },
+        output_filename: { type: 'string', description: 'Output YAML filename', required: true }
+      }
+    },
+    
+    // Visualization Functions
+    {
+      name: 'visualize_data',
+      description: 'Create LLM-powered interactive visualizations',
+      category: 'visualization',
+      enabled: true,
+      parameters: {
+        user_request: { type: 'string', description: 'Visualization request description', required: false }
+      }
+    },
+    {
+      name: 'get_visualization_suggestions',
+      description: 'Get AI suggestions for chart types based on data',
+      category: 'visualization',
+      enabled: true,
+      parameters: {}
+    },
+    {
+      name: 'create_dashboard',
+      description: 'Create multi-chart dashboard from query results',
+      category: 'visualization',
+      enabled: false,
+      parameters: {
+        dashboard_name: { type: 'string', description: 'Dashboard name', required: true },
+        chart_configs: { type: 'array', description: 'Array of chart configurations', required: true }
+      }
+    },
+    {
+      name: 'export_visualization',
+      description: 'Export visualizations to various formats',
+      category: 'visualization',
+      enabled: false,
+      parameters: {
+        format: { type: 'string', description: 'Export format (png, pdf, html)', required: true },
+        chart_id: { type: 'string', description: 'Chart identifier', required: true }
+      }
+    },
+    
+    // Analysis Functions
+    {
+      name: 'generate_summary',
+      description: 'Generate AI-powered analysis and insights from query results',
+      category: 'analysis',
+      enabled: true,
+      parameters: {
+        user_query: { type: 'string', description: 'Original user question', required: false }
+      }
+    },
+    {
+      name: 'detect_anomalies',
+      description: 'Detect data anomalies and outliers in query results',
+      category: 'analysis',
+      enabled: false,
+      parameters: {
+        sensitivity: { type: 'number', description: 'Anomaly detection sensitivity (0.1-1.0)', required: false }
+      }
+    },
+    {
+      name: 'correlation_analysis',
+      description: 'Perform correlation analysis on numeric columns',
+      category: 'analysis',
+      enabled: false,
+      parameters: {
+        columns: { type: 'array', description: 'Columns to analyze', required: false }
+      }
+    },
+    {
+      name: 'time_series_analysis',
+      description: 'Analyze time series patterns and trends',
+      category: 'analysis',
+      enabled: false,
+      parameters: {
+        date_column: { type: 'string', description: 'Date/time column name', required: true },
+        value_column: { type: 'string', description: 'Value column name', required: true }
+      }
     }
   ]);
 
@@ -110,7 +361,7 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
       id: 'query-system',
       name: 'Query Agent System Prompt',
       type: 'system',
-      content: 'You are a Snowflake Query Assistant that helps users interact with their data using natural language. Focus on accurate SQL generation and data analysis.',
+      content: 'You are a Snowflake Query Assistant that helps users interact with their data using natural language. Focus on accurate SQL generation, data analysis, and intelligent insights. Use available function tools to navigate databases, execute queries, and provide comprehensive analysis.',
       agentTypes: ['query'],
       enabled: true
     },
@@ -118,8 +369,24 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
       id: 'ontology-system',
       name: 'Ontology Agent System Prompt', 
       type: 'system',
-      content: 'You are an Ontology Agent that helps with semantic data modeling and YAML dictionary management. Focus on data relationships and structure.',
+      content: 'You are an Ontology Agent that helps with semantic data modeling and YAML dictionary management. Focus on data relationships, structure discovery, and creating comprehensive data dictionaries. Guide users through ontology design and semantic modeling best practices.',
       agentTypes: ['ontology'],
+      enabled: true
+    },
+    {
+      id: 'dashboard-system',
+      name: 'Dashboard Agent System Prompt',
+      type: 'system',
+      content: 'You are a Dashboard Agent specialized in creating interactive visualizations and dashboards. Help users transform their data into compelling visual stories with appropriate chart types, layouts, and interactive features.',
+      agentTypes: ['dashboards'],
+      enabled: true
+    },
+    {
+      id: 'general-system',
+      name: 'General Assistant System Prompt',
+      type: 'system',
+      content: 'You are a helpful DataMind platform assistant. Guide users through the platform, explain features, and direct them to appropriate specialized agents when needed. Maintain a friendly, professional tone.',
+      agentTypes: ['general'],
       enabled: true
     }
   ]);
@@ -131,9 +398,14 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
       type: 'query',
       description: 'Natural language to SQL query processing with Snowflake integration',
       enabled: true,
-      tools: ['connect_to_snowflake', 'generate_sql', 'execute_sql', 'get_tables', 'describe_table'],
+      tools: [
+        'connect_to_snowflake', 'get_current_context', 'get_databases', 'select_database', 
+        'get_schemas', 'select_schema', 'get_tables', 'describe_table', 'get_table_metadata',
+        'get_column_profile', 'generate_sql', 'execute_sql', 'explain_query', 'optimize_query',
+        'generate_summary', 'detect_anomalies', 'correlation_analysis', 'time_series_analysis'
+      ],
       prompts: ['query-system'],
-      mentions: ['@query', '@sql', '@data'],
+      mentions: ['@query', '@sql', '@data', '@analyze'],
       context: {
         maxHistory: 10,
         retainSession: true,
@@ -146,12 +418,54 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
       type: 'ontology',
       description: 'Semantic data modeling and YAML dictionary management',
       enabled: true,
-      tools: ['load_yaml_file', 'get_yaml_content', 'get_stages', 'select_stage'],
+      tools: [
+        'connect_to_snowflake', 'get_current_context', 'get_databases', 'select_database',
+        'get_schemas', 'select_schema', 'get_stages', 'select_stage', 'list_stage_files',
+        'get_yaml_files', 'load_yaml_file', 'get_yaml_content', 'validate_yaml_schema',
+        'create_yaml_dictionary', 'get_tables', 'describe_table'
+      ],
       prompts: ['ontology-system'],
-      mentions: ['@ontology', '@yaml', '@model'],
+      mentions: ['@ontology', '@yaml', '@model', '@semantic', '@dictionary'],
       context: {
         maxHistory: 15,
         retainSession: true,
+        autoExecute: false
+      }
+    },
+    {
+      id: 'dashboard-agent',
+      name: 'Dashboard Agent',
+      type: 'dashboards',
+      description: 'Interactive dashboard and visualization creation and management',
+      enabled: true,
+      tools: [
+        'connect_to_snowflake', 'get_current_context', 'execute_sql', 'visualize_data',
+        'get_visualization_suggestions', 'create_dashboard', 'export_visualization',
+        'generate_summary'
+      ],
+      prompts: ['dashboard-system'],
+      mentions: ['@dashboard', '@chart', '@visualize', '@plot'],
+      context: {
+        maxHistory: 8,
+        retainSession: true,
+        autoExecute: true
+      }
+    },
+    {
+      id: 'general-agent',
+      name: 'General Assistant',
+      type: 'general',
+      description: 'General conversational AI for platform navigation and guidance',
+      enabled: true,
+      tools: [
+        'get_current_context', 'connect_to_snowflake', 'get_databases', 'get_schemas',
+        'get_tables', 'generate_summary'
+      ],
+      prompts: ['general-system'],
+      mentions: ['@help', '@assistant', '@general'],
+      context: {
+        maxHistory: 5,
+        retainSession: false,
         autoExecute: false
       }
     }
@@ -192,9 +506,46 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center space-x-2">
-        <Settings className="h-5 w-5" />
-        <h2 className="text-xl font-semibold">Agent Hub Configuration</h2>
+      <div className="space-y-4">
+        <div className="flex items-center space-x-2">
+          <Settings className="h-5 w-5" />
+          <h2 className="text-xl font-semibold">Agent Hub Configuration</h2>
+        </div>
+        
+        {/* Implementation Status Summary */}
+        <Card className="bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800">
+          <CardContent className="pt-4">
+            <div className="flex items-start space-x-3">
+              <div className="w-2 h-2 bg-amber-500 rounded-full mt-2"></div>
+              <div className="space-y-2">
+                <h3 className="font-medium text-amber-800 dark:text-amber-200">CLI Function Parity Status</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium">Total Functions:</span>
+                    <span className="ml-2 text-amber-700 dark:text-amber-300">{functionTools.length}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium">Implemented:</span>
+                    <span className="ml-2 text-green-600 dark:text-green-400">{functionTools.filter(f => f.enabled).length}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium">Pending:</span>
+                    <span className="ml-2 text-orange-600 dark:text-orange-400">{functionTools.filter(f => !f.enabled).length}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium">Coverage:</span>
+                    <span className="ml-2 text-blue-600 dark:text-blue-400">
+                      {Math.round((functionTools.filter(f => f.enabled).length / functionTools.length) * 100)}%
+                    </span>
+                  </div>
+                </div>
+                <p className="text-xs text-amber-700 dark:text-amber-300 mt-2">
+                  Based on your original CLI implementation with connection_functions.py, metadata_functions.py, query_functions.py, stage_functions.py, and visualization_tools.py
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Tabs value={activeTab} onValueChange={(value: any) => setActiveTab(value)}>

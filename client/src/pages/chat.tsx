@@ -304,7 +304,7 @@ export default function ChatPage() {
     setAgentMode(detectedMode);
     
     setChatInput('');
-    setSelectedAgentType(null); // Clear selected agent after sending
+    // Don't clear selected agent - keep it active for this conversation
     setIsGenerateMode(false);
     setIsLoading(true);
 

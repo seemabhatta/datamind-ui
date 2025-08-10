@@ -140,7 +140,7 @@ export function initializeDatabase() {
       `);
       const connId = crypto.randomUUID();
       insertConn.run(
-        connId, userId, 'SF Personal', 'KIXUIII-MTC00254', 'nl2sql_service_user', '', 
+        connId, userId, 'SF Personal', 'KIXUIII-MTC00254', 'nl2sql_service_user', process.env.SNOWFLAKE_PASSWORD || '', 
         'CORTES_DEMO_2', 'CORTEX_DEMO', 'CORTEX_ANALYST_WH', 'nl2sql_service_role', 
         1, 1, now, now
       );

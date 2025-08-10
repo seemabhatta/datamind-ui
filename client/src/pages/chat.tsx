@@ -978,6 +978,55 @@ compliance:
                 )}
                 <form onSubmit={handleChatSubmit} className="flex space-x-4">
                   <div className="relative flex-1">
+                    {/* Agent Mode Indicator */}
+                    {(getContextualAgentMode() || isGenerateMode) && (
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10 flex items-center space-x-2">
+                        <div className={`flex items-center space-x-2 px-2 py-1 rounded-md text-xs font-medium ${
+                          getContextualAgentMode() === 'query'
+                            ? 'bg-green-100 text-green-700'
+                            : getContextualAgentMode() === 'semantic-model' || (isGenerateMode && chatInput.includes('@semantic-model'))
+                              ? 'bg-blue-100 text-blue-700'
+                              : getContextualAgentMode() === 'dashboards' || (isGenerateMode && chatInput.includes('@dashboards'))
+                                ? 'bg-purple-100 text-purple-700'
+                                : 'bg-gray-100 text-gray-700'
+                        }`}>
+                          <div className="w-4 h-4 rounded-sm bg-current/10 flex items-center justify-center">
+                            <span className="text-xs font-bold">
+                              {getContextualAgentMode() === 'query' || (isGenerateMode && chatInput.includes('@query'))
+                                ? 'Q'
+                                : getContextualAgentMode() === 'semantic-model' || (isGenerateMode && chatInput.includes('@semantic-model'))
+                                  ? 'S'
+                                  : getContextualAgentMode() === 'dashboards' || (isGenerateMode && chatInput.includes('@dashboards'))
+                                    ? 'D'
+                                    : 'A'
+                              }
+                            </span>
+                          </div>
+                          <span>
+                            {getContextualAgentMode() === 'query' || (isGenerateMode && chatInput.includes('@query'))
+                              ? 'Query'
+                              : getContextualAgentMode() === 'semantic-model' || (isGenerateMode && chatInput.includes('@semantic-model'))
+                                ? 'Semantic Model'
+                                : getContextualAgentMode() === 'dashboards' || (isGenerateMode && chatInput.includes('@dashboards'))
+                                  ? 'Dashboards'
+                                  : 'Assistant'
+                            }
+                          </span>
+                        </div>
+                        {!getContextualAgentMode() && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setChatInput('');
+                              setIsGenerateMode(false);
+                            }}
+                            className="p-1 text-gray-400 hover:text-gray-600 rounded-sm"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                    )}
                     <input
                       type="text"
                       value={chatInput}
@@ -985,10 +1034,14 @@ compliance:
                       onKeyDown={handleKeyDown}
                       placeholder={
                         getContextualAgentMode() 
-                          ? `Ask the ${getContextualAgentMode() === 'query' ? 'Query' : getContextualAgentMode() === 'semantic-model' ? 'Semantic Model' : 'Dashboard'} agent anything...`
+                          ? `Ask anything...`
                           : isGenerateMode ? "What would you like me to help you with?" : "Ask me anything... (Type @ for agents)"
                       }
-                      className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
+                      className={`w-full py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
+                        getContextualAgentMode() || isGenerateMode
+                          ? 'pl-32 pr-4'
+                          : 'px-4'
+                      } ${
                         getContextualAgentMode() === 'query'
                           ? 'border-green-400 bg-green-50 focus:ring-green-500 text-green-900 placeholder-green-600'
                           : getContextualAgentMode() === 'semantic-model'

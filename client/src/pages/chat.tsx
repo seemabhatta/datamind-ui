@@ -387,12 +387,56 @@ export default function ChatPage() {
     }));
   };
 
+  // Agent definitions that sync with Agent Hub Configuration
+  const agentDefinitions = [
+    { 
+      id: 'query', 
+      label: 'Query', 
+      mention: '@query',
+      description: 'Natural language to SQL query processing', 
+      icon: 'Q', 
+      type: 'agent', 
+      active: agentStatuses['query'],
+      tools: 18,
+      category: 'data-analysis'
+    },
+    { 
+      id: 'ontology', 
+      label: 'Ontology', 
+      mention: '@ontology',
+      description: 'Semantic data modeling and YAML dictionary management', 
+      icon: 'O', 
+      type: 'agent', 
+      active: agentStatuses['semantic-model'],
+      tools: 15,
+      category: 'modeling'
+    },
+    { 
+      id: 'dashboards', 
+      label: 'Dashboard', 
+      mention: '@dashboard',
+      description: 'Interactive visualization and dashboard creation', 
+      icon: 'D', 
+      type: 'agent', 
+      active: agentStatuses['dashboards'],
+      tools: 8,
+      category: 'visualization'
+    },
+    { 
+      id: 'general', 
+      label: 'Assistant', 
+      mention: '@help',
+      description: 'General platform guidance and support', 
+      icon: 'A', 
+      type: 'agent', 
+      active: true, // Always available
+      tools: 6,
+      category: 'general'
+    }
+  ];
+
   // Available mentions for autocomplete - filtered by active agents
-  const availableMentions = [
-    { id: 'domain-model', label: 'Ontology', description: 'Semantic data modeling and relationships', icon: 'O', type: 'agent', active: agentStatuses['semantic-model'] },
-    { id: 'query', label: 'Query', description: 'SQL queries and data analysis', icon: 'Q', type: 'agent', active: agentStatuses['query'] },
-    { id: 'dashboards', label: 'Dashboards', description: 'Interactive dashboards and visualizations', icon: 'B', type: 'agent', active: agentStatuses['dashboards'] }
-  ].filter(mention => mention.active);
+  const availableMentions = agentDefinitions.filter(agent => agent.active);
 
   // Handle @mention input detection and autocomplete
   const handleInputChange = (value: string) => {
@@ -432,7 +476,7 @@ export default function ChatPage() {
     
     // Check for specific mentions to set modes (but don't activate if we just cleared the input)
     if (value.trim().length > 0) {
-      setIsGenerateMode(value.includes('@ontology') || value.includes('@dashboards'));
+      setIsGenerateMode(value.includes('@ontology') || value.includes('@dashboard'));
     } else {
       setIsGenerateMode(false);
     }
@@ -441,6 +485,7 @@ export default function ChatPage() {
   // Filter mentions based on query
   const filteredMentions = availableMentions.filter(mention =>
     mention.label.toLowerCase().includes(currentMentionQuery) ||
+    mention.mention.toLowerCase().includes(currentMentionQuery) ||
     mention.description.toLowerCase().includes(currentMentionQuery)
   );
 
@@ -448,13 +493,13 @@ export default function ChatPage() {
   const selectMention = (mention: typeof availableMentions[0]) => {
     const beforeMention = chatInput.substring(0, mentionPosition);
     const afterMention = chatInput.substring(mentionPosition + 1 + currentMentionQuery.length);
-    // Don't include the @mention in the input, just show the indicator
-    const newValue = `${beforeMention}${afterMention}`.trim();
+    // Include the @mention in the input for clarity
+    const newValue = `${beforeMention}${mention.mention} ${afterMention}`.trim();
     
     setChatInput(newValue);
     setShowMentionDropdown(false);
-    setSelectedAgentType(mention.label.toLowerCase());
-    setIsGenerateMode(mention.label.toLowerCase() === 'ontology' || mention.label.toLowerCase() === 'dashboards');
+    setSelectedAgentType(mention.id);
+    setIsGenerateMode(mention.id === 'ontology' || mention.id === 'dashboards');
   };
 
   // Handle keyboard navigation in mention dropdown
@@ -702,85 +747,56 @@ compliance:
             {!isLeftSidebarCollapsed && (
               <div className="pt-4 pb-2">
                 <div className="px-3 text-xs font-medium text-gray-500 uppercase tracking-wide">
-                  Agents
+                  @agents
                 </div>
               </div>
             )}
             
-            {agentStatuses['query'] && (
+            {/* Render all active agents as navigation items */}
+            {agentDefinitions.filter(agent => agent.active).map(agent => (
             <button
-              onClick={() => setCurrentView('query')}
+              key={agent.id}
+              onClick={() => {
+                // For agents, open new chat with that agent selected
+                setCurrentSessionInfo(null);
+                setMessages([]);
+                setCurrentSessionId('');
+                setCurrentView('chat');
+                setSelectedAgentType(agent.id);
+                setChatInput(agent.mention + ' '); // Pre-fill the mention
+              }}
               className={`w-full flex items-center justify-start ${isLeftSidebarCollapsed ? 'px-2 py-3 justify-center' : 'px-3 py-2'} text-sm font-medium rounded-md transition-colors ${
-                currentView === 'query'
-                  ? 'bg-green-50 text-green-700 border border-green-200'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-              title={isLeftSidebarCollapsed ? 'Query' : ''}
-            >
-              {isLeftSidebarCollapsed ? (
-                <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
-                  <span className="text-xs font-bold text-white">Q</span>
-                </div>
-              ) : (
-                <>
-                  <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center mr-3">
-                    <span className="text-xs font-bold text-white">Q</span>
-                  </div>
-                  <span>query</span>
-                </>
-              )}
-            </button>
-            )}
-            
-            {agentStatuses['semantic-model'] && (
-            <button
-              onClick={() => setCurrentView('domain-model')}
-              className={`w-full flex items-center justify-start ${isLeftSidebarCollapsed ? 'px-2 py-3 justify-center' : 'px-3 py-2'} text-sm font-medium rounded-md transition-colors ${
-                currentView === 'domain-model'
+                selectedAgentType === agent.id && currentView === 'chat'
                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
-              title={isLeftSidebarCollapsed ? 'Ontology' : ''}
+              title={isLeftSidebarCollapsed ? `${agent.label} Agent` : ''}
             >
               {isLeftSidebarCollapsed ? (
-                <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
-                  <span className="text-xs font-bold text-white">O</span>
+                <div className={`w-5 h-5 rounded-full ${
+                  agent.category === 'data-analysis' ? 'bg-green-500' :
+                  agent.category === 'modeling' ? 'bg-purple-500' :
+                  agent.category === 'visualization' ? 'bg-blue-500' : 'bg-gray-500'
+                } flex items-center justify-center`}>
+                  <span className="text-xs font-bold text-white">{agent.icon}</span>
                 </div>
               ) : (
                 <>
-                  <div className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center mr-3">
-                    <span className="text-xs font-bold text-white">O</span>
+                  <div className={`w-4 h-4 rounded-full ${
+                    agent.category === 'data-analysis' ? 'bg-green-500' :
+                    agent.category === 'modeling' ? 'bg-purple-500' :
+                    agent.category === 'visualization' ? 'bg-blue-500' : 'bg-gray-500'
+                  } flex items-center justify-center mr-3`}>
+                    <span className="text-xs font-bold text-white">{agent.icon}</span>
                   </div>
-                  <span>ontology</span>
+                  <div className="flex flex-col items-start flex-1">
+                    <span className="text-sm">{agent.mention}</span>
+                    <span className="text-xs text-gray-500">{agent.tools} tools</span>
+                  </div>
                 </>
               )}
             </button>
-            )}
-
-            {agentStatuses['dashboards'] && (
-            <button
-              onClick={() => setCurrentView('dashboards')}
-              className={`w-full flex items-center justify-start ${isLeftSidebarCollapsed ? 'px-2 py-3 justify-center' : 'px-3 py-2'} text-sm font-medium rounded-md transition-colors ${
-                currentView === 'dashboards'
-                  ? 'bg-purple-50 text-purple-700 border border-purple-200'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-              title={isLeftSidebarCollapsed ? 'Dashboards' : ''}
-            >
-              {isLeftSidebarCollapsed ? (
-                <div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center">
-                  <span className="text-xs font-bold text-white">D</span>
-                </div>
-              ) : (
-                <>
-                  <div className="w-4 h-4 rounded-full bg-purple-500 flex items-center justify-center mr-3">
-                    <span className="text-xs font-bold text-white">D</span>
-                  </div>
-                  <span>dashboard</span>
-                </>
-              )}
-            </button>
-            )}
+            ))}
             
 
 
@@ -1146,18 +1162,30 @@ compliance:
                               index === selectedMentionIndex ? 'bg-blue-50 border-l-2 border-blue-500' : ''
                             }`}
                           >
-                            <div className="w-8 h-8 bg-gray-100 rounded-md flex items-center justify-center">
-                              <span className="text-sm font-medium text-gray-600">{mention.icon}</span>
+                            <div className={`w-8 h-8 rounded-full ${
+                              mention.category === 'data-analysis' ? 'bg-green-100' :
+                              mention.category === 'modeling' ? 'bg-purple-100' :
+                              mention.category === 'visualization' ? 'bg-blue-100' : 'bg-gray-100'
+                            } flex items-center justify-center`}>
+                              <span className={`text-sm font-bold ${
+                                mention.category === 'data-analysis' ? 'text-green-600' :
+                                mention.category === 'modeling' ? 'text-purple-600' :
+                                mention.category === 'visualization' ? 'text-blue-600' : 'text-gray-600'
+                              }`}>{mention.icon}</span>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center space-x-2">
-                                <span className="font-medium text-gray-900">@{mention.label.toLowerCase()}</span>
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-2">
+                                  <span className="font-medium text-gray-900">{mention.mention}</span>
+                                  <span className="text-xs text-gray-500">•</span>
+                                  <span className="text-xs text-gray-500">{mention.tools} tools</span>
+                                </div>
                                 <span className={`text-xs px-2 py-1 rounded-full ${
-                                  mention.type === 'agent' 
-                                    ? 'bg-blue-100 text-blue-700' 
-                                    : 'bg-green-100 text-green-700'
+                                  mention.category === 'data-analysis' ? 'bg-green-100 text-green-700' :
+                                  mention.category === 'modeling' ? 'bg-purple-100 text-purple-700' :
+                                  mention.category === 'visualization' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
                                 }`}>
-                                  {mention.type}
+                                  {mention.category.replace('-', ' ')}
                                 </span>
                               </div>
                               <p className="text-sm text-gray-500 truncate">{mention.description}</p>

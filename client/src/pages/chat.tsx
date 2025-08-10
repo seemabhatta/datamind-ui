@@ -32,6 +32,7 @@ export default function ChatPage() {
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isGenerateMode, setIsGenerateMode] = useState(false);
+  const [selectedAgentType, setSelectedAgentType] = useState<string | null>(null);
   const [showMentionDropdown, setShowMentionDropdown] = useState(false);
   const [mentionPosition, setMentionPosition] = useState(0);
   const [currentMentionQuery, setCurrentMentionQuery] = useState('');
@@ -290,14 +291,19 @@ export default function ChatPage() {
     }
     
     // Auto-detect context and set mode
-    // Use contextual agent mode if available, otherwise detect from input
+    // Use contextual agent mode, selected agent, or detect from input
     const detectedMode = getContextualAgentMode() ? 
       (getContextualAgentMode() === 'query' ? 'query' : 
        getContextualAgentMode() === 'semantic-model' ? 'model' : 'dashboard') 
+      : selectedAgentType ?
+        (selectedAgentType === 'query' ? 'query' :
+         selectedAgentType === 'semantic-model' ? 'model' : 'dashboard')
       : detectContextMode(messageContent);
     setAgentMode(detectedMode);
     
     setChatInput('');
+    setSelectedAgentType(null); // Clear selected agent after sending
+    setIsGenerateMode(false);
     setIsLoading(true);
 
     try {
@@ -393,8 +399,12 @@ export default function ChatPage() {
       setShowMentionDropdown(false);
     }
     
-    // Check for specific mentions to set modes
-    setIsGenerateMode(value.includes('@semantic-model') || value.includes('@dashboards'));
+    // Check for specific mentions to set modes (but don't activate if we just cleared the input)
+    if (value.trim().length > 0) {
+      setIsGenerateMode(value.includes('@semantic-model') || value.includes('@dashboards'));
+    } else {
+      setIsGenerateMode(false);
+    }
   };
 
   // Filter mentions based on query
@@ -407,11 +417,13 @@ export default function ChatPage() {
   const selectMention = (mention: typeof availableMentions[0]) => {
     const beforeMention = chatInput.substring(0, mentionPosition);
     const afterMention = chatInput.substring(mentionPosition + 1 + currentMentionQuery.length);
-    const newValue = `${beforeMention}@${mention.label.toLowerCase()} ${afterMention}`;
+    // Don't include the @mention in the input, just show the indicator
+    const newValue = `${beforeMention}${afterMention}`.trim();
     
     setChatInput(newValue);
     setShowMentionDropdown(false);
-    setIsGenerateMode(newValue.includes('@semantic-model') || newValue.includes('@dashboards'));
+    setSelectedAgentType(mention.label.toLowerCase());
+    setIsGenerateMode(mention.label.toLowerCase() === 'semantic-model' || mention.label.toLowerCase() === 'dashboards');
   };
 
   // Handle keyboard navigation in mention dropdown
@@ -979,45 +991,45 @@ compliance:
                 <form onSubmit={handleChatSubmit} className="flex space-x-4">
                   <div className="relative flex-1">
                     {/* Agent Mode Indicator */}
-                    {(getContextualAgentMode() || isGenerateMode) && (
+                    {(getContextualAgentMode() || selectedAgentType) && (
                       <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10 flex items-center space-x-2">
                         <div className={`flex items-center space-x-2 px-2 py-1 rounded-md text-xs font-medium ${
-                          getContextualAgentMode() === 'query'
+                          getContextualAgentMode() === 'query' || selectedAgentType === 'query'
                             ? 'bg-green-100 text-green-700'
-                            : getContextualAgentMode() === 'semantic-model' || (isGenerateMode && chatInput.includes('@semantic-model'))
+                            : getContextualAgentMode() === 'semantic-model' || selectedAgentType === 'semantic-model'
                               ? 'bg-blue-100 text-blue-700'
-                              : getContextualAgentMode() === 'dashboards' || (isGenerateMode && chatInput.includes('@dashboards'))
+                              : getContextualAgentMode() === 'dashboards' || selectedAgentType === 'dashboards'
                                 ? 'bg-purple-100 text-purple-700'
                                 : 'bg-gray-100 text-gray-700'
                         }`}>
                           <div className="w-4 h-4 rounded-sm bg-current/10 flex items-center justify-center">
                             <span className="text-xs font-bold">
-                              {getContextualAgentMode() === 'query' || (isGenerateMode && chatInput.includes('@query'))
+                              {getContextualAgentMode() === 'query' || selectedAgentType === 'query'
                                 ? 'Q'
-                                : getContextualAgentMode() === 'semantic-model' || (isGenerateMode && chatInput.includes('@semantic-model'))
+                                : getContextualAgentMode() === 'semantic-model' || selectedAgentType === 'semantic-model'
                                   ? 'S'
-                                  : getContextualAgentMode() === 'dashboards' || (isGenerateMode && chatInput.includes('@dashboards'))
+                                  : getContextualAgentMode() === 'dashboards' || selectedAgentType === 'dashboards'
                                     ? 'D'
                                     : 'A'
                               }
                             </span>
                           </div>
                           <span>
-                            {getContextualAgentMode() === 'query' || (isGenerateMode && chatInput.includes('@query'))
+                            {getContextualAgentMode() === 'query' || selectedAgentType === 'query'
                               ? 'Query'
-                              : getContextualAgentMode() === 'semantic-model' || (isGenerateMode && chatInput.includes('@semantic-model'))
+                              : getContextualAgentMode() === 'semantic-model' || selectedAgentType === 'semantic-model'
                                 ? 'Semantic Model'
-                                : getContextualAgentMode() === 'dashboards' || (isGenerateMode && chatInput.includes('@dashboards'))
-                                  ? 'Dashboards'
-                                  : 'Assistant'
+                              : getContextualAgentMode() === 'dashboards' || selectedAgentType === 'dashboards'
+                                ? 'Dashboards'
+                                : 'Assistant'
                             }
                           </span>
                         </div>
-                        {!getContextualAgentMode() && (
+                        {!getContextualAgentMode() && selectedAgentType && (
                           <button
                             type="button"
                             onClick={() => {
-                              setChatInput('');
+                              setSelectedAgentType(null);
                               setIsGenerateMode(false);
                             }}
                             className="p-1 text-gray-400 hover:text-gray-600 rounded-sm"
@@ -1033,24 +1045,22 @@ compliance:
                       onChange={(e) => handleInputChange(e.target.value)}
                       onKeyDown={handleKeyDown}
                       placeholder={
-                        getContextualAgentMode() 
+                        getContextualAgentMode() || selectedAgentType
                           ? `Ask anything...`
-                          : isGenerateMode ? "What would you like me to help you with?" : "Ask me anything... (Type @ for agents)"
+                          : "Ask me anything... (Type @ for agents)"
                       }
                       className={`w-full py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
-                        getContextualAgentMode() || isGenerateMode
+                        getContextualAgentMode() || selectedAgentType
                           ? 'pl-32 pr-4'
                           : 'px-4'
                       } ${
-                        getContextualAgentMode() === 'query'
+                        getContextualAgentMode() === 'query' || selectedAgentType === 'query'
                           ? 'border-green-400 bg-green-50 focus:ring-green-500 text-green-900 placeholder-green-600'
-                          : getContextualAgentMode() === 'semantic-model'
+                          : getContextualAgentMode() === 'semantic-model' || selectedAgentType === 'semantic-model'
                             ? 'border-blue-400 bg-blue-50 focus:ring-blue-500 text-blue-900 placeholder-blue-600'
-                            : getContextualAgentMode() === 'dashboards'
+                            : getContextualAgentMode() === 'dashboards' || selectedAgentType === 'dashboards'
                               ? 'border-purple-400 bg-purple-50 focus:ring-purple-500 text-purple-900 placeholder-purple-600'
-                              : isGenerateMode 
-                                ? 'border-blue-400 bg-blue-50 focus:ring-blue-500 text-blue-900 placeholder-blue-600'
-                                : 'border-gray-300 focus:ring-blue-500'
+                              : 'border-gray-300 focus:ring-blue-500'
                       }`}
                       disabled={isLoading}
                     />

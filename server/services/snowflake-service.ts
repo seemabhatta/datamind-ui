@@ -30,6 +30,14 @@ export class SnowflakeService {
    */
   async testConnection(config: SnowflakeConnectionConfig): Promise<boolean> {
     return new Promise((resolve) => {
+      console.log('Testing connection with config:', {
+        account: config.account,
+        username: config.username,
+        authenticator: config.authenticator,
+        hasPassword: !!config.password,
+        passwordLength: config.password?.length || 0
+      });
+
       // Configure authentication based on type
       const connectionConfig: any = {
         account: config.account,
@@ -44,9 +52,11 @@ export class SnowflakeService {
       if (config.authenticator === 'PAT') {
         connectionConfig.token = config.password; // PAT token goes in token field
         connectionConfig.authenticator = 'OAUTH';
+        console.log('Using PAT authentication, token length:', config.password?.length);
       } else {
         connectionConfig.password = config.password;
         connectionConfig.authenticator = config.authenticator || 'SNOWFLAKE';
+        console.log('Using password authentication');
       }
 
       const connection = snowflake.createConnection(connectionConfig);

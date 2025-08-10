@@ -331,10 +331,18 @@ export default function ChatPage() {
         }));
         
         // Get agent configuration from localStorage
-        const agentConfig = localStorage.getItem(`agentConfig_${userId}`);
+        const configKey = `agentConfig_${userId}`;
+        const agentConfig = localStorage.getItem(configKey);
+        console.log('Looking for config key:', configKey);
+        console.log('Agent config found:', agentConfig ? 'YES' : 'NO');
+        console.log('Config content:', agentConfig);
+        
         let headers = {};
         if (agentConfig) {
           headers['x-agent-config'] = encodeURIComponent(agentConfig);
+          console.log('Headers being sent:', headers);
+        } else {
+          console.log('No agent config found in localStorage');
         }
         
         // Then send the message

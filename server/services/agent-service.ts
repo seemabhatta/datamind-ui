@@ -190,21 +190,18 @@ Respond naturally but mention when function tools would help accomplish their go
 
   private async processFunctionCall(content: string, context: AgentContext): Promise<AgentResponse | null> {
     const lowercaseContent = content.toLowerCase().trim();
-    console.log(`Processing function call for: "${lowercaseContent}"`);
     
     // Simple command detection - can be enhanced with NLP
     const commandMap = [
       { patterns: ['connect', 'connect to snowflake', 'establish connection'], tool: 'connect_to_snowflake', params: {} },
-      { patterns: ['show databases', 'list databases', 'get databases', 'databases'], tool: 'get_databases', params: {} },
-      { patterns: ['show schemas', 'list schemas', 'get schemas', 'schemas'], tool: 'get_schemas', params: {} },
-      { patterns: ['show tables', 'list tables', 'get tables', 'tables'], tool: 'get_tables', params: {} },
+      { patterns: ['show databases', 'list databases', 'get databases'], tool: 'get_databases', params: {} },
+      { patterns: ['show schemas', 'list schemas', 'get schemas'], tool: 'get_schemas', params: {} },
+      { patterns: ['show tables', 'list tables', 'get tables'], tool: 'get_tables', params: {} },
       { patterns: ['current context', 'show context', 'what is my context'], tool: 'get_current_context', params: {} }
     ];
 
     for (const command of commandMap) {
-      const matchedPattern = command.patterns.find(pattern => lowercaseContent.includes(pattern));
-      if (matchedPattern) {
-        console.log(`Matched pattern: "${matchedPattern}" for tool: ${command.tool}`);
+      if (command.patterns.some(pattern => lowercaseContent.includes(pattern))) {
         const tool = getFunctionTool(command.tool);
         if (tool) {
           try {

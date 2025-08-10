@@ -1,22 +1,10 @@
 import { storage } from '../storage';
 
 // Agent Context - Replicated from your Python AgentContext but enhanced for web platform
-export interface SnowflakeConfig {
-  account: string;
-  username: string;
-  password: string;
-  database?: string;
-  schema?: string;
-  warehouse?: string;
-  role?: string;
-  authenticator?: string;
-}
-
 export interface AgentContext {
   sessionId: string;
   userId: string;
   connectionId?: string;
-  snowflakeConfig?: SnowflakeConfig;
   currentDatabase?: string;
   currentSchema?: string;
   currentStage?: string;
@@ -123,9 +111,22 @@ export class AgentContextManager {
 
   private async persistContext(context: AgentContext): Promise<void> {
     try {
-      // Context persistence is handled in-memory for now
-      // Future enhancement: persist to database
-      console.log('Context persisted for session:', context.sessionId);
+      // Store context snapshot in chat session metadata
+      const session = await storage.getChatSession(context.sessionId);
+      if (session) {
+        await storage.updateChatSession(context.sessionId, {
+          metadata: {
+            ...session.metadata,
+            agentContext: {
+              connectionId: context.connectionId,
+              currentDatabase: context.currentDatabase,
+              currentSchema: context.currentSchema,
+              selectedTables: context.selectedTables,
+              lastQuerySql: context.lastQuerySql
+            }
+          }
+        });
+      }
     } catch (error) {
       console.log('Could not persist context:', error);
     }

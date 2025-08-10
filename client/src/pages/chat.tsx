@@ -676,10 +676,10 @@ compliance:
                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
-              title={isLeftSidebarCollapsed ? 'Chats' : ''}
+              title={isLeftSidebarCollapsed ? 'Chat History' : ''}
             >
               <MessageSquare className={`${isLeftSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-3'}`} />
-              {!isLeftSidebarCollapsed && <span>chats</span>}
+              {!isLeftSidebarCollapsed && <span>chat history</span>}
             </button>
 
           </div>

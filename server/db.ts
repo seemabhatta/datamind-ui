@@ -78,6 +78,25 @@ export function initializeDatabase() {
         pinned_at INTEGER,
         FOREIGN KEY(user_id) REFERENCES users(id),
         FOREIGN KEY(visualization_id) REFERENCES visualizations(id)
+      )`,
+      `CREATE TABLE IF NOT EXISTS snowflake_connections (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        account TEXT NOT NULL,
+        username TEXT NOT NULL,
+        password TEXT,
+        database TEXT,
+        schema TEXT,
+        warehouse TEXT,
+        role TEXT,
+        authenticator TEXT DEFAULT 'SNOWFLAKE',
+        is_default INTEGER DEFAULT 0,
+        is_active INTEGER DEFAULT 1,
+        last_connected INTEGER,
+        created_at INTEGER,
+        updated_at INTEGER,
+        FOREIGN KEY(user_id) REFERENCES users(id)
       )`
     ];
 
@@ -97,8 +116,8 @@ export function initializeDatabase() {
     // Create a default user if none exists
     const userCheck = sqlite.prepare('SELECT id FROM users WHERE username = ?');
     const userExists = userCheck.get('user_1');
+    let userId = '0d493db8-bfed-4dd0-ab40-ae8a3225f8a5';
     if (!userExists) {
-      const userId = crypto.randomUUID();
       const now = Date.now();
       const insertUser = sqlite.prepare(`
         INSERT INTO users (id, username, password, display_name, role, created_at)
@@ -108,6 +127,26 @@ export function initializeDatabase() {
       console.log('Created default user:', userId);
     } else {
       console.log('Default user already exists:', (userExists as any).id);
+    }
+
+    // Create default Snowflake connection if none exists
+    const connCheck = sqlite.prepare('SELECT id FROM snowflake_connections WHERE user_id = ?');
+    const connExists = connCheck.get(userId);
+    if (!connExists) {
+      const now = Date.now();
+      const insertConn = sqlite.prepare(`
+        INSERT INTO snowflake_connections (id, user_id, name, account, username, password, database, schema, warehouse, role, is_default, is_active, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      const connId = crypto.randomUUID();
+      insertConn.run(
+        connId, userId, 'SF Personal', 'KIXUIII-MTC00254', 'nl2sql_service_user', '', 
+        'CORTES_DEMO_2', 'CORTEX_DEMO', 'CORTEX_ANALYST_WH', 'nl2sql_service_role', 
+        1, 1, now, now
+      );
+      console.log('Created default Snowflake connection:', connId);
+    } else {
+      console.log('Default Snowflake connection already exists');
     }
     
     // Ensure foreign key constraints are enabled

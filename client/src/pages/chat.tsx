@@ -272,7 +272,7 @@ export default function ChatPage() {
         const response = await fetch('/api/sessions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId, agentType: 'query' })
+          body: JSON.stringify({ userId, agentType: currentAgentType })
         });
         if (response.ok) {
           const session = await response.json();
@@ -288,17 +288,10 @@ export default function ChatPage() {
       }
     }
     
-    // Smart agent selection: contextual > selected > intent-based > general
-    const detectedMode = getContextualAgentMode() ? 
-      (getContextualAgentMode() === 'query' ? 'query' : 
-       getContextualAgentMode() === 'semantic-model' ? 'model' : 
-       getContextualAgentMode() === 'dashboards' ? 'dashboard' : 'general') 
-      : selectedAgentType ?
-        (selectedAgentType === 'query' ? 'query' :
-         selectedAgentType === 'ontology' ? 'model' : 
-         selectedAgentType === 'dashboards' ? 'dashboard' : 'general')
-      : detectIntentBasedAgent(messageContent); // Auto-detect intent from message content
-    setAgentMode(detectedMode);
+    // Use current agent mode - no automatic switching
+    const currentAgentType = agentMode === 'query' ? 'query' : 
+                            agentMode === 'model' ? 'yaml' :
+                            agentMode === 'dashboard' ? 'dashboards' : 'general';
     
     setChatInput('');
     setSelectedAgentType(null); // Clear selected agent after sending
@@ -323,9 +316,7 @@ export default function ChatPage() {
           type: 'chat_message',
           sessionId: sessionId,
           content: messageContent,
-          agentType: detectedMode === 'query' ? 'query' : 
-                    detectedMode === 'model' ? 'yaml' :
-                    detectedMode === 'dashboard' ? 'dashboards' : 'general',
+          agentType: currentAgentType,
           userId: userId
         }));
       };
@@ -2221,26 +2212,51 @@ compliance:
               <div className="p-6 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-1">
-                      {currentSessionInfo?.title || 'New Chat'}
-                    </h2>
-                    <p className="text-gray-600">
-                      {currentSessionInfo?.summary || 'Have a conversation with your AI assistant'}
-                    </p>
+                    {agentMode === 'general' ? (
+                      <>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-1">DataMind Chat</h2>
+                        <p className="text-gray-600">Choose an agent or start a general conversation</p>
+                      </>
+                    ) : (
+                      <>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-1">
+                          {agentMode === 'query' ? 'Query Agent' : 
+                           agentMode === 'model' ? 'Ontology Agent' : 
+                           agentMode === 'dashboard' ? 'Dashboard Agent' : 'Chat'}
+                        </h2>
+                        <p className="text-gray-600">
+                          {agentMode === 'query' ? 'SQL queries and data analysis' :
+                           agentMode === 'model' ? 'Semantic data modeling and relationships' :
+                           agentMode === 'dashboard' ? 'Interactive dashboards and visualizations' : 
+                           'General conversation'}
+                        </p>
+                      </>
+                    )}
                   </div>
                   <div className="flex items-center space-x-2">
-                    {currentSessionInfo && (
-                      <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        currentSessionInfo.agentType === 'query' 
-                          ? 'bg-green-100 text-green-800'
-                          : currentSessionInfo.agentType === 'yaml'
-                            ? 'bg-purple-100 text-purple-800'
-                            : currentSessionInfo.agentType === 'dashboards'
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {currentSessionInfo.agentType === 'yaml' ? 'Ontology' : currentSessionInfo.agentType}
-                      </div>
+                    {agentMode !== 'general' && (
+                      <>
+                        <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          agentMode === 'query' 
+                            ? 'bg-green-100 text-green-800'
+                            : agentMode === 'model'
+                              ? 'bg-purple-100 text-purple-800'
+                              : agentMode === 'dashboard'
+                                ? 'bg-blue-100 text-blue-800'
+                                : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {agentMode === 'query' ? 'Query Mode' : 
+                           agentMode === 'model' ? 'Ontology Mode' : 
+                           agentMode === 'dashboard' ? 'Dashboard Mode' : 'General'}
+                        </div>
+                        <button
+                          onClick={() => setAgentMode('general')}
+                          className="p-1 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600"
+                          title="Exit agent mode"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
@@ -2250,11 +2266,59 @@ compliance:
               <div className="flex-1 overflow-y-auto p-6 space-y-4">
                 {messages.length === 0 ? (
                   <div className="text-center py-16">
-                    <MessageSquare className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Start a conversation</h3>
-                    <p className="text-gray-500 max-w-md mx-auto">
-                      Ask questions, analyze data, or get help with your projects. The assistant will automatically use the right agent for your needs.
-                    </p>
+                    <div className="mb-8">
+                      <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome to DataMind</h1>
+                      <p className="text-gray-600 max-w-md mx-auto">
+                        Your AI-powered data analytics platform. Choose an agent to get started:
+                      </p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
+                      <button
+                        onClick={() => setAgentMode('query')}
+                        className="p-6 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors text-left"
+                      >
+                        <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center text-white text-xl font-bold mb-3 mx-auto">
+                          Q
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Query Agent</h3>
+                        <p className="text-sm text-gray-600">
+                          Write SQL queries, analyze data, and get insights from your databases
+                        </p>
+                      </button>
+                      
+                      <button
+                        onClick={() => setAgentMode('model')}
+                        className="p-6 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors text-left"
+                      >
+                        <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center text-white text-xl font-bold mb-3 mx-auto">
+                          O
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Ontology Agent</h3>
+                        <p className="text-sm text-gray-600">
+                          Create semantic data models, define relationships, and structure your data
+                        </p>
+                      </button>
+                      
+                      <button
+                        onClick={() => setAgentMode('dashboard')}
+                        className="p-6 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors text-left"
+                      >
+                        <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center text-white text-xl font-bold mb-3 mx-auto">
+                          D
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Dashboard Agent</h3>
+                        <p className="text-sm text-gray-600">
+                          Build interactive dashboards, create visualizations, and share insights
+                        </p>
+                      </button>
+                    </div>
+                    
+                    <div className="mt-8">
+                      <p className="text-sm text-gray-500">
+                        Or type a message below to start a general conversation
+                      </p>
+                    </div>
                   </div>
                 ) : (
                   messages.map((message) => (

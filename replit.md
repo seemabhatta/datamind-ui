@@ -11,11 +11,9 @@ Design philosophy: Clean, simple interface - strongly rejects modern/sleek desig
 Left sidebar: Collapsible navigation with new chat as default landing page, plus dashboards/query/semantic-model matching @agents system, and chat history for previous conversations. Settings moved to profile dropdown with integrations and agent hub in tabbed interface.
 Models section: Ontology data modeling interface where users select data sources (configured in settings), browse available tables/views/folders, select multiple objects, and create ontology models with relationships and configurations.
 Assistant panel: Should be minimizable/maximizable for better workspace management. Maximize should open fullscreen overlay mode.
-Context-aware assistant: Agent modes are automatically locked based on current navigation selection - Query section locks to @query agent, Ontology section locks to @ontology agent, Dashboard section locks to @dashboards agent. Users cannot manually switch agents in contextual views. Chat view allows manual agent selection via @mentions.
-@agents system: Implemented comprehensive @agents autocomplete with dropdown suggestions labeled as "@agents", keyboard navigation (arrow keys + Enter/Escape), clean letter-based icons (no emojis), and intelligent context switching for different agent types (@ontology, @query, @dashboards). Agent hub moved to settings. Removed plus button in favor of @agents workflow.
-Smart agent routing: Added intent-based agent detection that automatically routes messages to appropriate agents based on content keywords (SQL → Query agent, modeling → Ontology agent, visualization → Dashboard agent).
-Quick agent selection: Added clickable agent selection buttons (Q, O, D) for easy access to specialized agents without typing @mentions.
-Dynamic agent suggestions: Assistant now analyzes user messages and its own responses to intelligently suggest relevant agents contextually, replacing hardcoded buttons with smart, contextual recommendations.
+Simplified agent system: New chats start with DataMind welcome screen showing three clickable agent options (Query, Ontology, Dashboard). Users click an agent to enter that mode, which persists until they click the "X" button to return to general mode. No automatic agent switching or complex routing.
+Agent modes: Query Agent (Q) for SQL queries and data analysis, Ontology Agent (O) for semantic data modeling, Dashboard Agent (D) for visualizations. Each mode has clear visual indicators and an exit button.
+Chat persistence: Agent mode stays active throughout the conversation until user explicitly exits. General mode shows DataMind welcome with agent selection options.
 
 ## System Architecture
 

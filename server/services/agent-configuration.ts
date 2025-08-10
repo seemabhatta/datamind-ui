@@ -70,10 +70,7 @@ export class AgentConfigurationService {
         description: 'Natural language to SQL query processing with Snowflake integration',
         enabled: true,
         tools: [
-          'connect_to_snowflake', 'get_current_context', 'get_databases', 'select_database',
-          'get_schemas', 'select_schema', 'get_tables', 'describe_table', 'generate_sql',
-          'execute_sql', 'generate_summary', 'get_stages', 'select_stage', 'get_yaml_files',
-          'load_yaml_file', 'get_yaml_content', 'visualize_data', 'get_visualization_suggestions'
+          'connect_to_snowflake', 'get_current_context', 'generate_sql', 'execute_sql'
         ],
         context: {
           maxHistory: 10,
@@ -142,17 +139,13 @@ export class AgentConfigurationService {
     try {
       // Check if configuration was passed in headers from frontend
       const configHeader = headers?.['x-agent-config'];
-      console.log('Agent config header received:', configHeader ? 'YES' : 'NO');
       if (configHeader) {
         const parsed = JSON.parse(decodeURIComponent(configHeader));
-        console.log('Parsed agent configuration:', JSON.stringify(parsed, null, 2));
         return { ...this.defaultConfig, ...parsed };
       }
     } catch (error) {
-      console.log('Failed to parse agent configuration from headers, using defaults:', error);
+      console.log('Failed to parse agent configuration from headers, using defaults');
     }
-    
-    console.log('Using default agent configuration');
     return this.defaultConfig;
   }
 
@@ -162,20 +155,15 @@ export class AgentConfigurationService {
   getAvailableToolsForAgent(agentType: string, userConfig: UserAgentConfiguration): FunctionToolDefinition[] {
     const agent = userConfig.agents.find(a => a.agentType === agentType);
     if (!agent || !agent.enabled) {
-      console.log(`Agent ${agentType} not found or disabled`);
       return [];
     }
 
     const enabledToolNames = new Set(
       agent.tools.filter(toolName => {
         const toolConfig = userConfig.tools.find(t => t.name === toolName);
-        const isEnabled = toolConfig?.enabled !== false; // Default to enabled if not specified
-        console.log(`Tool ${toolName}: ${isEnabled ? 'ENABLED' : 'DISABLED'} (config: ${JSON.stringify(toolConfig)})`);
-        return isEnabled;
+        return toolConfig?.enabled !== false; // Default to enabled if not specified
       })
     );
-
-    console.log(`Available tools for ${agentType}:`, Array.from(enabledToolNames));
     return enhancedFunctionTools.filter(tool => enabledToolNames.has(tool.name));
   }
 

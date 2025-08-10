@@ -332,41 +332,11 @@ export default function ChatPage() {
         
         // Get agent configuration from localStorage
         const configKey = `agentConfig_${userId}`;
-        console.log('UserId:', userId);
-        console.log('Looking for config key:', configKey);
-        
-        // Check all localStorage keys to debug
-        console.log('All localStorage keys:', Object.keys(localStorage));
-        
         const agentConfig = localStorage.getItem(configKey);
-        console.log('Agent config found:', agentConfig ? 'YES' : 'NO');
-        if (agentConfig) {
-          console.log('Config content:', agentConfig);
-        }
         
         let headers = {};
         if (agentConfig) {
           headers['x-agent-config'] = encodeURIComponent(agentConfig);
-          console.log('Headers being sent:', headers);
-        } else {
-          console.log('No agent config found in localStorage - will use defaults');
-          
-          // For testing, let's create a simple disabled config
-          const testConfig = {
-            tools: [
-              { name: 'get_tables', enabled: false, category: 'database' }
-            ],
-            agents: [{
-              id: 'query',
-              name: 'Query Agent',
-              agentType: 'query',
-              enabled: true,
-              tools: [],  // No tools enabled
-              context: { maxHistory: 5, retainSession: true, autoExecute: false }
-            }]
-          };
-          headers['x-agent-config'] = encodeURIComponent(JSON.stringify(testConfig));
-          console.log('Using test config with disabled get_tables:', testConfig);
         }
         
         // Then send the message

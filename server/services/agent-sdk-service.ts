@@ -5,6 +5,7 @@
 
 import { AgentContext, agentContextManager } from './agent-context';
 import { enhancedFunctionTools, getEnhancedFunctionTool } from './function-tools-enhanced';
+import { agentConfigurationService } from './agent-configuration';
 import OpenAI from 'openai';
 
 const openai = new OpenAI({
@@ -84,12 +85,25 @@ Use the available tools to help users accomplish their goals efficiently.
 
 export class AgentSDKService {
   
-  async processMessage(sessionId: string, message: string, agentType: string = 'query'): Promise<{
+  async processMessage(sessionId: string, message: string, agentType: string = 'query', headers?: any): Promise<{
     content: string;
     metadata: any;
   }> {
     try {
       const context = agentContextManager.getContext(sessionId);
+      
+      // Get user configuration for dynamic agent behavior
+      const userId = context.userId || '0d493db8-bfed-4dd0-ab40-ae8a3225f8a5';
+      const userConfig = agentConfigurationService.getUserConfiguration(userId, headers);
+      
+      // Check if agent is enabled
+      const agentConfig = agentConfigurationService.getAgentConfig(agentType, userConfig);
+      if (!agentConfig) {
+        return {
+          content: `The ${agentType} agent is currently disabled. Please enable it in Agent Configuration.`,
+          metadata: { model: "agent-sdk", agentType, sessionId, disabled: true }
+        };
+      }
       
       // Add user message to conversation history
       agentContextManager.addToHistory(sessionId, {
@@ -98,14 +112,14 @@ export class AgentSDKService {
         timestamp: new Date()
       });
 
-      // First try enhanced function tool pattern matching
-      const enhancedResult = await this.tryEnhancedFunctionTools(context, message);
+      // First try enhanced function tool pattern matching with user-configured tools
+      const enhancedResult = await this.tryEnhancedFunctionTools(context, message, userConfig, agentType);
       if (enhancedResult) {
         return enhancedResult;
       }
 
       // Fall back to OpenAI Agent SDK for complex queries
-      return await this.processWithAgentSDK(context, message, agentType);
+      return await this.processWithAgentSDK(context, message, agentType, userConfig);
 
     } catch (error) {
       console.error('Error in Agent SDK service:', error);
@@ -121,7 +135,7 @@ export class AgentSDKService {
     }
   }
 
-  private async tryEnhancedFunctionTools(context: AgentContext, message: string): Promise<{
+  private async tryEnhancedFunctionTools(context: AgentContext, message: string, userConfig: any, agentType: string): Promise<{
     content: string;
     metadata: any;
   } | null> {
@@ -144,9 +158,18 @@ export class AgentSDKService {
       { patterns: ['visualization suggestions', 'chart suggestions', 'suggest charts'], tool: 'get_visualization_suggestions', params: {} }
     ];
 
-    // Check for direct pattern matches
+    // Get available tools for this agent based on user configuration
+    const availableTools = agentConfigurationService.getAvailableToolsForAgent(agentType, userConfig);
+    const availableToolNames = new Set(availableTools.map(t => t.name));
+
+    // Check for direct pattern matches with configured tools only
     for (const pattern of patterns) {
       if (pattern.patterns.some(p => lowercaseContent === p || lowercaseContent.includes(p))) {
+        // Check if this tool is enabled for the current agent
+        if (!availableToolNames.has(pattern.tool)) {
+          continue; // Skip disabled tools
+        }
+        
         const tool = getEnhancedFunctionTool(pattern.tool);
         if (tool) {
           try {
@@ -336,18 +359,23 @@ export class AgentSDKService {
     return null;
   }
 
-  private async processWithAgentSDK(context: AgentContext, message: string, agentType: string): Promise<{
+  private async processWithAgentSDK(context: AgentContext, message: string, agentType: string, userConfig: any): Promise<{
     content: string;
     metadata: any;
   }> {
     try {
+      // Get dynamic instructions and configuration based on user settings
+      const instructions = agentConfigurationService.getAgentInstructions(agentType, userConfig);
+      const agentConfig = agentConfigurationService.getAgentConfig(agentType, userConfig);
+      const maxHistory = agentConfig?.context.maxHistory || 10;
+      
       // Build conversation history for context
       const messages: any[] = [
-        { role: "system", content: QUERY_AGENT_INSTRUCTIONS }
+        { role: "system", content: instructions }
       ];
 
-      // Add recent conversation history
-      const recentHistory = context.conversationHistory.slice(-10); // Last 10 messages
+      // Add recent conversation history with configured limit
+      const recentHistory = context.conversationHistory.slice(-maxHistory);
       recentHistory.forEach(entry => {
         if (entry.role === 'user' || entry.role === 'assistant') {
           messages.push({
@@ -357,11 +385,12 @@ export class AgentSDKService {
         }
       });
 
-      // Add current context summary
+      // Add current context summary with configured tools
       const contextSummary = agentContextManager.getContextSummary(context);
+      const availableTools = agentConfigurationService.getAvailableToolsForAgent(agentType, userConfig);
       const contextMessage = `Current Agent State:${contextSummary}
 
-Available tools: ${enhancedFunctionTools.map(t => t.name).join(', ')}`;
+Available tools: ${availableTools.map(t => t.name).join(', ')}`;
 
       messages.push({
         role: "system",
@@ -374,8 +403,8 @@ Available tools: ${enhancedFunctionTools.map(t => t.name).join(', ')}`;
         content: message
       });
 
-      // Convert our function tools to OpenAI format
-      const tools = enhancedFunctionTools.map(tool => ({
+      // Convert configured function tools to OpenAI format
+      const tools = availableTools.map(tool => ({
         type: "function" as const,
         function: {
           name: tool.name,

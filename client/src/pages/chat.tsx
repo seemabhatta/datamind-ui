@@ -330,6 +330,13 @@ export default function ChatPage() {
           sessionId: sessionId
         }));
         
+        // Get agent configuration from localStorage
+        const agentConfig = localStorage.getItem('agent-configuration');
+        let headers = {};
+        if (agentConfig) {
+          headers['x-agent-config'] = encodeURIComponent(agentConfig);
+        }
+        
         // Then send the message
         socket.send(JSON.stringify({
           type: 'chat_message',
@@ -338,7 +345,8 @@ export default function ChatPage() {
           agentType: detectedMode === 'query' ? 'query' : 
                     detectedMode === 'model' ? 'yaml' :
                     detectedMode === 'dashboard' ? 'dashboards' : 'general',
-          userId: userId
+          userId: userId,
+          headers: headers
         }));
       };
 

@@ -70,7 +70,10 @@ export class AgentConfigurationService {
         description: 'Natural language to SQL query processing with Snowflake integration',
         enabled: true,
         tools: [
-          'connect_to_snowflake', 'get_current_context', 'generate_sql', 'execute_sql'
+          'connect_to_snowflake', 'get_current_context', 'get_databases', 'select_database',
+          'get_schemas', 'select_schema', 'get_tables', 'describe_table', 'generate_sql',
+          'execute_sql', 'generate_summary', 'get_stages', 'select_stage', 'get_yaml_files',
+          'load_yaml_file', 'get_yaml_content', 'visualize_data', 'get_visualization_suggestions'
         ],
         context: {
           maxHistory: 10,

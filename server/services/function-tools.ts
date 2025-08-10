@@ -42,24 +42,19 @@ export const connectToSnowflake: FunctionTool = {
         return 'Missing required Snowflake credentials (account and username). Please configure in Settings → Integrations.';
       }
 
-      // Create persistent connection for queries
-      const connectionCreated = await snowflakeService.createConnection(defaultConnection.id, {
-        account: defaultConnection.account,
-        username: defaultConnection.username,
-        password: defaultConnection.password || '',
-        database: defaultConnection.database || undefined,
-        schema: defaultConnection.schema || undefined,
-        warehouse: defaultConnection.warehouse || undefined,
-        role: defaultConnection.role || undefined,
-        authenticator: defaultConnection.authenticator || undefined,
-      });
-
-      if (!connectionCreated) {
-        return 'Failed to create persistent Snowflake connection.';
-      }
-
+      // Store connection credentials for query-time connections (MFA-compatible)
       await agentContextManager.updateContext(context.sessionId, {
         connectionId: defaultConnection.id,
+        snowflakeConfig: {
+          account: defaultConnection.account,
+          username: defaultConnection.username,
+          password: defaultConnection.password || '',
+          database: defaultConnection.database || undefined,
+          schema: defaultConnection.schema || undefined,
+          warehouse: defaultConnection.warehouse || undefined,
+          role: defaultConnection.role || undefined,
+          authenticator: defaultConnection.authenticator || undefined,
+        },
         currentDatabase: defaultConnection.database || undefined,
         currentSchema: defaultConnection.schema || undefined
       });
@@ -96,12 +91,12 @@ export const getDatabases: FunctionTool = {
   },
   execute: async (context: AgentContext, params: any) => {
     try {
-      if (!context.connectionId) {
+      if (!context.snowflakeConfig) {
         return 'Not connected to Snowflake. Please connect first.';
       }
 
-      const result = await snowflakeService.executeQuery(
-        context.connectionId,
+      const result = await snowflakeService.executeQueryWithConfig(
+        context.snowflakeConfig,
         'SHOW DATABASES'
       );
 
@@ -109,6 +104,9 @@ export const getDatabases: FunctionTool = {
       
       return `Available databases (${databases.length}):\n${databases.map((db: string, i: number) => `${i + 1}. ${db}`).join('\n')}`;
     } catch (error) {
+      if (error instanceof Error && error.message.includes('Multi-factor authentication')) {
+        return 'Query requires MFA approval. Please approve the authentication request in your Snowflake session and try again.';
+      }
       return `Error fetching databases: ${error instanceof Error ? error.message : 'Unknown error'}`;
     }
   }

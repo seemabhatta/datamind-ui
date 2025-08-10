@@ -234,6 +234,58 @@ export class SnowflakeService {
   hasActiveConnection(connectionId: string): boolean {
     return this.activeConnections.has(connectionId);
   }
+
+  /**
+   * Execute query with temporary connection (MFA-compatible)
+   */
+  async executeQueryWithConfig(config: any, sqlText: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const snowflake = require('snowflake-sdk');
+      const connection = snowflake.createConnection({
+        account: config.account,
+        username: config.username,
+        password: config.password,
+        database: config.database,
+        schema: config.schema,
+        warehouse: config.warehouse,
+        role: config.role,
+        authenticator: config.authenticator || 'SNOWFLAKE',
+      });
+
+      connection.connect((err: any, conn: any) => {
+        if (err) {
+          console.error('Snowflake temporary connection failed:', err.message);
+          reject(err);
+          return;
+        }
+
+        connection.execute({
+          sqlText,
+          complete: (queryErr: any, stmt: any, rows: any[] | undefined) => {
+            // Always clean up the connection
+            connection.destroy(() => {});
+            
+            if (queryErr) {
+              console.error('Snowflake query execution failed:', queryErr.message);
+              reject(queryErr);
+            } else {
+              const columns = stmt.getColumns?.() || [];
+              resolve({
+                rows: rows || [],
+                columns: columns.map((col: any) => ({
+                  name: col.getName(),
+                  type: col.getType(),
+                  nullable: col.isNullable(),
+                  scale: col.getScale(),
+                  precision: col.getPrecision()
+                }))
+              });
+            }
+          }
+        });
+      });
+    });
+  }
 }
 
 // Global Snowflake service instance

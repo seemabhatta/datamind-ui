@@ -114,28 +114,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: assistantMessage
       }));
 
-      // Update session with message count and generate summary if needed
-      const allMessages = await storage.getMessagesBySession(sessionId);
-      const messageCount = allMessages.length;
-      
-      // Generate summary after 3+ messages
-      if (messageCount >= 3) {
-        try {
-          const summary = await agentService.generateConversationSummary(
-            allMessages.map(msg => ({ role: msg.role, content: msg.content }))
-          );
-          
-          await storage.updateChatSession(sessionId, {
-            title: summary.title,
-            summary: summary.summary,
-            messageCount,
-            lastMessageAt: new Date()
-          });
-        } catch (error) {
-          console.error('Failed to generate summary:', error);
-        }
-      }
-
       // If response includes visualization data, create visualization
       if (agentResponse.visualization) {
         const visualization = await storage.createVisualization({

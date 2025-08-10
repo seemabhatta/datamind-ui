@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { BarChart3, MessageSquare, Home, Database, ChevronLeft, ChevronRight, Minimize2, Maximize2, X, Zap, BookOpen, Settings, Cloud, Link, Send, GraduationCap, ChevronDown, Upload, Plus, Play, Save, Eye, Edit3, Brain, Search, Trash2, Check, Square, Bot } from 'lucide-react';
-import { ChatHistory } from '@/components/ChatHistory';
 
 // Type definitions for messages
 interface Message {
@@ -23,7 +22,6 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(false);
-  const [isChatHistoryCollapsed, setIsChatHistoryCollapsed] = useState(false);
   const [isAssistantMinimized, setIsAssistantMinimized] = useState(false);
   const [isAssistantFullscreen, setIsAssistantFullscreen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -197,66 +195,70 @@ export default function ChatPage() {
 
   // Create initial session
   useEffect(() => {
-    if (!currentSessionId && userId && currentView === 'chat') {
+    if (!currentSessionId && userId) {
       createNewSession();
     }
-  }, [userId, currentSessionId, currentView]);
+  }, [userId]);
 
   const createNewSession = async () => {
     try {
       const response = await fetch('/api/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, agentType: 'general' }) // Start with general agent for new chats
+        body: JSON.stringify({ userId, agentType: 'query' })
       });
       if (response.ok) {
         const session = await response.json();
         setCurrentSessionId(session.id);
-        // Set session info for the new chat
-        setCurrentSessionInfo({
-          id: session.id,
-          agentType: 'general',
-          createdAt: new Date().toISOString()
-        });
       }
     } catch (error) {
       console.error('Failed to create session:', error);
     }
   };
 
-  // Smart intent detection to automatically route to appropriate agents
-  const detectIntentBasedAgent = (input: string): 'general' | 'query' | 'model' | 'dashboard' => {
+  // Context-aware mode detection based on navigation + input content
+  const detectContextMode = (input: string): 'model' | 'query' | 'dashboard' => {
     const lowerInput = input.toLowerCase();
     
-    // SQL and database queries
-    if (lowerInput.includes('select') || lowerInput.includes('from') ||
-        lowerInput.includes('where') || lowerInput.includes('sql') ||
-        lowerInput.includes('query') || lowerInput.includes('database') ||
-        lowerInput.includes('table') || lowerInput.includes('count') ||
-        lowerInput.includes('sum') || lowerInput.includes('group by') ||
-        lowerInput.includes('join') || lowerInput.includes('order by')) {
-      return 'query';
-    }
-    
-    // Data modeling and semantic modeling
-    if (lowerInput.includes('model') || lowerInput.includes('schema') ||
-        lowerInput.includes('ontology') || lowerInput.includes('semantic') ||
-        lowerInput.includes('relationship') || lowerInput.includes('entity') ||
-        lowerInput.includes('yaml') || lowerInput.includes('data structure')) {
-      return 'model';
-    }
-    
-    // Visualization and dashboards
-    if (lowerInput.includes('chart') || lowerInput.includes('graph') || 
-        lowerInput.includes('visualiz') || lowerInput.includes('plot') ||
-        lowerInput.includes('dashboard') || lowerInput.includes('bar chart') || 
-        lowerInput.includes('line chart') || lowerInput.includes('pie chart') ||
-        lowerInput.includes('show me') || lowerInput.includes('display')) {
+    // First, consider the current navigation context
+    if (currentView === 'dashboard') {
+      // In dashboard view, prioritize visualization modes
+      if (lowerInput.includes('chart') || lowerInput.includes('graph') || 
+          lowerInput.includes('visualiz') || lowerInput.includes('plot') ||
+          lowerInput.includes('bar chart') || lowerInput.includes('line chart') || 
+          lowerInput.includes('pie chart') || lowerInput.includes('show me')) {
+        return 'dashboard';
+      }
+      // SQL queries in dashboard context still go to query mode
+      if (lowerInput.includes('select') || lowerInput.includes('from') ||
+          lowerInput.includes('where') || lowerInput.includes('sql') ||
+          lowerInput.includes('database') || lowerInput.includes('table')) {
+        return 'query';
+      }
+      // Default to dashboard mode when in dashboard view
       return 'dashboard';
     }
     
-    // Default to general for conversational queries
-    return 'general';
+    if (currentView === 'studio') {
+      // In studio view, prioritize query/development modes
+      if (lowerInput.includes('select') || lowerInput.includes('from') ||
+          lowerInput.includes('where') || lowerInput.includes('sql') ||
+          lowerInput.includes('query') || lowerInput.includes('database') ||
+          lowerInput.includes('table') || lowerInput.includes('count') ||
+          lowerInput.includes('sum') || lowerInput.includes('group by')) {
+        return 'query';
+      }
+      // Visualization requests in studio can still go to dashboard
+      if (lowerInput.includes('chart') || lowerInput.includes('graph') || 
+          lowerInput.includes('visualiz') || lowerInput.includes('plot')) {
+        return 'dashboard';
+      }
+      // Default to query mode when in studio view
+      return 'query';
+    }
+    
+    // Fallback to model for general conversation
+    return 'model';
   };
 
   const handleChatSubmit = async (e: React.FormEvent) => {
@@ -272,7 +274,7 @@ export default function ChatPage() {
         const response = await fetch('/api/sessions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId, agentType: currentAgentType })
+          body: JSON.stringify({ userId, agentType: 'query' })
         });
         if (response.ok) {
           const session = await response.json();
@@ -288,10 +290,18 @@ export default function ChatPage() {
       }
     }
     
-    // Use current agent mode - no automatic switching
-    const currentAgentType = agentMode === 'query' ? 'query' : 
-                            agentMode === 'model' ? 'yaml' :
-                            agentMode === 'dashboard' ? 'dashboards' : 'general';
+    // Auto-detect context and set mode
+    // Use contextual agent mode, selected agent, or default to general
+    const detectedMode = getContextualAgentMode() ? 
+      (getContextualAgentMode() === 'query' ? 'query' : 
+       getContextualAgentMode() === 'semantic-model' ? 'model' : 
+       getContextualAgentMode() === 'dashboards' ? 'dashboard' : 'general') 
+      : selectedAgentType ?
+        (selectedAgentType === 'query' ? 'query' :
+         selectedAgentType === 'ontology' ? 'model' : 
+         selectedAgentType === 'dashboards' ? 'dashboard' : 'general')
+      : 'general'; // Default to general assistant for all chat conversations
+    setAgentMode(detectedMode);
     
     setChatInput('');
     setSelectedAgentType(null); // Clear selected agent after sending
@@ -316,7 +326,9 @@ export default function ChatPage() {
           type: 'chat_message',
           sessionId: sessionId,
           content: messageContent,
-          agentType: currentAgentType,
+          agentType: detectedMode === 'query' ? 'query' : 
+                    detectedMode === 'model' ? 'yaml' :
+                    detectedMode === 'dashboard' ? 'dashboards' : 'general',
           userId: userId
         }));
       };
@@ -668,17 +680,9 @@ compliance:
           <div className="space-y-2">
             <button
               onClick={() => {
-                // Clear all chat state for a fresh start
-                setCurrentSessionInfo(null);
-                setMessages([]);
-                setCurrentSessionId('');
-                setSelectedAgentType(null);
-                setAgentMode('general');
-                setIsLoading(false);
-                setIsGenerateMode(false);
-                setChatInput('');
-                setUploadedFiles([]);
-                setShowMentionDropdown(false);
+                setCurrentSessionInfo(null); // Clear session info for new chat
+                setMessages([]); // Clear messages
+                setCurrentSessionId(''); // Clear session ID to create new one
                 setCurrentView('chat');
               }}
               className={`w-full flex items-center justify-start ${isLeftSidebarCollapsed ? 'px-2 py-3 justify-center' : 'px-3 py-2'} text-sm font-medium rounded-md transition-colors ${
@@ -1100,8 +1104,6 @@ compliance:
                     )}
                   </div>
                 )}
-
-
 
                 <form onSubmit={handleChatSubmit} className="flex space-x-4">
                   <div className="relative flex-1">
@@ -2187,186 +2189,10 @@ compliance:
             </div>
           </div>
         ) : (
-          // Main Chat Interface with History Sidebar
-          <div className="flex flex-1">
-            {/* Chat History Sidebar */}
-            <ChatHistory
-              userId={userId}
-              currentSessionId={currentSessionId}
-              onSessionSelect={(sessionId) => {
-                setMessages([]);
-                setCurrentSessionId(sessionId);
-                setCurrentView('chat');
-                queryClient.invalidateQueries({
-                  queryKey: ['/api/sessions', sessionId, 'messages']
-                });
-              }}
-              onNewChat={handleNewChat}
-              isCollapsed={isChatHistoryCollapsed}
-              onToggleCollapse={() => setIsChatHistoryCollapsed(!isChatHistoryCollapsed)}
-            />
-            
-            {/* Main Chat Area */}
-            <div className="flex-1 flex flex-col">
-              {/* Chat Header */}
-              <div className="p-6 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    {agentMode === 'general' ? (
-                      <>
-                        <h2 className="text-2xl font-bold text-gray-900 mb-1">DataMind Chat</h2>
-                        <p className="text-gray-600">Choose an agent or start a general conversation</p>
-                      </>
-                    ) : (
-                      <>
-                        <h2 className="text-2xl font-bold text-gray-900 mb-1">
-                          {agentMode === 'query' ? 'Query Agent' : 
-                           agentMode === 'model' ? 'Ontology Agent' : 
-                           agentMode === 'dashboard' ? 'Dashboard Agent' : 'Chat'}
-                        </h2>
-                        <p className="text-gray-600">
-                          {agentMode === 'query' ? 'SQL queries and data analysis' :
-                           agentMode === 'model' ? 'Semantic data modeling and relationships' :
-                           agentMode === 'dashboard' ? 'Interactive dashboards and visualizations' : 
-                           'General conversation'}
-                        </p>
-                      </>
-                    )}
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {agentMode !== 'general' && (
-                      <>
-                        <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          agentMode === 'query' 
-                            ? 'bg-green-100 text-green-800'
-                            : agentMode === 'model'
-                              ? 'bg-purple-100 text-purple-800'
-                              : agentMode === 'dashboard'
-                                ? 'bg-blue-100 text-blue-800'
-                                : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {agentMode === 'query' ? 'Query Mode' : 
-                           agentMode === 'model' ? 'Ontology Mode' : 
-                           agentMode === 'dashboard' ? 'Dashboard Mode' : 'General'}
-                        </div>
-                        <button
-                          onClick={() => setAgentMode('general')}
-                          className="p-1 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600"
-                          title="Exit agent mode"
-                        >
-                          <X className="w-5 h-5" />
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Messages Area */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                {messages.length === 0 ? (
-                  <div className="text-center py-16">
-                    <div className="mb-8">
-                      <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome to DataMind</h1>
-                      <p className="text-gray-600 max-w-md mx-auto">
-                        Your AI-powered data analytics platform. Choose an agent to get started:
-                      </p>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
-                      <button
-                        onClick={() => setAgentMode('query')}
-                        className="p-6 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors text-left"
-                      >
-                        <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center text-white text-xl font-bold mb-3 mx-auto">
-                          Q
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Query Agent</h3>
-                        <p className="text-sm text-gray-600">
-                          Write SQL queries, analyze data, and get insights from your databases
-                        </p>
-                      </button>
-                      
-                      <button
-                        onClick={() => setAgentMode('model')}
-                        className="p-6 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors text-left"
-                      >
-                        <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center text-white text-xl font-bold mb-3 mx-auto">
-                          O
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Ontology Agent</h3>
-                        <p className="text-sm text-gray-600">
-                          Create semantic data models, define relationships, and structure your data
-                        </p>
-                      </button>
-                      
-                      <button
-                        onClick={() => setAgentMode('dashboard')}
-                        className="p-6 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors text-left"
-                      >
-                        <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center text-white text-xl font-bold mb-3 mx-auto">
-                          D
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Dashboard Agent</h3>
-                        <p className="text-sm text-gray-600">
-                          Build interactive dashboards, create visualizations, and share insights
-                        </p>
-                      </button>
-                    </div>
-                    
-                    <div className="mt-8">
-                      <p className="text-sm text-gray-500">
-                        Or type a message below to start a general conversation
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  messages.map((message) => (
-                    <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-2xl px-4 py-3 rounded-lg ${
-                        message.role === 'user' 
-                          ? 'bg-blue-600 text-white' 
-                          : 'bg-gray-100 text-gray-900'
-                      }`}>
-                        <div className="text-sm whitespace-pre-wrap">{message.content}</div>
-                      </div>
-                    </div>
-                  ))
-                )}
-                
-                {isLoading && (
-                  <div className="flex justify-start">
-                    <div className="bg-gray-100 px-4 py-3 rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-400 border-t-transparent"></div>
-                        <span className="text-sm text-gray-600">Assistant is thinking...</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Chat Input */}
-              <div className="border-t border-gray-200 p-6">
-                <form onSubmit={handleChatSubmit} className="flex space-x-3">
-                  <input
-                    type="text"
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    placeholder="Type your message..."
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    disabled={isLoading}
-                  />
-                  <button
-                    type="submit"
-                    disabled={!chatInput.trim() || isLoading}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-                  >
-                    <Send className="w-4 h-4" />
-                    <span>Send</span>
-                  </button>
-                </form>
-              </div>
+          <div className="flex-1 p-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome</h2>
+              <p className="text-gray-600">Select a section from the navigation to get started</p>
             </div>
           </div>
         )}

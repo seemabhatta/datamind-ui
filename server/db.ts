@@ -41,10 +41,7 @@ export function initializeDatabase() {
         id TEXT PRIMARY KEY,
         user_id TEXT,
         title TEXT,
-        summary TEXT,
         agent_type TEXT NOT NULL,
-        message_count INTEGER DEFAULT 0,
-        last_message_at INTEGER,
         created_at INTEGER,
         updated_at INTEGER,
         FOREIGN KEY(user_id) REFERENCES users(id)
@@ -96,28 +93,6 @@ export function initializeDatabase() {
     }
     
     console.log('Tables created successfully');
-    
-    // Add new columns to existing chat_sessions table if they don't exist
-    try {
-      sqlite.exec('ALTER TABLE chat_sessions ADD COLUMN summary TEXT');
-      console.log('Added summary column to chat_sessions');
-    } catch (error) {
-      // Column already exists, ignore
-    }
-    
-    try {
-      sqlite.exec('ALTER TABLE chat_sessions ADD COLUMN message_count INTEGER DEFAULT 0');
-      console.log('Added message_count column to chat_sessions');
-    } catch (error) {
-      // Column already exists, ignore
-    }
-    
-    try {
-      sqlite.exec('ALTER TABLE chat_sessions ADD COLUMN last_message_at INTEGER');
-      console.log('Added last_message_at column to chat_sessions');
-    } catch (error) {
-      // Column already exists, ignore
-    }
     
     // Create a default user if none exists
     const userCheck = sqlite.prepare('SELECT id FROM users WHERE username = ?');

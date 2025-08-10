@@ -16,11 +16,8 @@ export const users = sqliteTable("users", {
 export const chatSessions = sqliteTable("chat_sessions", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   userId: text("user_id"),
-  title: text("title"), // Auto-generated conversation summary (short)
-  summary: text("summary"), // Detailed conversation summary
-  agentType: text("agent_type").notNull(), // 'query', 'yaml', 'general', 'dashboards'
-  messageCount: integer("message_count").default(0), // Track number of messages
-  lastMessageAt: integer("last_message_at", { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  title: text("title"),
+  agentType: text("agent_type").notNull(), // 'query' or 'yaml'
   createdAt: integer("created_at", { mode: 'timestamp' }).$defaultFn(() => new Date()),
   updatedAt: integer("updated_at", { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });

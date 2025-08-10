@@ -35,7 +35,7 @@ export default function ChatPage() {
 
 
   
-  const userId = 'user_1';
+  const userId = '0d493db8-bfed-4dd0-ab40-ae8a3225f8a5';
 
   const { data: sessions } = useQuery({
     queryKey: ['/api/sessions', userId],
@@ -872,8 +872,12 @@ compliance:
                     type="text"
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
-                    placeholder="Ask me anything..."
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder={isGenerateMode ? "What would you like me to generate?" : "Ask me anything..."}
+                    className={`flex-1 px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
+                      isGenerateMode 
+                        ? 'border-blue-400 bg-blue-50 focus:ring-blue-500 text-blue-900 placeholder-blue-600'
+                        : 'border-gray-300 focus:ring-blue-500'
+                    }`}
                     disabled={isLoading}
                   />
                   <button

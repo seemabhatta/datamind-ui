@@ -41,7 +41,6 @@ export default function ChatPage() {
     'query': true,
     'dashboards': true
   });
-  const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
 
   // Get context-aware agent mode based on current view
   const getContextualAgentMode = () => {
@@ -353,23 +352,10 @@ export default function ChatPage() {
 
   // Available mentions for autocomplete - filtered by active agents
   const availableMentions = [
-    { id: 'semantic-model', label: 'Semantic-Model', description: 'Semantic data modeling and relationships', icon: 'S', type: 'agent', active: agentStatuses['semantic-model'] },
+    { id: 'domain-model', label: 'Semantic-Model', description: 'Semantic data modeling and relationships', icon: 'S', type: 'agent', active: agentStatuses['semantic-model'] },
     { id: 'query', label: 'Query', description: 'SQL queries and data analysis', icon: 'Q', type: 'agent', active: agentStatuses['query'] },
-    { id: 'dashboards', label: 'Dashboards', description: 'Interactive dashboards and visualizations', icon: 'D', type: 'agent', active: agentStatuses['dashboards'] }
+    { id: 'dashboards', label: 'Dashboards', description: 'Interactive dashboards and visualizations', icon: 'B', type: 'agent', active: agentStatuses['dashboards'] }
   ].filter(mention => mention.active);
-
-  // Specific agent names for display when selected
-  const agentDisplayNames = {
-    'semantic-model': 'Data Dictionary Builder',
-    'query': 'nl2gpt', 
-    'dashboards': 'Chart Generator Pro'
-  };
-
-  const agentDisplayIcons = {
-    'semantic-model': '📚',
-    'query': '🗃️',
-    'dashboards': '📊'
-  };
 
   // Handle @mention input detection and autocomplete
   const handleInputChange = (value: string) => {
@@ -419,22 +405,13 @@ export default function ChatPage() {
 
   // Handle mention selection
   const selectMention = (mention: typeof availableMentions[0]) => {
-    // Set the selected agent instead of adding to input
-    setSelectedAgent(mention.id);
-    setChatInput(''); // Clear input
+    const beforeMention = chatInput.substring(0, mentionPosition);
+    const afterMention = chatInput.substring(mentionPosition + 1 + currentMentionQuery.length);
+    const newValue = `${beforeMention}@${mention.label.toLowerCase()} ${afterMention}`;
+    
+    setChatInput(newValue);
     setShowMentionDropdown(false);
-    setIsGenerateMode(mention.id === 'semantic-model' || mention.id === 'dashboards');
-  };
-
-  // Get selected agent details with specific display names
-  const getSelectedAgentDetails = () => {
-    if (!selectedAgent) return null;
-    return {
-      id: selectedAgent,
-      label: agentDisplayNames[selectedAgent as keyof typeof agentDisplayNames] || selectedAgent,
-      icon: agentDisplayIcons[selectedAgent as keyof typeof agentDisplayIcons] || 'A',
-      description: availableMentions.find(agent => agent.id === selectedAgent)?.description || ''
-    };
+    setIsGenerateMode(newValue.includes('@semantic-model') || newValue.includes('@dashboards'));
   };
 
   // Handle keyboard navigation in mention dropdown
@@ -686,10 +663,10 @@ compliance:
                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
-              title={isLeftSidebarCollapsed ? 'Chart Generator Pro' : ''}
+              title={isLeftSidebarCollapsed ? 'Dashboards' : ''}
             >
               <BarChart3 className={`${isLeftSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-3'}`} />
-              {!isLeftSidebarCollapsed && <span>Chart Generator Pro</span>}
+              {!isLeftSidebarCollapsed && <span>dashboards</span>}
             </button>
             )}
             
@@ -701,10 +678,10 @@ compliance:
                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
-              title={isLeftSidebarCollapsed ? 'nl2gpt' : ''}
+              title={isLeftSidebarCollapsed ? 'Query' : ''}
             >
               <Search className={`${isLeftSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-3'}`} />
-              {!isLeftSidebarCollapsed && <span>nl2gpt</span>}
+              {!isLeftSidebarCollapsed && <span>query</span>}
             </button>
             )}
             
@@ -716,10 +693,10 @@ compliance:
                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
-              title={isLeftSidebarCollapsed ? 'Data Dictionary Builder' : ''}
+              title={isLeftSidebarCollapsed ? 'Semantic Model' : ''}
             >
               <Database className={`${isLeftSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-3'}`} />
-              {!isLeftSidebarCollapsed && <span>Data Dictionary Builder</span>}
+              {!isLeftSidebarCollapsed && <span>semantic model</span>}
             </button>
             )}
             
@@ -930,7 +907,7 @@ compliance:
             {/* Chat Messages Area */}
             <div className="flex-1 overflow-y-auto p-6">
               <div className="max-w-4xl mx-auto space-y-4">
-                {messages.length === 0 && !selectedAgent && (
+                {messages.length === 0 && (
                   <div className="text-center py-16">
                     <MessageSquare className="w-16 h-16 mx-auto text-gray-300 mb-4" />
                     <h4 className="text-lg font-medium text-gray-900 mb-2">
@@ -944,22 +921,6 @@ compliance:
                         ? `You're in ${getContextualAgentMode() === 'query' ? 'Query' : getContextualAgentMode() === 'semantic-model' ? 'Semantic Model' : 'Dashboard'} mode. Ask questions specific to ${getContextualAgentMode() === 'query' ? 'data queries and analysis' : getContextualAgentMode() === 'semantic-model' ? 'data modeling and relationships' : 'dashboards and visualizations'}.`
                         : 'Start by typing @ to explore our AI agents for data analysis, modeling, and visualization'
                       }
-                    </p>
-                  </div>
-                )}
-
-                {messages.length === 0 && selectedAgent && (
-                  <div className="text-center py-16">
-                    <div className="w-16 h-16 mx-auto mb-4 text-4xl bg-gray-100 rounded-full flex items-center justify-center">
-                      {getSelectedAgentDetails()?.icon}
-                    </div>
-                    <h4 className="text-lg font-medium text-gray-900 mb-2">
-                      {getSelectedAgentDetails()?.label} Ready
-                    </h4>
-                    <p className="text-gray-500">
-                      {selectedAgent === 'query' && 'Natural language to SQL conversion and data analysis'}
-                      {selectedAgent === 'semantic-model' && 'Build comprehensive data dictionaries and semantic models'}  
-                      {selectedAgent === 'dashboards' && 'Create advanced data visualizations and dashboards'}
                     </p>
                   </div>
                 )}
@@ -985,26 +946,6 @@ compliance:
                 )}
               </div>
             </div>
-            {/* Agent Selection Bar (when agent is selected) */}
-            {selectedAgent && currentView === 'chat' && (
-              <div className="border-b border-gray-200 p-4">
-                <div className="max-w-4xl mx-auto flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 text-xl bg-gray-100 rounded-full flex items-center justify-center">
-                      {getSelectedAgentDetails()?.icon}
-                    </div>
-                    <span className="font-medium text-gray-900">{getSelectedAgentDetails()?.label}</span>
-                  </div>
-                  <button
-                    onClick={() => setSelectedAgent(null)}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            )}
-
             {/* Chat Input */}
             <div className="border-t border-gray-200 p-6">
               <div className="max-w-4xl mx-auto">
@@ -1037,24 +978,17 @@ compliance:
                 )}
                 <form onSubmit={handleChatSubmit} className="flex space-x-4">
                   <div className="relative flex-1">
-                    {selectedAgent && currentView === 'chat' && (
-                      <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
-                        <Plus className="w-4 h-4 text-gray-400" />
-                      </div>
-                    )}
                     <input
                       type="text"
                       value={chatInput}
                       onChange={(e) => handleInputChange(e.target.value)}
                       onKeyDown={handleKeyDown}
                       placeholder={
-                        selectedAgent && currentView === 'chat'
-                          ? "Ask anything"
-                          : getContextualAgentMode() 
-                            ? `Ask the ${getContextualAgentMode() === 'query' ? 'Query' : getContextualAgentMode() === 'semantic-model' ? 'Semantic Model' : 'Dashboard'} agent anything...`
-                            : isGenerateMode ? "What would you like me to help you with?" : "Ask me anything... (Type @ for agents)"
+                        getContextualAgentMode() 
+                          ? `Ask the ${getContextualAgentMode() === 'query' ? 'Query' : getContextualAgentMode() === 'semantic-model' ? 'Semantic Model' : 'Dashboard'} agent anything...`
+                          : isGenerateMode ? "What would you like me to help you with?" : "Ask me anything... (Type @ for agents)"
                       }
-                      className={`w-full ${selectedAgent && currentView === 'chat' ? 'pl-10' : 'pl-4'} pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
+                      className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
                         getContextualAgentMode() === 'query'
                           ? 'border-green-400 bg-green-50 focus:ring-green-500 text-green-900 placeholder-green-600'
                           : getContextualAgentMode() === 'semantic-model'
@@ -1068,8 +1002,8 @@ compliance:
                       disabled={isLoading}
                     />
                     
-                    {/* @mention Autocomplete Dropdown - only show if not in contextual mode and no agent selected */}
-                    {!getContextualAgentMode() && !selectedAgent && showMentionDropdown && filteredMentions.length > 0 && (
+                    {/* @mention Autocomplete Dropdown - only show if not in contextual mode */}
+                    {!getContextualAgentMode() && showMentionDropdown && filteredMentions.length > 0 && (
                       <div className="absolute bottom-full mb-2 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto z-50">
                         <div className="px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide border-b border-gray-100">
                           @agents

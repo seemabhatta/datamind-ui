@@ -41,24 +41,47 @@ export const connectToSnowflake: FunctionToolDefinition = {
       // Use existing fresh PAT connection strategy
       console.log('Creating fresh PAT connection for agent...');
       
-      const connection = await snowflakeService.createFreshPATConnection();
-      if (!connection) {
-        return 'Failed to establish Snowflake connection. Please check your PAT token and network policy.';
+      // Use existing PAT connection from user's connections
+      const userConnections = await storage.getSnowflakeConnections(context.userId);
+      
+      if (userConnections.length === 0) {
+        return `No Snowflake connections found for your account. Please configure a connection first in Settings.`;
+      }
+      
+      const patConnection = userConnections.find(conn => conn.authenticator === 'PAT');
+      if (!patConnection) {
+        return `No PAT connection found. Please configure a PAT connection in Settings.`;
+      }
+      
+      // Create connection using existing configuration
+      const success = await snowflakeService.createConnection(patConnection.id, {
+        account: patConnection.account,
+        username: patConnection.username,
+        password: patConnection.password,
+        database: patConnection.database,
+        schema: patConnection.schema,
+        warehouse: patConnection.warehouse,
+        role: patConnection.role,
+        authenticator: patConnection.authenticator
+      });
+      
+      if (!success) {
+        return `Failed to establish connection to Snowflake. Please check your credentials.`;
       }
 
       await agentContextManager.updateContext(context.sessionId, {
-        connectionId: connection,
-        currentDatabase: 'CORTES_DEMO_2',
-        currentSchema: 'CORTEX_DEMO'
+        connectionId: patConnection.id,
+        currentDatabase: patConnection.database,
+        currentSchema: patConnection.schema
       });
 
-      return `✅ Successfully connected to Snowflake account: KIXUIIJ-MTC00254
+      return `✅ Successfully connected to Snowflake account: ${patConnection.account}
       
 🔗 **Connection Details:**
-- Database: CORTES_DEMO_2
-- Schema: CORTEX_DEMO
-- Warehouse: CORTEX_ANALYST_WH
-- Role: nl2sql_service_role
+- Database: ${patConnection.database}
+- Schema: ${patConnection.schema}
+- Warehouse: ${patConnection.warehouse}
+- Role: ${patConnection.role}
 
 🚀 **Ready for queries!** Try:
 - "show databases" - List available databases

@@ -168,7 +168,7 @@ export class SnowflakeService {
       const config = this.connectionConfigs.get(connectionId);
       if (config?.authenticator === 'PAT') {
         console.log('Creating fresh PAT connection for query execution...');
-        connection = await this.createFreshPATConnection(config);
+        connection = await this.createFreshPATConnectionWithConfig(config);
       } else {
         throw new Error(`No active Snowflake connection found for ID: ${connectionId}`);
       }
@@ -317,7 +317,7 @@ export class SnowflakeService {
   /**
    * Create a fresh PAT connection for single query execution
    */
-  private async createFreshPATConnection(config: SnowflakeConnectionConfig): Promise<any> {
+  private async createFreshPATConnectionWithConfig(config: SnowflakeConnectionConfig): Promise<any> {
     return new Promise((resolve, reject) => {
       const connectionConfig: any = {
         account: config.account,

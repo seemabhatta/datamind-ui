@@ -686,10 +686,10 @@ compliance:
                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
-              title={isLeftSidebarCollapsed ? 'Dashboards' : ''}
+              title={isLeftSidebarCollapsed ? 'Chart Generator Pro' : ''}
             >
               <BarChart3 className={`${isLeftSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-3'}`} />
-              {!isLeftSidebarCollapsed && <span>dashboards</span>}
+              {!isLeftSidebarCollapsed && <span>Chart Generator Pro</span>}
             </button>
             )}
             
@@ -701,10 +701,10 @@ compliance:
                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
-              title={isLeftSidebarCollapsed ? 'Query' : ''}
+              title={isLeftSidebarCollapsed ? 'nl2gpt' : ''}
             >
               <Search className={`${isLeftSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-3'}`} />
-              {!isLeftSidebarCollapsed && <span>query</span>}
+              {!isLeftSidebarCollapsed && <span>nl2gpt</span>}
             </button>
             )}
             
@@ -716,10 +716,10 @@ compliance:
                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
-              title={isLeftSidebarCollapsed ? 'Semantic Model' : ''}
+              title={isLeftSidebarCollapsed ? 'Data Dictionary Builder' : ''}
             >
               <Database className={`${isLeftSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-3'}`} />
-              {!isLeftSidebarCollapsed && <span>semantic model</span>}
+              {!isLeftSidebarCollapsed && <span>Data Dictionary Builder</span>}
             </button>
             )}
             

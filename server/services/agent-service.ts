@@ -205,7 +205,9 @@ Respond naturally but mention when function tools would help accomplish their go
         const tool = getFunctionTool(command.tool);
         if (tool) {
           try {
+            console.log(`Executing function tool: ${command.tool}`);
             const result = await tool.execute(context, command.params);
+            console.log(`Function tool result: ${result}`);
             
             await agentContextManager.addToHistory(context.sessionId, {
               role: 'function',
@@ -224,6 +226,7 @@ Respond naturally but mention when function tools would help accomplish their go
               }
             };
           } catch (error) {
+            console.log(`Function tool error: ${error}`);
             return {
               content: `Error executing ${command.tool}: ${error instanceof Error ? error.message : 'Unknown error'}`,
               metadata: {

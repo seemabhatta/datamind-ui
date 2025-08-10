@@ -32,6 +32,9 @@ export default function ChatPage() {
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isGenerateMode, setIsGenerateMode] = useState(false);
+  const [showMentionDropdown, setShowMentionDropdown] = useState(false);
+  const [mentionPosition, setMentionPosition] = useState(0);
+  const [currentMentionQuery, setCurrentMentionQuery] = useState('');
 
 
   
@@ -312,10 +315,95 @@ export default function ChatPage() {
     }
   };
 
-  // Check if input contains @generate to enable blue theme
+  // Available mentions for autocomplete
+  const availableMentions = [
+    { id: 'generate', label: 'Generate', description: 'AI content generation', icon: '🧠', type: 'agent' },
+    { id: 'query', label: 'Query', description: 'Data analysis and SQL queries', icon: '🔍', type: 'agent' },
+    { id: 'chart', label: 'Chart', description: 'Create visualizations', icon: '📊', type: 'agent' },
+    { id: 'model', label: 'Model', description: 'AI model management', icon: '🤖', type: 'agent' },
+    { id: 'datamind', label: 'DataMind', description: 'General assistant', icon: '💡', type: 'assistant' }
+  ];
+
+  // Handle @mention input detection and autocomplete
+  const handleInputChange = (value: string) => {
+    setChatInput(value);
+    
+    // Check for @ symbol and show dropdown
+    const lastAtIndex = value.lastIndexOf('@');
+    if (lastAtIndex !== -1 && lastAtIndex === value.length - 1) {
+      // Just typed @, show all options
+      setShowMentionDropdown(true);
+      setMentionPosition(lastAtIndex);
+      setCurrentMentionQuery('');
+    } else if (lastAtIndex !== -1) {
+      // Check if we're still in mention context
+      const afterAt = value.substring(lastAtIndex + 1);
+      const hasSpace = afterAt.includes(' ');
+      
+      if (!hasSpace) {
+        // Still typing mention
+        setShowMentionDropdown(true);
+        setMentionPosition(lastAtIndex);
+        setCurrentMentionQuery(afterAt.toLowerCase());
+      } else {
+        // Space pressed, close dropdown
+        setShowMentionDropdown(false);
+      }
+    } else {
+      setShowMentionDropdown(false);
+    }
+    
+    // Check for specific mentions to set modes
+    setIsGenerateMode(value.includes('@generate'));
+  };
+
+  // Filter mentions based on query
+  const filteredMentions = availableMentions.filter(mention =>
+    mention.label.toLowerCase().includes(currentMentionQuery) ||
+    mention.description.toLowerCase().includes(currentMentionQuery)
+  );
+
+  // Handle mention selection
+  const selectMention = (mention: typeof availableMentions[0]) => {
+    const beforeMention = chatInput.substring(0, mentionPosition);
+    const afterMention = chatInput.substring(mentionPosition + 1 + currentMentionQuery.length);
+    const newValue = `${beforeMention}@${mention.label.toLowerCase()} ${afterMention}`;
+    
+    setChatInput(newValue);
+    setShowMentionDropdown(false);
+    setIsGenerateMode(newValue.includes('@generate'));
+  };
+
+  // Handle keyboard navigation in mention dropdown
+  const [selectedMentionIndex, setSelectedMentionIndex] = useState(0);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (showMentionDropdown) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedMentionIndex(prev => 
+          prev < filteredMentions.length - 1 ? prev + 1 : 0
+        );
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedMentionIndex(prev => 
+          prev > 0 ? prev - 1 : filteredMentions.length - 1
+        );
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (filteredMentions[selectedMentionIndex]) {
+          selectMention(filteredMentions[selectedMentionIndex]);
+        }
+      } else if (e.key === 'Escape') {
+        setShowMentionDropdown(false);
+      }
+    }
+  };
+
+  // Reset selected index when dropdown opens/query changes
   useEffect(() => {
-    setIsGenerateMode(chatInput.startsWith('@generate'));
-  }, [chatInput]);
+    setSelectedMentionIndex(0);
+  }, [currentMentionQuery, showMentionDropdown]);
 
   const handlePlusOption = (option: 'generate' | 'query' | 'upload') => {
     if (option === 'generate') {
@@ -868,18 +956,55 @@ compliance:
                     )}
                   </div>
                   
-                  <input
-                    type="text"
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    placeholder={isGenerateMode ? "What would you like me to generate?" : "Ask me anything..."}
-                    className={`flex-1 px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
-                      isGenerateMode 
-                        ? 'border-blue-400 bg-blue-50 focus:ring-blue-500 text-blue-900 placeholder-blue-600'
-                        : 'border-gray-300 focus:ring-blue-500'
-                    }`}
-                    disabled={isLoading}
-                  />
+                  <div className="relative flex-1">
+                    <input
+                      type="text"
+                      value={chatInput}
+                      onChange={(e) => handleInputChange(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder={isGenerateMode ? "What would you like me to generate?" : "Ask me anything... (Type @ for suggestions)"}
+                      className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
+                        isGenerateMode 
+                          ? 'border-blue-400 bg-blue-50 focus:ring-blue-500 text-blue-900 placeholder-blue-600'
+                          : 'border-gray-300 focus:ring-blue-500'
+                      }`}
+                      disabled={isLoading}
+                    />
+                    
+                    {/* @mention Autocomplete Dropdown */}
+                    {showMentionDropdown && filteredMentions.length > 0 && (
+                      <div className="absolute bottom-full mb-2 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto z-50">
+                        <div className="px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide border-b border-gray-100">
+                          Mentions
+                        </div>
+                        {filteredMentions.map((mention, index) => (
+                          <button
+                            key={mention.id}
+                            type="button"
+                            onClick={() => selectMention(mention)}
+                            className={`w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center space-x-3 transition-colors ${
+                              index === selectedMentionIndex ? 'bg-blue-50 border-l-2 border-blue-500' : ''
+                            }`}
+                          >
+                            <span className="text-lg">{mention.icon}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center space-x-2">
+                                <span className="font-medium text-gray-900">@{mention.label.toLowerCase()}</span>
+                                <span className={`text-xs px-2 py-1 rounded-full ${
+                                  mention.type === 'agent' 
+                                    ? 'bg-blue-100 text-blue-700' 
+                                    : 'bg-green-100 text-green-700'
+                                }`}>
+                                  {mention.type}
+                                </span>
+                              </div>
+                              <p className="text-sm text-gray-500 truncate">{mention.description}</p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   <button
                     type="submit"
                     disabled={!chatInput.trim() || isLoading}

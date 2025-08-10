@@ -121,7 +121,19 @@ export const getDatabases: FunctionTool = {
 
       const databases = result.rows?.map((row: any) => row.name || row.NAME) || [];
       
-      return `Available databases (${databases.length}):\n${databases.map((db: string, i: number) => `${i + 1}. ${db}`).join('\n')}`;
+      if (databases.length === 0) {
+        return `No databases found.`;
+      }
+
+      return `🗄️ **Available Databases**
+
+**${databases.length} databases found:**
+
+${databases.map((db: string) => `• **${db}**`).join('\n')}
+
+💡 **Next steps:**
+- \`USE DATABASE database_name\` - Switch to a database
+- Ask about specific database contents`;
     } catch (error) {
       return `Error fetching databases: ${error instanceof Error ? error.message : 'Unknown error'}`;
     }
@@ -197,7 +209,19 @@ export const getSchemas: FunctionTool = {
 
       const schemas = result.rows?.map((row: any) => row.name || row.NAME) || [];
       
-      return `Available schemas in ${database} (${schemas.length}):\n${schemas.map((schema: string, i: number) => `${i + 1}. ${schema}`).join('\n')}`;
+      if (schemas.length === 0) {
+        return `No schemas found in database ${database}.`;
+      }
+
+      return `📂 **Available Schemas** in \`${database}\`
+
+**${schemas.length} schemas found:**
+
+${schemas.map((schema: string) => `• **${schema}**`).join('\n')}
+
+💡 **Next steps:**
+- \`USE SCHEMA schema_name\` - Switch to a schema
+- \`SHOW TABLES\` - List tables in a schema`;
     } catch (error) {
       return `Error fetching schemas: ${error instanceof Error ? error.message : 'Unknown error'}`;
     }
@@ -275,9 +299,83 @@ export const getTables: FunctionTool = {
         tables
       });
       
-      return `Available tables in ${context.currentDatabase}.${context.currentSchema} (${tables.length}):\n${tables.map((table: any, i: number) => `${i + 1}. ${table.name}`).join('\n')}`;
+      if (tables.length === 0) {
+        return `No tables found in ${context.currentDatabase}.${context.currentSchema}`;
+      }
+
+      return `📊 **Available Tables** in \`${context.currentDatabase}.${context.currentSchema}\`
+
+**${tables.length} tables found:**
+
+${tables.map((table: any) => `• **${table.name}**`).join('\n')}
+
+💡 **Next steps:**
+- \`DESCRIBE table_name\` - View table structure
+- \`SELECT * FROM table_name LIMIT 10\` - Preview data
+- Ask about specific data analysis needs`;
     } catch (error) {
       return `Error fetching tables: ${error instanceof Error ? error.message : 'Unknown error'}`;
+    }
+  }
+};
+
+export const describeTable: FunctionTool = {
+  name: 'describe_table',
+  description: 'Get detailed information about a specific table structure',
+  parameters: {
+    type: 'object',
+    properties: {
+      table_name: {
+        type: 'string',
+        description: 'Name of the table to describe'
+      }
+    },
+    required: ['table_name']
+  },
+  execute: async (context: AgentContext, params: any) => {
+    try {
+      if (!context.connectionId) {
+        return 'Not connected to Snowflake. Please connect first.';
+      }
+
+      if (!context.currentDatabase || !context.currentSchema) {
+        return 'No database or schema selected. Please select both first.';
+      }
+
+      const { table_name } = params;
+      
+      const result = await snowflakeService.executeQuery(
+        context.connectionId,
+        `DESCRIBE TABLE "${context.currentDatabase}"."${context.currentSchema}"."${table_name}"`
+      );
+
+      if (!result.rows || result.rows.length === 0) {
+        return `Table ${table_name} not found or no columns available.`;
+      }
+
+      const columns = result.rows.map((row: any) => ({
+        name: row.name || row.NAME,
+        type: row.type || row.TYPE,
+        nullable: row.null === 'Y' || row.null === true || row.NULLABLE === 'Y' || row.NULLABLE === true,
+        default: row.default || row.DEFAULT || null,
+        comment: row.comment || row.COMMENT || ''
+      }));
+
+      return `📋 **Table Structure:** \`${table_name}\`
+
+**${columns.length} columns:**
+
+${columns.map((col: any) => 
+  `• **${col.name}** \`${col.type}\`${col.nullable ? ' (nullable)' : ' (required)'}`
+).join('\n')}
+
+💡 **Try these queries:**
+- \`SELECT * FROM ${table_name} LIMIT 10\` - Preview data
+- \`SELECT COUNT(*) FROM ${table_name}\` - Count rows
+- Ask about specific analysis on this table`;
+
+    } catch (error) {
+      return `Error describing table: ${error instanceof Error ? error.message : 'Unknown error'}`;
     }
   }
 };
@@ -449,6 +547,7 @@ export const availableFunctionTools: FunctionTool[] = [
   getSchemas,
   selectSchema,
   getTables,
+  describeTable,
   generateSql,
   executeSql,
   getCurrentContext

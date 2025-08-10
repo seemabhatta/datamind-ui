@@ -24,6 +24,7 @@ export interface SnowflakeConnectionConfig {
 
 export class SnowflakeService {
   private activeConnections = new Map<string, any>();
+  private connectionConfigs = new Map<string, SnowflakeConnectionConfig>();
 
   /**
    * Test a Snowflake connection
@@ -81,6 +82,13 @@ export class SnowflakeService {
    * Create and cache a Snowflake connection
    */
   async createConnection(connectionId: string, config: SnowflakeConnectionConfig): Promise<boolean> {
+    // For PAT connections, store config instead of persistent connection due to network policy
+    if (config.authenticator === 'PAT') {
+      console.log(`Storing PAT connection config for connectionId: ${connectionId}`);
+      this.connectionConfigs.set(connectionId, config);
+      return true; // PAT authentication already verified, just store the config
+    }
+
     return new Promise((resolve) => {
       // Configure authentication based on type
       const connectionConfig: any = {
@@ -92,15 +100,8 @@ export class SnowflakeService {
         role: config.role,
       };
 
-      // Handle different authentication methods
-      if (config.authenticator === 'PAT') {
-        // For PAT authentication, use the token as password with standard SNOWFLAKE authenticator
-        connectionConfig.password = config.password; // PAT token goes in password field
-        connectionConfig.authenticator = 'SNOWFLAKE'; // Use standard authenticator
-      } else {
-        connectionConfig.password = config.password;
-        connectionConfig.authenticator = config.authenticator || 'SNOWFLAKE';
-      }
+      connectionConfig.password = config.password;
+      connectionConfig.authenticator = config.authenticator || 'SNOWFLAKE';
 
       const connection = snowflake.createConnection(connectionConfig);
 
@@ -121,10 +122,17 @@ export class SnowflakeService {
    * Execute a SQL query on Snowflake
    */
   async executeQuery(connectionId: string, sqlText: string): Promise<SnowflakeQueryResult> {
-    const connection = this.activeConnections.get(connectionId);
+    let connection = this.activeConnections.get(connectionId);
     
+    // For PAT connections, create a fresh connection for each query
     if (!connection) {
-      throw new Error(`No active Snowflake connection found for ID: ${connectionId}`);
+      const config = this.connectionConfigs.get(connectionId);
+      if (config?.authenticator === 'PAT') {
+        console.log('Creating fresh PAT connection for query execution...');
+        connection = await this.createFreshPATConnection(config);
+      } else {
+        throw new Error(`No active Snowflake connection found for ID: ${connectionId}`);
+      }
     }
 
     return new Promise((resolve, reject) => {
@@ -264,7 +272,37 @@ export class SnowflakeService {
    * Check if connection exists and is valid
    */
   hasActiveConnection(connectionId: string): boolean {
-    return this.activeConnections.has(connectionId);
+    return this.activeConnections.has(connectionId) || this.connectionConfigs.has(connectionId);
+  }
+
+  /**
+   * Create a fresh PAT connection for single query execution
+   */
+  private async createFreshPATConnection(config: SnowflakeConnectionConfig): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const connectionConfig: any = {
+        account: config.account,
+        username: config.username,
+        password: config.password, // PAT token
+        database: config.database,
+        schema: config.schema,
+        warehouse: config.warehouse,
+        role: config.role,
+        authenticator: 'SNOWFLAKE'
+      };
+
+      const connection = snowflake.createConnection(connectionConfig);
+
+      connection.connect((err, conn) => {
+        if (err) {
+          console.error('Failed to create fresh PAT connection:', err.message);
+          reject(new Error(`PAT connection failed: ${err.message}`));
+        } else {
+          console.log('Fresh PAT connection created successfully');
+          resolve(connection);
+        }
+      });
+    });
   }
 }
 

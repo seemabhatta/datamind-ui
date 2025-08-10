@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -60,8 +60,53 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
   const [editingTool, setEditingTool] = useState<string | null>(null);
   const [editingPrompt, setEditingPrompt] = useState<string | null>(null);
   const [editingAgent, setEditingAgent] = useState<string | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Save configuration to localStorage
+  const saveConfiguration = () => {
+    try {
+      const configData = {
+        tools: functionTools,
+        agents: agentConfigs,
+        prompts: agentPrompts,
+        lastSaved: new Date().toISOString()
+      };
+      localStorage.setItem(`agentConfig_${userId}`, JSON.stringify(configData));
+      setHasUnsavedChanges(false);
+      toast({
+        title: "Configuration Saved",
+        description: "Agent settings have been saved successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Save Failed",
+        description: "Failed to save configuration. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Load configuration from localStorage on component mount
+  const loadConfiguration = () => {
+    try {
+      const saved = localStorage.getItem(`agentConfig_${userId}`);
+      if (saved) {
+        const configData = JSON.parse(saved);
+        if (configData.tools) setFunctionTools(configData.tools);
+        if (configData.agents) setAgentConfigs(configData.agents);
+        if (configData.prompts) setAgentPrompts(configData.prompts);
+      }
+    } catch (error) {
+      console.error('Failed to load configuration:', error);
+    }
+  };
+
+  // Load configuration on mount
+  useEffect(() => {
+    loadConfiguration();
+  }, [userId]);
 
   // Complete function ecosystem based on CLI structure
   const [functionTools, setFunctionTools] = useState<FunctionTool[]>([
@@ -602,7 +647,7 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                                 <pre>{JSON.stringify(tool.parameters, null, 2)}</pre>
                               </div>
                               <div className="flex space-x-2">
-                                <Button size="sm" onClick={() => setEditingTool(null)}>
+                                <Button size="sm" onClick={() => { saveConfiguration(); setEditingTool(null); }}>
                                   <Save className="h-3 w-3 mr-1" />
                                   Save
                                 </Button>
@@ -898,7 +943,7 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
 
                         {editingAgent === agent.id && (
                           <div className="flex space-x-2">
-                            <Button size="sm" onClick={() => setEditingAgent(null)}>
+                            <Button size="sm" onClick={() => { saveConfiguration(); setEditingAgent(null); }}>
                               <Save className="h-3 w-3 mr-1" />
                               Save Changes
                             </Button>

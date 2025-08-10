@@ -73,12 +73,27 @@ export const snowflakeConnections = sqliteTable("snowflake_connections", {
   updatedAt: integer("updated_at", { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });
 
+// Agent configurations
+export const agentConfigurations = sqliteTable("agent_configurations", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id").notNull(),
+  agentType: text("agent_type").notNull(), // 'query', 'ontology', 'dashboards', 'general'
+  name: text("name").notNull(),
+  description: text("description"),
+  enabled: integer("enabled", { mode: 'boolean' }).default(true),
+  tools: text("tools", { mode: 'json' }).notNull(), // Array of enabled tool names
+  context: text("context", { mode: 'json' }).notNull(), // Context settings object
+  createdAt: integer("created_at", { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: 'timestamp' }).$defaultFn(() => new Date()),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   chatSessions: many(chatSessions),
   visualizations: many(visualizations),
   pinnedVisualizations: many(pinnedVisualizations),
   snowflakeConnections: many(snowflakeConnections),
+  agentConfigurations: many(agentConfigurations),
 }));
 
 export const chatSessionsRelations = relations(chatSessions, ({ one, many }) => ({
@@ -123,6 +138,13 @@ export const pinnedVisualizationsRelations = relations(pinnedVisualizations, ({ 
 export const snowflakeConnectionsRelations = relations(snowflakeConnections, ({ one }) => ({
   user: one(users, {
     fields: [snowflakeConnections.userId],
+    references: [users.id],
+  }),
+}));
+
+export const agentConfigurationsRelations = relations(agentConfigurations, ({ one }) => ({
+  user: one(users, {
+    fields: [agentConfigurations.userId],
     references: [users.id],
   }),
 }));
@@ -197,5 +219,18 @@ export const insertSnowflakeConnectionSchema = createInsertSchema(snowflakeConne
   isActive: true,
 });
 
+export const insertAgentConfigurationSchema = createInsertSchema(agentConfigurations).pick({
+  userId: true,
+  agentType: true,
+  name: true,
+  description: true,
+  enabled: true,
+  tools: true,
+  context: true,
+});
+
 export type InsertSnowflakeConnection = z.infer<typeof insertSnowflakeConnectionSchema>;
 export type SnowflakeConnection = typeof snowflakeConnections.$inferSelect;
+
+export type InsertAgentConfiguration = z.infer<typeof insertAgentConfigurationSchema>;
+export type AgentConfiguration = typeof agentConfigurations.$inferSelect;

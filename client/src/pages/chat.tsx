@@ -993,51 +993,49 @@ compliance:
                     {/* Agent Mode Indicator */}
                     {(getContextualAgentMode() || selectedAgentType) && (
                       <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10 flex items-center space-x-2">
-                        <div className={`flex items-center space-x-2 px-2 py-1 rounded-md text-xs font-medium ${
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold ${
                           getContextualAgentMode() === 'query' || selectedAgentType === 'query'
-                            ? 'bg-green-100 text-green-700'
+                            ? 'bg-green-500'
                             : getContextualAgentMode() === 'semantic-model' || selectedAgentType === 'semantic-model'
-                              ? 'bg-blue-100 text-blue-700'
+                              ? 'bg-blue-500'
                               : getContextualAgentMode() === 'dashboards' || selectedAgentType === 'dashboards'
-                                ? 'bg-purple-100 text-purple-700'
-                                : 'bg-gray-100 text-gray-700'
+                                ? 'bg-purple-500'
+                                : 'bg-gray-500'
                         }`}>
-                          <div className="w-4 h-4 rounded-sm bg-current/10 flex items-center justify-center">
-                            <span className="text-xs font-bold">
-                              {getContextualAgentMode() === 'query' || selectedAgentType === 'query'
-                                ? 'Q'
-                                : getContextualAgentMode() === 'semantic-model' || selectedAgentType === 'semantic-model'
-                                  ? 'S'
-                                  : getContextualAgentMode() === 'dashboards' || selectedAgentType === 'dashboards'
-                                    ? 'D'
-                                    : 'A'
-                              }
-                            </span>
-                          </div>
-                          <span>
-                            {getContextualAgentMode() === 'query' || selectedAgentType === 'query'
-                              ? 'Query'
-                              : getContextualAgentMode() === 'semantic-model' || selectedAgentType === 'semantic-model'
-                                ? 'Semantic Model'
+                          {getContextualAgentMode() === 'query' || selectedAgentType === 'query'
+                            ? 'Q'
+                            : getContextualAgentMode() === 'semantic-model' || selectedAgentType === 'semantic-model'
+                              ? 'S'
+                              : getContextualAgentMode() === 'dashboards' || selectedAgentType === 'dashboards'
+                                ? 'D'
+                                : 'A'
+                          }
+                        </div>
+                        <span className="text-sm font-medium text-gray-700">
+                          {getContextualAgentMode() === 'query' || selectedAgentType === 'query'
+                            ? 'Query'
+                            : getContextualAgentMode() === 'semantic-model' || selectedAgentType === 'semantic-model'
+                              ? 'Semantic Model'
                               : getContextualAgentMode() === 'dashboards' || selectedAgentType === 'dashboards'
                                 ? 'Dashboards'
                                 : 'Assistant'
-                            }
-                          </span>
-                        </div>
-                        {!getContextualAgentMode() && selectedAgentType && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedAgentType(null);
-                              setIsGenerateMode(false);
-                            }}
-                            className="p-1 text-gray-400 hover:text-gray-600 rounded-sm"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        )}
+                          }
+                        </span>
                       </div>
+                    )}
+
+                    {/* Close Agent Button */}
+                    {!getContextualAgentMode() && selectedAgentType && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedAgentType(null);
+                          setIsGenerateMode(false);
+                        }}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
                     )}
                     <input
                       type="text"
@@ -1051,7 +1049,7 @@ compliance:
                       }
                       className={`w-full py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
                         getContextualAgentMode() || selectedAgentType
-                          ? 'pl-32 pr-4'
+                          ? (!getContextualAgentMode() && selectedAgentType ? 'pl-32 pr-12' : 'pl-32 pr-4')
                           : 'px-4'
                       } ${
                         getContextualAgentMode() === 'query' || selectedAgentType === 'query'

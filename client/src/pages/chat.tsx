@@ -608,10 +608,10 @@ compliance:
                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
-              title={isLeftSidebarCollapsed ? 'Home' : ''}
+              title={isLeftSidebarCollapsed ? 'New Chat' : ''}
             >
-              <Home className={`${isLeftSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-3'}`} />
-              {!isLeftSidebarCollapsed && <span>home</span>}
+              <MessageSquare className={`${isLeftSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-3'}`} />
+              {!isLeftSidebarCollapsed && <span>new chat</span>}
             </button>
             
             <button

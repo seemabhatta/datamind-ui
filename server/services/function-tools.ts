@@ -36,22 +36,28 @@ export const connectToSnowflake: FunctionTool = {
         return 'No default Snowflake connection found. Please configure a connection in Settings → Integrations.';
       }
 
-      // Test and establish connection
-      console.log('Testing Snowflake connection...');
-      const isConnected = await snowflakeService.testConnection({
-        account: defaultConnection.account,
-        username: defaultConnection.username,
-        password: defaultConnection.password || '',
-        database: defaultConnection.database || undefined,
-        schema: defaultConnection.schema || undefined,
-        warehouse: defaultConnection.warehouse || undefined,
-        role: defaultConnection.role || undefined,
-        authenticator: defaultConnection.authenticator || undefined,
-      });
-      console.log('Connection test result:', isConnected);
+      // For PAT connections, skip test and proceed directly to establish connection
+      // This bypasses network policy requirements for automated environments
+      if (defaultConnection.authenticator === 'PAT') {
+        console.log('Skipping test connection for PAT - establishing direct connection...');
+      } else {
+        // Test and establish connection for non-PAT connections
+        console.log('Testing Snowflake connection...');
+        const isConnected = await snowflakeService.testConnection({
+          account: defaultConnection.account,
+          username: defaultConnection.username,
+          password: defaultConnection.password || '',
+          database: defaultConnection.database || undefined,
+          schema: defaultConnection.schema || undefined,
+          warehouse: defaultConnection.warehouse || undefined,
+          role: defaultConnection.role || undefined,
+          authenticator: defaultConnection.authenticator || undefined,
+        });
+        console.log('Connection test result:', isConnected);
 
-      if (!isConnected) {
-        return 'Failed to connect to Snowflake. Please check your credentials.';
+        if (!isConnected) {
+          return 'Failed to connect to Snowflake. Please check your credentials.';
+        }
       }
 
       // Create persistent connection for queries

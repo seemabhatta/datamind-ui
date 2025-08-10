@@ -127,15 +127,15 @@ export const selectDatabase: FunctionTool = {
   },
   execute: async (context: AgentContext, params: any) => {
     try {
-      if (!context.connectionId) {
+      if (!context.snowflakeConfig) {
         return 'Not connected to Snowflake. Please connect first.';
       }
 
       const { database_name } = params;
       
       // Execute USE DATABASE command
-      await snowflakeService.executeQuery(
-        context.connectionId,
+      await snowflakeService.executeQueryWithConfig(
+        context.snowflakeConfig,
         `USE DATABASE "${database_name}"`
       );
 
@@ -145,6 +145,9 @@ export const selectDatabase: FunctionTool = {
 
       return `Selected database: ${database_name}`;
     } catch (error) {
+      if (error instanceof Error && error.message.includes('Multi-factor authentication')) {
+        return 'Query requires MFA approval. Please approve the authentication request in your Snowflake session and try again.';
+      }
       return `Error selecting database: ${error instanceof Error ? error.message : 'Unknown error'}`;
     }
   }
@@ -165,7 +168,7 @@ export const getSchemas: FunctionTool = {
   },
   execute: async (context: AgentContext, params: any) => {
     try {
-      if (!context.connectionId) {
+      if (!context.snowflakeConfig) {
         return 'Not connected to Snowflake. Please connect first.';
       }
 
@@ -174,8 +177,8 @@ export const getSchemas: FunctionTool = {
         return 'No database selected. Please select a database first.';
       }
 
-      const result = await snowflakeService.executeQuery(
-        context.connectionId,
+      const result = await snowflakeService.executeQueryWithConfig(
+        context.snowflakeConfig,
         `SHOW SCHEMAS IN DATABASE "${database}"`
       );
 
@@ -183,6 +186,9 @@ export const getSchemas: FunctionTool = {
       
       return `Available schemas in ${database} (${schemas.length}):\n${schemas.map((schema: string, i: number) => `${i + 1}. ${schema}`).join('\n')}`;
     } catch (error) {
+      if (error instanceof Error && error.message.includes('Multi-factor authentication')) {
+        return 'Query requires MFA approval. Please approve the authentication request in your Snowflake session and try again.';
+      }
       return `Error fetching schemas: ${error instanceof Error ? error.message : 'Unknown error'}`;
     }
   }
@@ -236,7 +242,7 @@ export const getTables: FunctionTool = {
   },
   execute: async (context: AgentContext, params: any) => {
     try {
-      if (!context.connectionId) {
+      if (!context.snowflakeConfig) {
         return 'Not connected to Snowflake. Please connect first.';
       }
 
@@ -244,8 +250,8 @@ export const getTables: FunctionTool = {
         return 'No database or schema selected. Please select both first.';
       }
 
-      const result = await snowflakeService.executeQuery(
-        context.connectionId,
+      const result = await snowflakeService.executeQueryWithConfig(
+        context.snowflakeConfig,
         `SHOW TABLES IN SCHEMA "${context.currentDatabase}"."${context.currentSchema}"`
       );
 
@@ -261,6 +267,9 @@ export const getTables: FunctionTool = {
       
       return `Available tables in ${context.currentDatabase}.${context.currentSchema} (${tables.length}):\n${tables.map((table: any, i: number) => `${i + 1}. ${table.name}`).join('\n')}`;
     } catch (error) {
+      if (error instanceof Error && error.message.includes('Multi-factor authentication')) {
+        return 'Query requires MFA approval. Please approve the authentication request in your Snowflake session and try again.';
+      }
       return `Error fetching tables: ${error instanceof Error ? error.message : 'Unknown error'}`;
     }
   }

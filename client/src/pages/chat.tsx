@@ -854,8 +854,8 @@ compliance:
                 {messages.length === 0 && (
                   <div className="text-center py-16">
                     <MessageSquare className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                    <h4 className="text-lg font-medium text-gray-900 mb-2">Welcome to Assistant Chat</h4>
-                    <p className="text-gray-500">Start a conversation with enhanced workspace for detailed interactions</p>
+                    <h4 className="text-lg font-medium text-gray-900 mb-2">Welcome to DataMind</h4>
+                    <p className="text-gray-500">Start by typing @ to explore our AI agents for data analysis, modeling, and visualization</p>
                   </div>
                 )}
                 

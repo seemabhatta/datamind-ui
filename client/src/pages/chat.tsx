@@ -352,9 +352,15 @@ export default function ChatPage() {
 
   // Available mentions for autocomplete - filtered by active agents
   const availableMentions = [
-    { id: 'domain-model', label: 'Semantic-Model', description: 'Semantic data modeling and relationships', icon: 'S', type: 'agent', active: agentStatuses['semantic-model'] },
-    { id: 'query', label: 'Query', description: 'SQL queries and data analysis', icon: 'Q', type: 'agent', active: agentStatuses['query'] },
-    { id: 'dashboards', label: 'Dashboards', description: 'Interactive dashboards and visualizations', icon: 'B', type: 'agent', active: agentStatuses['dashboards'] }
+    // Query agents
+    { id: 'nl2gpt', label: 'nl2gpt', description: 'Natural language to SQL conversion', icon: '🗃️', type: 'agent', active: agentStatuses['query'], category: 'query' },
+    { id: 'sql-intent', label: 'SQL Intent Identifier', description: 'Identify SQL query patterns and intents', icon: '🔍', type: 'agent', active: agentStatuses['query'], category: 'query' },
+    // Semantic model agents  
+    { id: 'data-dictionary', label: 'Data Dictionary Builder', description: 'Build comprehensive data dictionaries', icon: '📚', type: 'agent', active: agentStatuses['semantic-model'], category: 'semantic-model' },
+    { id: 'profile-matcher', label: 'Profile Matcher Recruiter', description: 'Match data profiles and patterns', icon: '👥', type: 'agent', active: agentStatuses['semantic-model'], category: 'semantic-model' },
+    // Dashboard agents
+    { id: 'astrology-birth-chart', label: 'Astrology Birth Chart CDT', description: 'Generate astrological data visualizations', icon: '🌟', type: 'agent', active: agentStatuses['dashboards'], category: 'dashboards' },
+    { id: 'chart-generator', label: 'Chart Generator Pro', description: 'Create advanced data visualizations', icon: '📊', type: 'agent', active: agentStatuses['dashboards'], category: 'dashboards' }
   ].filter(mention => mention.active);
 
   // Handle @mention input detection and autocomplete

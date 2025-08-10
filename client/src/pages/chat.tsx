@@ -358,7 +358,7 @@ export default function ChatPage() {
 
   // Available mentions for autocomplete - filtered by active agents
   const availableMentions = [
-    { id: 'domain-model', label: 'Semantic-Model', description: 'Semantic data modeling and relationships', icon: 'S', type: 'agent', active: agentStatuses['semantic-model'] },
+    { id: 'domain-model', label: 'Ontology', description: 'Semantic data modeling and relationships', icon: 'O', type: 'agent', active: agentStatuses['semantic-model'] },
     { id: 'query', label: 'Query', description: 'SQL queries and data analysis', icon: 'Q', type: 'agent', active: agentStatuses['query'] },
     { id: 'dashboards', label: 'Dashboards', description: 'Interactive dashboards and visualizations', icon: 'B', type: 'agent', active: agentStatuses['dashboards'] }
   ].filter(mention => mention.active);
@@ -401,7 +401,7 @@ export default function ChatPage() {
     
     // Check for specific mentions to set modes (but don't activate if we just cleared the input)
     if (value.trim().length > 0) {
-      setIsGenerateMode(value.includes('@semantic-model') || value.includes('@dashboards'));
+      setIsGenerateMode(value.includes('@ontology') || value.includes('@dashboards'));
     } else {
       setIsGenerateMode(false);
     }
@@ -423,7 +423,7 @@ export default function ChatPage() {
     setChatInput(newValue);
     setShowMentionDropdown(false);
     setSelectedAgentType(mention.label.toLowerCase());
-    setIsGenerateMode(mention.label.toLowerCase() === 'semantic-model' || mention.label.toLowerCase() === 'dashboards');
+    setIsGenerateMode(mention.label.toLowerCase() === 'ontology' || mention.label.toLowerCase() === 'dashboards');
   };
 
   // Handle keyboard navigation in mention dropdown
@@ -709,18 +709,18 @@ compliance:
                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
-              title={isLeftSidebarCollapsed ? 'Semantic Model' : ''}
+              title={isLeftSidebarCollapsed ? 'Ontology' : ''}
             >
               {isLeftSidebarCollapsed ? (
                 <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
-                  <span className="text-xs font-bold text-white">S</span>
+                  <span className="text-xs font-bold text-white">O</span>
                 </div>
               ) : (
                 <>
                   <div className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center mr-3">
-                    <span className="text-xs font-bold text-white">S</span>
+                    <span className="text-xs font-bold text-white">O</span>
                   </div>
-                  <span>semantic model</span>
+                  <span>ontology</span>
                 </>
               )}
             </button>
@@ -1034,7 +1034,7 @@ compliance:
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold ${
                         getContextualAgentMode() === 'query' || selectedAgentType === 'query'
                           ? 'bg-green-500'
-                          : getContextualAgentMode() === 'semantic-model' || selectedAgentType === 'semantic-model'
+                          : getContextualAgentMode() === 'semantic-model' || selectedAgentType === 'ontology'
                             ? 'bg-blue-500'
                             : getContextualAgentMode() === 'dashboards' || selectedAgentType === 'dashboards'
                               ? 'bg-purple-500'
@@ -1042,8 +1042,8 @@ compliance:
                       }`}>
                         {getContextualAgentMode() === 'query' || selectedAgentType === 'query'
                           ? 'Q'
-                          : getContextualAgentMode() === 'semantic-model' || selectedAgentType === 'semantic-model'
-                            ? 'S'
+                          : getContextualAgentMode() === 'semantic-model' || selectedAgentType === 'ontology'
+                            ? 'O'
                             : getContextualAgentMode() === 'dashboards' || selectedAgentType === 'dashboards'
                               ? 'D'
                               : 'A'
@@ -1052,8 +1052,8 @@ compliance:
                       <span className="text-sm font-medium text-gray-700">
                         {getContextualAgentMode() === 'query' || selectedAgentType === 'query'
                           ? 'Query Agent'
-                          : getContextualAgentMode() === 'semantic-model' || selectedAgentType === 'semantic-model'
-                            ? 'Semantic Model Agent'
+                          : getContextualAgentMode() === 'semantic-model' || selectedAgentType === 'ontology'
+                            ? 'Ontology Agent'
                             : getContextualAgentMode() === 'dashboards' || selectedAgentType === 'dashboards'
                               ? 'Dashboards Agent'
                               : 'Assistant'
@@ -1091,7 +1091,7 @@ compliance:
                       className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
                         getContextualAgentMode() === 'query' || selectedAgentType === 'query'
                           ? 'border-green-400 bg-green-50 focus:ring-green-500 text-green-900 placeholder-green-600'
-                          : getContextualAgentMode() === 'semantic-model' || selectedAgentType === 'semantic-model'
+                          : getContextualAgentMode() === 'semantic-model' || selectedAgentType === 'ontology'
                             ? 'border-blue-400 bg-blue-50 focus:ring-blue-500 text-blue-900 placeholder-blue-600'
                             : getContextualAgentMode() === 'dashboards' || selectedAgentType === 'dashboards'
                               ? 'border-purple-400 bg-purple-50 focus:ring-purple-500 text-purple-900 placeholder-purple-600'

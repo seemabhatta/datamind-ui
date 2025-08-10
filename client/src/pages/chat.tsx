@@ -291,7 +291,7 @@ export default function ChatPage() {
     }
     
     // Auto-detect context and set mode
-    // Use contextual agent mode, selected agent, or detect from input
+    // Use contextual agent mode, selected agent, or default to general
     const detectedMode = getContextualAgentMode() ? 
       (getContextualAgentMode() === 'query' ? 'query' : 
        getContextualAgentMode() === 'semantic-model' ? 'model' : 
@@ -300,7 +300,7 @@ export default function ChatPage() {
         (selectedAgentType === 'query' ? 'query' :
          selectedAgentType === 'ontology' ? 'model' : 
          selectedAgentType === 'dashboards' ? 'dashboard' : 'general')
-      : detectContextMode(messageContent);
+      : 'general'; // Default to general assistant for all chat conversations
     setAgentMode(detectedMode);
     
     setChatInput('');

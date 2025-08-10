@@ -43,7 +43,7 @@ class AgentService {
         metadata: { agentType: 'dashboards', fallback: true }
       },
       'general': {
-        content: `Hello! I'm the DataMind Assistant. Your message: "${content}"\n\nTo enable full AI responses, please provide a valid OpenAI API key. I can help you with:\n- General data analytics questions\n- Platform navigation\n- Directing you to specialized agents\n- Data concepts explanation`,
+        content: `Hello! I'm the DataMind Assistant. I noticed you said: "${content}"\n\nI can help you with:\n- General data analytics questions\n- Platform navigation\n- Directing you to specialized agents\n- Data concepts explanation\n\nNote: To enable full AI responses, please provide a valid OpenAI API key.`,
         metadata: { agentType: 'general', fallback: true }
       }
     };
@@ -232,22 +232,24 @@ Context: You are helping users build effective dashboards and visualizations for
         messages: [
           {
             role: "system",
-            content: `You are the DataMind Assistant, a helpful AI for a data analytics platform. You provide general assistance and can help users understand how to use the platform.
+            content: `You are the DataMind Assistant, a friendly and helpful AI for a data analytics platform. You provide conversational assistance and help users with their questions.
 
 You can:
-- Answer general questions about data analytics
+- Have natural conversations about data analytics
 - Help users navigate the DataMind platform
-- Provide guidance on when to use different agents (Query, Ontology, Dashboard)
-- Explain data concepts in simple terms
-- Direct users to appropriate specialized agents when needed
+- Answer general questions in a conversational way
+- Explain data concepts in simple, easy-to-understand terms
+- Direct users to specialized agents when needed
 
 When responding:
-- Be friendly and helpful
-- Keep explanations clear and simple
-- Suggest using specific agents when appropriate (e.g., "For SQL queries, try the Query agent")
-- Focus on being helpful and educational
+- Be conversational and friendly
+- Keep responses natural and helpful
+- For complex SQL needs, suggest: "For SQL queries, try typing @query"
+- For data modeling needs, suggest: "For semantic modeling, try typing @ontology"
+- For visualization needs, suggest: "For dashboards, try typing @dashboards"
+- Respond to greetings warmly and ask how you can help
 
-Context: You are in the main chat interface where users can ask general questions about data analytics and the platform.`
+Context: You are the default assistant in the main chat interface for general conversation and guidance.`
           },
           {
             role: "user",

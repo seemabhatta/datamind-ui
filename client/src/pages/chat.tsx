@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { BarChart3, MessageSquare, Home, Database, ChevronLeft, ChevronRight, Minimize2, Maximize2, X, Zap, BookOpen, Settings, Cloud, Link, Send, GraduationCap, ChevronDown, Upload, Plus, Play, Save, Eye, Edit3, Brain, Search, Trash2, Check, Square, Bot } from 'lucide-react';
@@ -44,6 +44,9 @@ export default function ChatPage() {
     'query': true,
     'dashboards': true
   });
+
+  // Ref for the dropdown to handle click outside
+  const mentionDropdownRef = useRef<HTMLDivElement>(null);
 
   // Get context-aware agent mode based on current view
   const getContextualAgentMode = () => {
@@ -155,11 +158,15 @@ export default function ChatPage() {
       if (isPlusDropdownOpen && !target.closest('.plus-dropdown-container')) {
         setIsPlusDropdownOpen(false);
       }
+      
+      if (showMentionDropdown && !target.closest('.mention-dropdown-container')) {
+        setShowMentionDropdown(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isProfileDropdownOpen, isPlusDropdownOpen]);
+  }, [isProfileDropdownOpen, isPlusDropdownOpen, showMentionDropdown]);
 
   // WebSocket connection for real-time updates
   useEffect(() => {
@@ -1149,7 +1156,7 @@ compliance:
                     
                     {/* @mention Autocomplete Dropdown - only show if not in contextual mode */}
                     {!getContextualAgentMode() && showMentionDropdown && filteredMentions.length > 0 && (
-                      <div className="absolute bottom-full mb-2 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto z-50">
+                      <div className="mention-dropdown-container absolute bottom-full mb-2 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto z-50">
                         <div className="px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide border-b border-gray-100">
                           @agents
                         </div>

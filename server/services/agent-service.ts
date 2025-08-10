@@ -4,6 +4,8 @@ import { visualizationService } from './visualization-service';
 import OpenAI from 'openai';
 import { storage } from '../storage';
 import { snowflakeService } from './snowflake-service';
+import { agentContextManager, AgentContext } from './agent-context';
+import { availableFunctionTools, getFunctionTool } from './function-tools';
 
 interface AgentResponse {
   content: string;
@@ -50,7 +52,7 @@ class AgentService {
       }
     };
     
-    return responses[agentType] || responses['general'];
+    return responses[agentType as keyof typeof responses] || responses['general'];
   }
 
   async processMessage(content: string, agentType: 'query' | 'yaml' | 'dashboards' | 'general', sessionId: string): Promise<AgentResponse> {
@@ -69,65 +71,90 @@ class AgentService {
       console.error('Error processing agent message:', error);
       return {
         content: 'I apologize, but I encountered an error processing your request. Please try again or rephrase your question.',
-        metadata: { error: error.message }
+        metadata: { error: error instanceof Error ? error.message : 'Unknown error' }
       };
     }
   }
 
   private async processQueryAgent(content: string, sessionId: string): Promise<AgentResponse> {
     try {
-      // Check if this looks like a SQL query and we have a Snowflake connection
-      const sqlQueryPattern = /\b(SELECT|WITH|SHOW|DESCRIBE|DESC)\b/i;
+      // Get or create agent context
+      const userId = '0d493db8-bfed-4dd0-ab40-ae8a3225f8a5'; // TODO: Get from session
+      const context = await agentContextManager.getContext(sessionId, userId);
+
+      // Add user message to history
+      await agentContextManager.addToHistory(sessionId, {
+        role: 'user',
+        content,
+        timestamp: new Date()
+      });
+
+      // Check for function calls (commands like "connect", "show tables", etc.)
+      const functionResponse = await this.processFunctionCall(content, context);
+      if (functionResponse) {
+        return functionResponse;
+      }
+
+      // Check if this looks like a direct SQL query
+      const sqlQueryPattern = /\b(SELECT|WITH|SHOW|DESCRIBE|DESC|INSERT|UPDATE|DELETE|CREATE|DROP|ALTER)\b/i;
       const isDirectSQLQuery = sqlQueryPattern.test(content.trim());
       
-      if (isDirectSQLQuery) {
-        // Try to execute on Snowflake if available
+      if (isDirectSQLQuery && context.connectionId) {
+        // Execute directly on Snowflake
         try {
-          const connections = await storage.getSnowflakeConnections(sessionId); // Using sessionId as placeholder for userId
-          const defaultConnection = connections.find(c => c.isDefault && c.isActive);
+          const executeTool = getFunctionTool('execute_sql');
+          const result = await executeTool!.execute(context, { sql: content.trim() });
           
-          if (defaultConnection) {
-            // Execute the query on Snowflake
-            const result = await this.executeSnowflakeQuery(defaultConnection.id, content);
-            
-            return {
-              content: `Successfully executed your Snowflake query!\n\n**Query:** \`\`\`sql\n${content}\n\`\`\`\n\n**Results:** ${result.rows?.length || 0} rows returned\n\nFirst few rows:\n${this.formatQueryResults(result)}`,
-              metadata: {
-                model: "snowflake-execution",
-                agentType: "query",
-                sessionId,
-                queryResult: result
-              }
-            };
-          }
+          return {
+            content: result,
+            metadata: {
+              model: "function-tool",
+              agentType: "query",
+              sessionId,
+              functionCall: "execute_sql"
+            }
+          };
         } catch (snowflakeError) {
-          console.log('Snowflake execution failed, falling back to AI assistant');
+          console.log('Direct SQL execution failed:', snowflakeError);
         }
       }
 
-      // Use OpenAI to process the query
+      // Use OpenAI with enhanced context
+      const contextSummary = agentContextManager.getContextSummary(context);
+      
       const response = await this.openai.chat.completions.create({
-        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        model: "gpt-4o",
         messages: [
           {
             role: "system",
-            content: `You are a Query Agent for DataMind, a data analytics platform. Your role is to help users with SQL queries and data analysis. 
+            content: `You are a Query Agent for DataMind, a data analytics platform. You help users with natural language queries, SQL generation, and data analysis.
 
-You can:
-- Help write SQL queries for various databases (PostgreSQL, MySQL, Snowflake, etc.)
-- Explain query results and concepts
-- Suggest query optimizations
-- Provide insights about data analysis patterns
-- Generate SQL from natural language descriptions
+CAPABILITIES:
+- Convert natural language to SQL queries  
+- Execute queries on connected Snowflake databases
+- Explain query results and provide insights
+- Guide users through database exploration
+- Help with semantic data modeling
 
-When responding:
-- Be conversational and helpful
-- Explain your reasoning clearly
-- Provide practical SQL examples when relevant
-- If generating SQL, make it compatible with Snowflake syntax
-- Consider common data warehouse patterns
+FUNCTION TOOLS AVAILABLE:
+${availableFunctionTools.map(tool => `- ${tool.name}: ${tool.description}`).join('\n')}
 
-Context: You are in a chat interface where users can ask questions about their data and SQL queries. Users may have Snowflake connections configured.`
+BEHAVIOR GUIDELINES:
+- Be proactive and action-oriented
+- If user asks to connect/explore data, suggest specific function calls
+- For queries that need database context, help guide them through connection setup
+- When suggesting SQL, consider Snowflake syntax and best practices
+- Use the current context to provide relevant suggestions
+
+${contextSummary}
+
+EXAMPLES OF FUNCTION CALLS:
+- "connect to snowflake" → suggest using connect_to_snowflake()
+- "show me databases" → suggest using get_databases()  
+- "list tables" → suggest using get_tables()
+- "generate SQL for X" → use current schema context with generate_sql()
+
+Respond naturally but mention when function tools would help accomplish their goal.`
           },
           {
             role: "user", 
@@ -140,6 +167,13 @@ Context: You are in a chat interface where users can ask questions about their d
 
       const responseContent = response.choices[0].message.content || "I'm sorry, I couldn't process your request.";
 
+      // Add assistant response to history
+      await agentContextManager.addToHistory(sessionId, {
+        role: 'assistant',
+        content: responseContent,
+        timestamp: new Date()
+      });
+
       return {
         content: responseContent,
         metadata: {
@@ -150,9 +184,86 @@ Context: You are in a chat interface where users can ask questions about their d
       };
     } catch (error) {
       console.error('Query agent error:', error);
-      // Return fallback response if OpenAI fails
       return this.getFallbackResponse('query', content);
     }
+  }
+
+  private async processFunctionCall(content: string, context: AgentContext): Promise<AgentResponse | null> {
+    const lowercaseContent = content.toLowerCase().trim();
+    
+    // Simple command detection - can be enhanced with NLP
+    const commandMap = [
+      { patterns: ['connect', 'connect to snowflake', 'establish connection'], tool: 'connect_to_snowflake', params: {} },
+      { patterns: ['show databases', 'list databases', 'get databases'], tool: 'get_databases', params: {} },
+      { patterns: ['show schemas', 'list schemas', 'get schemas'], tool: 'get_schemas', params: {} },
+      { patterns: ['show tables', 'list tables', 'get tables'], tool: 'get_tables', params: {} },
+      { patterns: ['current context', 'show context', 'what is my context'], tool: 'get_current_context', params: {} }
+    ];
+
+    for (const command of commandMap) {
+      if (command.patterns.some(pattern => lowercaseContent.includes(pattern))) {
+        const tool = getFunctionTool(command.tool);
+        if (tool) {
+          try {
+            const result = await tool.execute(context, command.params);
+            
+            await agentContextManager.addToHistory(context.sessionId, {
+              role: 'function',
+              content: result,
+              functionCall: command.tool,
+              timestamp: new Date()
+            });
+
+            return {
+              content: result,
+              metadata: {
+                model: "function-tool",
+                agentType: "query",
+                sessionId: context.sessionId,
+                functionCall: command.tool
+              }
+            };
+          } catch (error) {
+            return {
+              content: `Error executing ${command.tool}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+              metadata: {
+                model: "function-tool",
+                agentType: "query", 
+                sessionId: context.sessionId,
+                error: true
+              }
+            };
+          }
+        }
+      }
+    }
+
+    // Check for database/schema selection patterns
+    const selectDbMatch = lowercaseContent.match(/(?:select|use|choose)\s+database\s+(\w+)/);
+    if (selectDbMatch) {
+      const tool = getFunctionTool('select_database');
+      if (tool) {
+        const result = await tool.execute(context, { database_name: selectDbMatch[1] });
+        return {
+          content: result,
+          metadata: { model: "function-tool", agentType: "query", sessionId: context.sessionId, functionCall: "select_database" }
+        };
+      }
+    }
+
+    const selectSchemaMatch = lowercaseContent.match(/(?:select|use|choose)\s+schema\s+(\w+)/);
+    if (selectSchemaMatch) {
+      const tool = getFunctionTool('select_schema');
+      if (tool) {
+        const result = await tool.execute(context, { schema_name: selectSchemaMatch[1] });
+        return {
+          content: result,
+          metadata: { model: "function-tool", agentType: "query", sessionId: context.sessionId, functionCall: "select_schema" }
+        };
+      }
+    }
+
+    return null;
   }
 
   private async executeSnowflakeQuery(connectionId: string, sqlText: string): Promise<any> {
@@ -451,7 +562,7 @@ Context: You are the default assistant in the main chat interface for general co
       }
     } catch (error) {
       console.error('Error parsing agent output:', error);
-      return { content: output, error: error.message };
+      return { content: output, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 

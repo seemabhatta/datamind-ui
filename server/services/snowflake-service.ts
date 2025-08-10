@@ -129,7 +129,7 @@ export class SnowflakeService {
       const connection = snowflake.createConnection({
         account: 'KIXUIIJ-MTC00254',
         username: 'NL2SQL_CHAT_SVC',
-        password: 'eyJraWQiOiI5MDcxMDE4MTczOTY4MzkwIiwiYWxnIjoiRVMyNTYifQ.eyJwIjoiNTQwNjc0OTgwOjEzODQxMjc1MzI4NSIsImlzcyI6IlNGOjEwNTYiLCJleHAiOjE3NTYxNDk0MjF9._1GHsThId_cGuw4WUwYCh2NZ3DPZmrviQRxbwqJ7t_uQ2FFymuJwBt3Cf6zM-2-vesNh580UeXQjdsJ8gC5pHA',
+        password: 'eyJraWQiOiI5MDcxMDE4MTczOTY4MzkwIiwiYWxnIjoiRVMyNTYifQ.eyJwIjoiNTQwNjc0OTgwOjEzODQxMjc1MzQxMyIsImlzcyI6IlNGOjEwNTYiLCJleHAiOjE3NTYxNTI4NzZ9.zW9Y7RY7KwOuGmpK7KkO13xQJIW8JQ-pqu7jLUQRi7DMSwnm7MWNYNxyNG1ohF95G1q4GbqlwPXMltVrwc3QSQ',
         database: 'CORTES_DEMO_2',
         schema: 'CORTEX_DEMO',
         warehouse: 'CORTEX_ANALYST_WH',

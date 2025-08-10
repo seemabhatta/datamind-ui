@@ -52,6 +52,22 @@ export const connectToSnowflake: FunctionTool = {
         return 'Failed to connect to Snowflake. Please check your credentials.';
       }
 
+      // Create persistent connection for queries
+      const connectionCreated = await snowflakeService.createConnection(defaultConnection.id, {
+        account: defaultConnection.account,
+        username: defaultConnection.username,
+        password: defaultConnection.password || '',
+        database: defaultConnection.database || undefined,
+        schema: defaultConnection.schema || undefined,
+        warehouse: defaultConnection.warehouse || undefined,
+        role: defaultConnection.role || undefined,
+        authenticator: defaultConnection.authenticator || undefined,
+      });
+
+      if (!connectionCreated) {
+        return 'Failed to create persistent Snowflake connection.';
+      }
+
       await agentContextManager.updateContext(context.sessionId, {
         connectionId: defaultConnection.id,
         currentDatabase: defaultConnection.database || undefined,

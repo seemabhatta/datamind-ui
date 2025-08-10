@@ -905,7 +905,7 @@ compliance:
                     {showMentionDropdown && filteredMentions.length > 0 && (
                       <div className="absolute bottom-full mb-2 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto z-50">
                         <div className="px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide border-b border-gray-100">
-                          Mentions
+                          @agents
                         </div>
                         {filteredMentions.map((mention, index) => (
                           <button

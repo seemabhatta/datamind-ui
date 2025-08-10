@@ -12,7 +12,7 @@ Left sidebar: Collapsible navigation with dashboard/studio/models/trainings as t
 Models section: Semantic data modeling interface where users select data sources (configured in settings), browse available tables/views/folders, select multiple objects, and create semantic models with relationships and configurations.
 Assistant panel: Should be minimizable/maximizable for better workspace management. Maximize should open fullscreen overlay mode.
 Context-aware assistant: Agent modes (model/query/dashboard) are automatically detected based on current navigation selection (dashboard/studio/integrations/trainings) combined with user input keywords. No mode indicators needed - intelligence is completely transparent.
-@mention system: Implemented comprehensive @mention autocomplete with dropdown suggestions, keyboard navigation (arrow keys + Enter/Escape), visual feedback with icons and descriptions, and intelligent context switching for different agent types (@generate, @query, @chart, @model, @datamind).
+@mention system: Implemented comprehensive @mention autocomplete with dropdown suggestions, keyboard navigation (arrow keys + Enter/Escape), clean letter-based icons (no emojis), and intelligent context switching for different agent types (@generate, @query, @chart, @model, @datamind). Removed plus button in favor of @mention workflow.
 
 ## System Architecture
 

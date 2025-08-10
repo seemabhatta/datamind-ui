@@ -317,11 +317,11 @@ export default function ChatPage() {
 
   // Available mentions for autocomplete
   const availableMentions = [
-    { id: 'generate', label: 'Generate', description: 'AI content generation', icon: '🧠', type: 'agent' },
-    { id: 'query', label: 'Query', description: 'Data analysis and SQL queries', icon: '🔍', type: 'agent' },
-    { id: 'chart', label: 'Chart', description: 'Create visualizations', icon: '📊', type: 'agent' },
-    { id: 'model', label: 'Model', description: 'AI model management', icon: '🤖', type: 'agent' },
-    { id: 'datamind', label: 'DataMind', description: 'General assistant', icon: '💡', type: 'assistant' }
+    { id: 'generate', label: 'Generate', description: 'AI content generation', icon: 'G', type: 'agent' },
+    { id: 'query', label: 'Query', description: 'Data analysis and SQL queries', icon: 'Q', type: 'agent' },
+    { id: 'chart', label: 'Chart', description: 'Create visualizations', icon: 'C', type: 'agent' },
+    { id: 'model', label: 'Model', description: 'AI model management', icon: 'M', type: 'agent' },
+    { id: 'datamind', label: 'DataMind', description: 'General assistant', icon: 'D', type: 'assistant' }
   ];
 
   // Handle @mention input detection and autocomplete
@@ -405,31 +405,7 @@ export default function ChatPage() {
     setSelectedMentionIndex(0);
   }, [currentMentionQuery, showMentionDropdown]);
 
-  const handlePlusOption = (option: 'generate' | 'query' | 'upload') => {
-    if (option === 'generate') {
-      setChatInput('@generate ');
-      setIsGenerateMode(true);
-    } else if (option === 'query') {
-      setChatInput('@query ');
-      setIsGenerateMode(false);
-    } else if (option === 'upload') {
-      // Trigger file input
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.multiple = true;
-      input.accept = '.csv,.json,.xlsx,.txt,.pdf';
-      input.onchange = (e) => {
-        const target = e.target as HTMLInputElement;
-        if (target.files) {
-          const newFiles = Array.from(target.files);
-          setUploadedFiles(prev => [...prev, ...newFiles]);
-          setChatInput(prev => prev + `Uploaded ${newFiles.length} file(s): ${newFiles.map(f => f.name).join(', ')}. `);
-        }
-      };
-      input.click();
-    }
-    setIsPlusDropdownOpen(false);
-  };
+
 
   const removeUploadedFile = (index: number) => {
     setUploadedFiles(prev => prev.filter((_, i) => i !== index));
@@ -910,52 +886,6 @@ compliance:
                   </div>
                 )}
                 <form onSubmit={handleChatSubmit} className="flex space-x-4">
-                  <div className="relative plus-dropdown-container">
-                    <button
-                      type="button"
-                      onClick={() => setIsPlusDropdownOpen(!isPlusDropdownOpen)}
-                      className="px-3 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <Plus className="w-5 h-5 text-gray-600" />
-                    </button>
-                    
-                    {isPlusDropdownOpen && (
-                      <div className="absolute bottom-full mb-2 left-0 bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-[160px] z-10">
-                        <div className="px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide border-b border-gray-100">
-                          Agent Tools
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handlePlusOption('generate')}
-                          className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
-                        >
-                          <Brain className="w-4 h-4" />
-                          <span>Generate</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handlePlusOption('query')}
-                          className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
-                        >
-                          <Search className="w-4 h-4" />
-                          <span>Query</span>
-                        </button>
-                        <div className="border-t border-gray-100 my-1"></div>
-                        <div className="px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
-                          Attachments
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handlePlusOption('upload')}
-                          className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
-                        >
-                          <Upload className="w-4 h-4" />
-                          <span>Upload File</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  
                   <div className="relative flex-1">
                     <input
                       type="text"
@@ -986,7 +916,9 @@ compliance:
                               index === selectedMentionIndex ? 'bg-blue-50 border-l-2 border-blue-500' : ''
                             }`}
                           >
-                            <span className="text-lg">{mention.icon}</span>
+                            <div className="w-8 h-8 bg-gray-100 rounded-md flex items-center justify-center">
+                              <span className="text-sm font-medium text-gray-600">{mention.icon}</span>
+                            </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center space-x-2">
                                 <span className="font-medium text-gray-900">@{mention.label.toLowerCase()}</span>

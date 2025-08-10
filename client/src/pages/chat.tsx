@@ -317,11 +317,10 @@ export default function ChatPage() {
 
   // Available mentions for autocomplete
   const availableMentions = [
-    { id: 'generate', label: 'Generate', description: 'AI content generation', icon: 'G', type: 'agent' },
-    { id: 'query', label: 'Query', description: 'Data analysis and SQL queries', icon: 'Q', type: 'agent' },
-    { id: 'chart', label: 'Chart', description: 'Create visualizations', icon: 'C', type: 'agent' },
-    { id: 'model', label: 'Model', description: 'AI model management', icon: 'M', type: 'agent' },
-    { id: 'datamind', label: 'DataMind', description: 'General assistant', icon: 'D', type: 'assistant' }
+    { id: 'domain-model', label: 'Domain-Model', description: 'Semantic data modeling and relationships', icon: 'D', type: 'agent' },
+    { id: 'query', label: 'Query', description: 'SQL queries and data analysis', icon: 'Q', type: 'agent' },
+    { id: 'agent-hub', label: 'Agent-Hub', description: 'Central agent management and coordination', icon: 'A', type: 'agent' },
+    { id: 'dashboards', label: 'Dashboards', description: 'Interactive dashboards and visualizations', icon: 'B', type: 'agent' }
   ];
 
   // Handle @mention input detection and autocomplete
@@ -354,7 +353,7 @@ export default function ChatPage() {
     }
     
     // Check for specific mentions to set modes
-    setIsGenerateMode(value.includes('@generate'));
+    setIsGenerateMode(value.includes('@domain-model') || value.includes('@dashboards'));
   };
 
   // Filter mentions based on query
@@ -371,7 +370,7 @@ export default function ChatPage() {
     
     setChatInput(newValue);
     setShowMentionDropdown(false);
-    setIsGenerateMode(newValue.includes('@generate'));
+    setIsGenerateMode(newValue.includes('@domain-model') || newValue.includes('@dashboards'));
   };
 
   // Handle keyboard navigation in mention dropdown
@@ -892,7 +891,7 @@ compliance:
                       value={chatInput}
                       onChange={(e) => handleInputChange(e.target.value)}
                       onKeyDown={handleKeyDown}
-                      placeholder={isGenerateMode ? "What would you like me to generate?" : "Ask me anything... (Type @ for suggestions)"}
+                      placeholder={isGenerateMode ? "What would you like me to help you with?" : "Ask me anything... (Type @ for agents)"}
                       className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
                         isGenerateMode 
                           ? 'border-blue-400 bg-blue-50 focus:ring-blue-500 text-blue-900 placeholder-blue-600'

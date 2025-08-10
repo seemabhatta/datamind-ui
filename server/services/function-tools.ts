@@ -105,7 +105,18 @@ export const getDatabases: FunctionTool = {
       return `Available databases (${databases.length}):\n${databases.map((db: string, i: number) => `${i + 1}. ${db}`).join('\n')}`;
     } catch (error) {
       if (error instanceof Error && error.message.includes('Multi-factor authentication')) {
-        return 'Query requires MFA approval. Please approve the authentication request in your Snowflake session and try again.';
+        return `🔐 **MFA Authentication Required**
+
+Your Snowflake account requires multi-factor authentication for queries.
+
+**Next Steps:**
+1. Check your Snowflake mobile app or SMS for an authentication request
+2. Approve the MFA prompt 
+3. Try your query again within a few minutes
+
+**Alternative:** You can also run queries directly in Snowsight and share results here for analysis.
+
+**Note:** MFA approval is typically valid for your session duration.`;
       }
       return `Error fetching databases: ${error instanceof Error ? error.message : 'Unknown error'}`;
     }

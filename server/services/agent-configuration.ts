@@ -142,14 +142,17 @@ export class AgentConfigurationService {
     try {
       // Check if configuration was passed in headers from frontend
       const configHeader = headers?.['x-agent-config'];
+      console.log('Agent config header received:', configHeader ? 'YES' : 'NO');
       if (configHeader) {
         const parsed = JSON.parse(decodeURIComponent(configHeader));
+        console.log('Parsed agent configuration:', JSON.stringify(parsed, null, 2));
         return { ...this.defaultConfig, ...parsed };
       }
     } catch (error) {
-      console.log('Failed to parse agent configuration from headers, using defaults');
+      console.log('Failed to parse agent configuration from headers, using defaults:', error);
     }
     
+    console.log('Using default agent configuration');
     return this.defaultConfig;
   }
 
@@ -159,16 +162,20 @@ export class AgentConfigurationService {
   getAvailableToolsForAgent(agentType: string, userConfig: UserAgentConfiguration): FunctionToolDefinition[] {
     const agent = userConfig.agents.find(a => a.agentType === agentType);
     if (!agent || !agent.enabled) {
+      console.log(`Agent ${agentType} not found or disabled`);
       return [];
     }
 
     const enabledToolNames = new Set(
       agent.tools.filter(toolName => {
         const toolConfig = userConfig.tools.find(t => t.name === toolName);
-        return toolConfig?.enabled !== false; // Default to enabled if not specified
+        const isEnabled = toolConfig?.enabled !== false; // Default to enabled if not specified
+        console.log(`Tool ${toolName}: ${isEnabled ? 'ENABLED' : 'DISABLED'} (config: ${JSON.stringify(toolConfig)})`);
+        return isEnabled;
       })
     );
 
+    console.log(`Available tools for ${agentType}:`, Array.from(enabledToolNames));
     return enhancedFunctionTools.filter(tool => enabledToolNames.has(tool.name));
   }
 

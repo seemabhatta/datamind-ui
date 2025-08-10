@@ -331,7 +331,7 @@ export default function ChatPage() {
         }));
         
         // Get agent configuration from localStorage
-        const agentConfig = localStorage.getItem('agent-configuration');
+        const agentConfig = localStorage.getItem(`agentConfig_${userId}`);
         let headers = {};
         if (agentConfig) {
           headers['x-agent-config'] = encodeURIComponent(agentConfig);

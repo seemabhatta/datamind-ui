@@ -14,7 +14,7 @@ interface Message {
 
 export default function ChatPage() {
   const [currentView, setCurrentView] = useState<'chat' | 'dashboards' | 'query' | 'domain-model' | 'chats' | 'settings'>('chat');
-  const [agentMode, setAgentMode] = useState<'model' | 'query' | 'dashboard'>('query');
+  const [agentMode, setAgentMode] = useState<'model' | 'query' | 'dashboard' | 'general'>('general');
   const [currentSessionId, setCurrentSessionId] = useState<string>('');
   const [currentSessionInfo, setCurrentSessionInfo] = useState<any>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -309,12 +309,19 @@ export default function ChatPage() {
     setIsLoading(true);
 
     try {
-      // Send message via WebSocket
+      // Use existing WebSocket connection for sending messages
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       const wsUrl = `${protocol}//${window.location.host}/ws`;
       const socket = new WebSocket(wsUrl);
 
       socket.onopen = () => {
+        // First join the session
+        socket.send(JSON.stringify({
+          type: 'join_session',
+          sessionId: sessionId
+        }));
+        
+        // Then send the message
         socket.send(JSON.stringify({
           type: 'chat_message',
           sessionId: sessionId,
@@ -324,7 +331,25 @@ export default function ChatPage() {
                     detectedMode === 'dashboard' ? 'dashboards' : 'general',
           userId: userId
         }));
-        socket.close();
+      };
+
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log('Received:', data);
+        
+        if (data.type === 'message_saved') {
+          setMessages(prev => [...prev, data.message]);
+        } else if (data.type === 'agent_response') {
+          setMessages(prev => [...prev, data.message]);
+          setIsLoading(false);
+          socket.close();
+        } else if (data.type === 'agent_typing') {
+          setIsLoading(data.isTyping);
+        } else if (data.type === 'error') {
+          setIsLoading(false);
+          console.error('Agent error:', data.message);
+          socket.close();
+        }
       };
 
       socket.onerror = (error) => {

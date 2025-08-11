@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
@@ -58,6 +58,12 @@ interface AgentHubSettingsProps {
 
 export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
   const [activeTab, setActiveTab] = useState<'tools' | 'prompts' | 'agents' | 'mentions'>('tools');
+
+  // Load saved configuration
+  const { data: savedConfig, isLoading } = useQuery({
+    queryKey: ['/api/agent-config', userId],
+    enabled: !!userId
+  });
   const [editingTool, setEditingTool] = useState<string | null>(null);
   const [editingPrompt, setEditingPrompt] = useState<string | null>(null);
   const [editingAgent, setEditingAgent] = useState<string | null>(null);
@@ -471,6 +477,22 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
       }
     }
   ]);
+
+  // Update state when saved configuration loads
+  useEffect(() => {
+    if (savedConfig) {
+      console.log('Loading saved configuration:', savedConfig);
+      if (savedConfig.functionTools?.length > 0) {
+        setFunctionTools(savedConfig.functionTools);
+      }
+      if (savedConfig.agentPrompts?.length > 0) {
+        setAgentPrompts(savedConfig.agentPrompts);
+      }
+      if (savedConfig.agentConfigs?.length > 0) {
+        setAgentConfigs(savedConfig.agentConfigs);
+      }
+    }
+  }, [savedConfig]);
 
   const categoryColors = {
     connection: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',

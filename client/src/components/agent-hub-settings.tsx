@@ -485,6 +485,7 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
   const saveConfigMutation = useMutation({
     mutationFn: async (config: { functionTools: FunctionTool[], agentPrompts: AgentPrompt[], agentConfigs: AgentConfig[] }) => {
       console.log('Saving configuration:', config);
+      console.log('Agent configs in detail:', JSON.stringify(config.agentConfigs, null, 2));
       const response = await apiRequest('PUT', `/api/agent-config/${userId}`, config);
       console.log('Save response:', response);
       return response.json();
@@ -847,8 +848,6 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                                               : a
                                           )
                                         );
-                                        // Auto-save after tool assignment changes
-                                        setTimeout(saveConfiguration, 500);
                                       }}
                                     />
                                     <span className="text-sm">{tool.name}</span>
@@ -876,8 +875,6 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                                             : a
                                         )
                                       );
-                                      // Auto-save after context changes
-                                      setTimeout(saveConfiguration, 500);
                                     }}
                                   />
                                 </div>
@@ -895,8 +892,6 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                                             : a
                                         )
                                       );
-                                      // Auto-save after context changes
-                                      setTimeout(saveConfiguration, 500);
                                     }}
                                   />
                                   <Label className="text-xs">Retain Session</Label>
@@ -915,8 +910,6 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                                             : a
                                         )
                                       );
-                                      // Auto-save after context changes
-                                      setTimeout(saveConfiguration, 500);
                                     }}
                                   />
                                   <Label className="text-xs">Auto Execute</Label>
@@ -1031,8 +1024,6 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                                             : a
                                         )
                                       );
-                                      // Auto-save after mention removal
-                                      setTimeout(saveConfiguration, 500);
                                     }}
                                   >
                                     <X className="h-2 w-2" />
@@ -1058,8 +1049,6 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                                       )
                                     );
                                     e.currentTarget.value = '';
-                                    // Auto-save after mention addition
-                                    setTimeout(saveConfiguration, 500);
                                   }
                                 }
                               }}

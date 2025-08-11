@@ -331,9 +331,7 @@ export default function ChatPage() {
         }));
         
         // Get agent configuration from localStorage
-        const configKey = `agentConfig_${userId}`;
-        const agentConfig = localStorage.getItem(configKey);
-        
+        const agentConfig = localStorage.getItem('agent-configuration');
         let headers = {};
         if (agentConfig) {
           headers['x-agent-config'] = encodeURIComponent(agentConfig);
@@ -404,42 +402,6 @@ export default function ChatPage() {
     }));
   };
 
-  // Add state to trigger updates when configuration changes
-  const [configTimestamp, setConfigTimestamp] = useState(Date.now());
-  
-  // Listen for storage changes (when Agent Hub saves configuration)
-  useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key?.startsWith('agentConfig_')) {
-        setConfigTimestamp(Date.now());
-      }
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
-  // Get dynamic tool counts from saved configuration
-  const getAgentToolCount = (agentType: string) => {
-    try {
-      const configKey = `agentConfig_${userId}`;
-      const savedConfig = localStorage.getItem(configKey);
-      if (savedConfig) {
-        const config = JSON.parse(savedConfig);
-        const agent = config.agents?.find((a: any) => a.agentType === agentType);
-        if (agent) {
-          return agent.tools?.length || 0;
-        }
-      }
-    } catch (error) {
-      console.error('Error reading agent configuration:', error);
-    }
-    
-    // Fallback to default counts if no saved config
-    const defaults = { query: 18, ontology: 15, dashboards: 8, general: 6 };
-    return defaults[agentType as keyof typeof defaults] || 0;
-  };
-
   // Agent definitions that sync with Agent Hub Configuration
   const agentDefinitions = [
     { 
@@ -450,7 +412,7 @@ export default function ChatPage() {
       icon: 'Q', 
       type: 'agent', 
       active: agentStatuses['query'],
-      tools: getAgentToolCount('query'),
+      tools: 18,
       category: 'data-analysis'
     },
     { 
@@ -461,7 +423,7 @@ export default function ChatPage() {
       icon: 'O', 
       type: 'agent', 
       active: agentStatuses['semantic-model'],
-      tools: getAgentToolCount('ontology'),
+      tools: 15,
       category: 'modeling'
     },
     { 
@@ -472,7 +434,7 @@ export default function ChatPage() {
       icon: 'D', 
       type: 'agent', 
       active: agentStatuses['dashboards'],
-      tools: getAgentToolCount('dashboards'),
+      tools: 8,
       category: 'visualization'
     },
     { 
@@ -483,7 +445,7 @@ export default function ChatPage() {
       icon: 'A', 
       type: 'agent', 
       active: true, // Always available
-      tools: getAgentToolCount('general'),
+      tools: 6,
       category: 'general'
     }
   ];

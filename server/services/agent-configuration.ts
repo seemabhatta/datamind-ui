@@ -149,6 +149,7 @@ export class AgentConfigurationService {
     } catch (error) {
       console.log('Failed to parse agent configuration from headers, using defaults');
     }
+    
     return this.defaultConfig;
   }
 
@@ -167,6 +168,7 @@ export class AgentConfigurationService {
         return toolConfig?.enabled !== false; // Default to enabled if not specified
       })
     );
+
     return enhancedFunctionTools.filter(tool => enabledToolNames.has(tool.name));
   }
 

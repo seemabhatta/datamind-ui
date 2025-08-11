@@ -68,24 +68,11 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
   const saveConfiguration = () => {
     try {
       const configData = {
-        tools: functionTools.map(tool => ({
-          name: tool.name,
-          enabled: tool.enabled,
-          category: tool.category
-        })),
-        agents: agentConfigs.map(agent => ({
-          id: agent.type, // Use type as ID for backend mapping
-          name: agent.name,
-          agentType: agent.type,
-          enabled: agent.enabled,
-          tools: agent.tools,
-          context: agent.context
-        })),
+        tools: functionTools,
+        agents: agentConfigs,
         prompts: agentPrompts,
         lastSaved: new Date().toISOString()
       };
-      
-      console.log('Saving configuration:', JSON.stringify(configData, null, 2));
       localStorage.setItem(`agentConfig_${userId}`, JSON.stringify(configData));
       setHasUnsavedChanges(false);
       toast({
@@ -93,7 +80,6 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
         description: "Agent settings have been saved successfully.",
       });
     } catch (error) {
-      console.error('Save configuration error:', error);
       toast({
         title: "Save Failed",
         description: "Failed to save configuration. Please try again.",

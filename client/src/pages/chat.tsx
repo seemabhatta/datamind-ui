@@ -69,6 +69,12 @@ export default function ChatPage() {
   
   const userId = '0d493db8-bfed-4dd0-ab40-ae8a3225f8a5';
 
+  // Load agent configuration to get real tool counts
+  const { data: agentConfig } = useQuery({
+    queryKey: ['/api/agent-config', userId],
+    enabled: !!userId
+  });
+
   const { data: sessions } = useQuery({
     queryKey: ['/api/sessions', userId],
     enabled: !!userId,
@@ -394,7 +400,25 @@ export default function ChatPage() {
     }));
   };
 
-  // Agent definitions that sync with Agent Hub Configuration
+  // Get real tool count for an agent from loaded configuration
+  const getRealToolCount = (agentId: string) => {
+    if (!agentConfig?.agentConfigs) return 0;
+    
+    const agent = agentConfig.agentConfigs.find((config: any) => {
+      // Map agent IDs to match the configuration
+      const idMap: Record<string, string> = {
+        'query': 'query-agent',
+        'ontology': 'ontology-agent',
+        'dashboards': 'dashboard-agent',
+        'general': 'general-agent'
+      };
+      return config.id === idMap[agentId];
+    });
+    
+    return agent?.tools?.length || 0;
+  };
+
+  // Agent definitions that sync with Agent Hub Configuration - now with real tool counts
   const agentDefinitions = [
     { 
       id: 'query', 
@@ -404,7 +428,7 @@ export default function ChatPage() {
       icon: 'Q', 
       type: 'agent', 
       active: agentStatuses['query'],
-      tools: 18,
+      tools: getRealToolCount('query'),
       category: 'data-analysis'
     },
     { 
@@ -415,7 +439,7 @@ export default function ChatPage() {
       icon: 'O', 
       type: 'agent', 
       active: agentStatuses['semantic-model'],
-      tools: 15,
+      tools: getRealToolCount('ontology'),
       category: 'modeling'
     },
     { 
@@ -426,7 +450,7 @@ export default function ChatPage() {
       icon: 'D', 
       type: 'agent', 
       active: agentStatuses['dashboards'],
-      tools: 8,
+      tools: getRealToolCount('dashboards'),
       category: 'visualization'
     },
     { 
@@ -437,7 +461,7 @@ export default function ChatPage() {
       icon: 'A', 
       type: 'agent', 
       active: true, // Always available
-      tools: 6,
+      tools: getRealToolCount('general'),
       category: 'general'
     }
   ];

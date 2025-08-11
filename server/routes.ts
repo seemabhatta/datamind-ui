@@ -445,7 +445,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/agent-config/:userId', async (req, res) => {
     try {
       const config = await storage.getAgentConfiguration(req.params.userId);
-      res.json(config);
+      
+      // Return the configuration data or default structure if none exists
+      const configData = config?.configData || {
+        functionTools: [],
+        agentPrompts: [],
+        agentConfigs: []
+      };
+      
+      res.json(configData);
     } catch (error) {
       console.error('Error fetching agent configuration:', error);
       res.status(500).json({ message: 'Failed to fetch agent configuration' });

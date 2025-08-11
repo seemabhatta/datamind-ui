@@ -97,6 +97,14 @@ export function initializeDatabase() {
         created_at INTEGER,
         updated_at INTEGER,
         FOREIGN KEY(user_id) REFERENCES users(id)
+      )`,
+      `CREATE TABLE IF NOT EXISTS agent_configurations (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        config_data TEXT NOT NULL,
+        created_at INTEGER,
+        updated_at INTEGER,
+        FOREIGN KEY(user_id) REFERENCES users(id)
       )`
     ];
 

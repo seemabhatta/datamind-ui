@@ -73,12 +73,22 @@ export const snowflakeConnections = sqliteTable("snowflake_connections", {
   updatedAt: integer("updated_at", { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });
 
+// Agent configurations
+export const agentConfigurations = sqliteTable("agent_configurations", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id").notNull(),
+  configData: text("config_data", { mode: 'json' }).notNull(), // JSON containing functionTools, agentPrompts, agentConfigs
+  createdAt: integer("created_at", { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: 'timestamp' }).$defaultFn(() => new Date()),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   chatSessions: many(chatSessions),
   visualizations: many(visualizations),
   pinnedVisualizations: many(pinnedVisualizations),
   snowflakeConnections: many(snowflakeConnections),
+  agentConfigurations: many(agentConfigurations),
 }));
 
 export const chatSessionsRelations = relations(chatSessions, ({ one, many }) => ({
@@ -123,6 +133,13 @@ export const pinnedVisualizationsRelations = relations(pinnedVisualizations, ({ 
 export const snowflakeConnectionsRelations = relations(snowflakeConnections, ({ one }) => ({
   user: one(users, {
     fields: [snowflakeConnections.userId],
+    references: [users.id],
+  }),
+}));
+
+export const agentConfigurationsRelations = relations(agentConfigurations, ({ one }) => ({
+  user: one(users, {
+    fields: [agentConfigurations.userId],
     references: [users.id],
   }),
 }));
@@ -199,3 +216,11 @@ export const insertSnowflakeConnectionSchema = createInsertSchema(snowflakeConne
 
 export type InsertSnowflakeConnection = z.infer<typeof insertSnowflakeConnectionSchema>;
 export type SnowflakeConnection = typeof snowflakeConnections.$inferSelect;
+
+export const insertAgentConfigurationSchema = createInsertSchema(agentConfigurations).pick({
+  userId: true,
+  configData: true,
+});
+
+export type InsertAgentConfiguration = z.infer<typeof insertAgentConfigurationSchema>;
+export type AgentConfiguration = typeof agentConfigurations.$inferSelect;

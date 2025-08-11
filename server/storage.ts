@@ -1,9 +1,10 @@
 import { 
-  users, chatSessions, chatMessages, visualizations, pinnedVisualizations, snowflakeConnections,
+  users, chatSessions, chatMessages, visualizations, pinnedVisualizations, snowflakeConnections, agentConfigurations,
   type User, type InsertUser, type ChatSession, type InsertChatSession,
   type ChatMessage, type InsertChatMessage, type Visualization, type InsertVisualization,
   type PinnedVisualization, type InsertPinnedVisualization,
-  type SnowflakeConnection, type InsertSnowflakeConnection
+  type SnowflakeConnection, type InsertSnowflakeConnection,
+  type AgentConfiguration, type InsertAgentConfiguration
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, inArray } from "drizzle-orm";
@@ -51,8 +52,8 @@ export interface IStorage {
   setDefaultSnowflakeConnection(userId: string, connectionId: string): Promise<void>;
 
   // Agent configuration methods
-  getAgentConfiguration(userId: string): Promise<any>;
-  saveAgentConfiguration(userId: string, config: any): Promise<void>;
+  getAgentConfiguration(userId: string): Promise<AgentConfiguration | null>;
+  saveAgentConfiguration(userId: string, config: any): Promise<AgentConfiguration>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -278,24 +279,49 @@ export class DatabaseStorage implements IStorage {
       .where(eq(snowflakeConnections.id, connectionId));
   }
 
-  async getAgentConfiguration(userId: string): Promise<any> {
-    // For now, return default configuration
-    // In a full implementation, this could be stored in a dedicated table
-    return {
-      functionTools: [],
-      agentPrompts: [],
-      agentConfigs: []
-    };
+  async getAgentConfiguration(userId: string): Promise<AgentConfiguration | null> {
+    const [config] = await db
+      .select()
+      .from(agentConfigurations)
+      .where(eq(agentConfigurations.userId, userId))
+      .orderBy(desc(agentConfigurations.updatedAt))
+      .limit(1);
+    
+    return config || null;
   }
 
-  async saveAgentConfiguration(userId: string, config: any): Promise<void> {
-    // For now, just log the configuration save
-    // In a full implementation, this would save to a dedicated table
+  async saveAgentConfiguration(userId: string, config: any): Promise<AgentConfiguration> {
     console.log(`Saving agent configuration for user ${userId}:`, {
       functionToolsCount: config.functionTools?.length || 0,
       agentPromptsCount: config.agentPrompts?.length || 0,
       agentConfigsCount: config.agentConfigs?.length || 0
     });
+
+    // Check if configuration exists for this user
+    const existingConfig = await this.getAgentConfiguration(userId);
+    
+    if (existingConfig) {
+      // Update existing configuration
+      const [updated] = await db
+        .update(agentConfigurations)
+        .set({ 
+          configData: config,
+          updatedAt: new Date()
+        })
+        .where(eq(agentConfigurations.userId, userId))
+        .returning();
+      return updated;
+    } else {
+      // Create new configuration
+      const [newConfig] = await db
+        .insert(agentConfigurations)
+        .values({
+          userId,
+          configData: config
+        })
+        .returning();
+      return newConfig;
+    }
   }
 }
 

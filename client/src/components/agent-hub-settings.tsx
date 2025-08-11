@@ -56,6 +56,8 @@ interface AgentHubSettingsProps {
 }
 
 export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
+  console.log('AgentHubSettings component rendering with userId:', userId);
+  
   const [activeTab, setActiveTab] = useState<'tools' | 'prompts' | 'agents' | 'mentions'>('tools');
   const [editingTool, setEditingTool] = useState<string | null>(null);
   const [editingPrompt, setEditingPrompt] = useState<string | null>(null);

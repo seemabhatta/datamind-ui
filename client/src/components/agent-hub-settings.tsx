@@ -480,12 +480,47 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
     analysis: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300'
   };
 
+  // Save configuration mutation
+  const saveConfigMutation = useMutation({
+    mutationFn: (config: { functionTools: FunctionTool[], agentPrompts: AgentPrompt[], agentConfigs: AgentConfig[] }) => {
+      return apiRequest(`/api/agent-config/${userId}`, {
+        method: 'PUT',
+        body: JSON.stringify(config),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Configuration saved",
+        description: "Agent configuration has been successfully saved.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Save failed",
+        description: "Failed to save configuration. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const saveConfiguration = () => {
+    saveConfigMutation.mutate({
+      functionTools,
+      agentPrompts,
+      agentConfigs
+    });
+  };
+
   const toggleToolEnabled = (toolName: string) => {
     setFunctionTools(prev => 
       prev.map(tool => 
         tool.name === toolName ? { ...tool, enabled: !tool.enabled } : tool
       )
     );
+    
+    // Auto-save after a short delay
+    setTimeout(saveConfiguration, 500);
   };
 
   const togglePromptEnabled = (promptId: string) => {
@@ -494,6 +529,9 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
         prompt.id === promptId ? { ...prompt, enabled: !prompt.enabled } : prompt
       )
     );
+    
+    // Auto-save after a short delay
+    setTimeout(saveConfiguration, 500);
   };
 
   const toggleAgentEnabled = (agentId: string) => {
@@ -502,14 +540,32 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
         agent.id === agentId ? { ...agent, enabled: !agent.enabled } : agent
       )
     );
+    
+    // Auto-save after a short delay
+    setTimeout(saveConfiguration, 500);
   };
 
   return (
     <div className="space-y-6">
       <div className="space-y-4">
-        <div className="flex items-center space-x-2">
-          <Settings className="h-5 w-5" />
-          <h2 className="text-xl font-semibold">Agent Hub Configuration</h2>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Settings className="h-5 w-5" />
+            <h2 className="text-xl font-semibold">Agent Hub Configuration</h2>
+          </div>
+          <div className="flex items-center space-x-2">
+            {saveConfigMutation.isPending && (
+              <span className="text-sm text-muted-foreground">Saving...</span>
+            )}
+            <Button 
+              onClick={saveConfiguration}
+              disabled={saveConfigMutation.isPending}
+              size="sm"
+            >
+              <Save className="h-4 w-4 mr-1" />
+              Save Configuration
+            </Button>
+          </div>
         </div>
         
         {/* Implementation Status Summary */}

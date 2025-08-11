@@ -441,5 +441,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Agent Configuration Routes
+  app.get('/api/agent-config/:userId', async (req, res) => {
+    try {
+      const config = await storage.getAgentConfiguration(req.params.userId);
+      res.json(config);
+    } catch (error) {
+      console.error('Error fetching agent configuration:', error);
+      res.status(500).json({ message: 'Failed to fetch agent configuration' });
+    }
+  });
+
+  app.put('/api/agent-config/:userId', async (req, res) => {
+    try {
+      const { functionTools, agentPrompts, agentConfigs } = req.body;
+      await storage.saveAgentConfiguration(req.params.userId, {
+        functionTools,
+        agentPrompts,
+        agentConfigs
+      });
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error saving agent configuration:', error);
+      res.status(500).json({ message: 'Failed to save agent configuration' });
+    }
+  });
+
   return httpServer;
 }

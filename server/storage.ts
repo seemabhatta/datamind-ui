@@ -49,6 +49,10 @@ export interface IStorage {
   updateSnowflakeConnection(id: string, updates: Partial<SnowflakeConnection>): Promise<SnowflakeConnection>;
   deleteSnowflakeConnection(id: string): Promise<void>;
   setDefaultSnowflakeConnection(userId: string, connectionId: string): Promise<void>;
+
+  // Agent configuration methods
+  getAgentConfiguration(userId: string): Promise<any>;
+  saveAgentConfiguration(userId: string, config: any): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -272,6 +276,26 @@ export class DatabaseStorage implements IStorage {
       .update(snowflakeConnections)
       .set({ isDefault: true })
       .where(eq(snowflakeConnections.id, connectionId));
+  }
+
+  async getAgentConfiguration(userId: string): Promise<any> {
+    // For now, return default configuration
+    // In a full implementation, this could be stored in a dedicated table
+    return {
+      functionTools: [],
+      agentPrompts: [],
+      agentConfigs: []
+    };
+  }
+
+  async saveAgentConfiguration(userId: string, config: any): Promise<void> {
+    // For now, just log the configuration save
+    // In a full implementation, this would save to a dedicated table
+    console.log(`Saving agent configuration for user ${userId}:`, {
+      functionToolsCount: config.functionTools?.length || 0,
+      agentPromptsCount: config.agentPrompts?.length || 0,
+      agentConfigsCount: config.agentConfigs?.length || 0
+    });
   }
 }
 

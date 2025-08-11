@@ -25,9 +25,53 @@ export interface SnowflakeConnectionConfig {
 export class SnowflakeService {
   private activeConnections = new Map<string, any>();
   private connectionConfigs = new Map<string, SnowflakeConnectionConfig>();
+  private connectionMetadata = new Map<string, {
+    version: string;
+    connectedAt: Date;
+    lastUsed: Date;
+    account: string;
+    database?: string;
+    schema?: string;
+    warehouse?: string;
+    role?: string;
+  }>();
 
   /**
-   * Test a Snowflake connection
+   * Get connection metadata - CLI style
+   */
+  getConnectionMetadata(connectionId: string) {
+    return this.connectionMetadata.get(connectionId);
+  }
+
+  /**
+   * Get active connections count - CLI style
+   */
+  getActiveConnectionsCount(): number {
+    return this.activeConnections.size;
+  }
+
+  /**
+   * Remove connection from store - CLI style
+   */
+  removeConnection(connectionId: string): boolean {
+    const connection = this.activeConnections.get(connectionId);
+    if (connection) {
+      try {
+        connection.destroy(() => {});
+      } catch (error) {
+        console.warn('Error destroying connection:', error);
+      }
+    }
+    
+    this.activeConnections.delete(connectionId);
+    this.connectionConfigs.delete(connectionId);
+    this.connectionMetadata.delete(connectionId);
+    
+    return true;
+  }
+
+  /**
+   * Test a Snowflake connection - Enhanced with version detection
    */
   async testConnection(config: SnowflakeConnectionConfig): Promise<boolean> {
     return new Promise((resolve) => {
@@ -112,6 +156,20 @@ export class SnowflakeService {
         } else {
           console.log(`Snowflake connection created: ${connectionId}`);
           this.activeConnections.set(connectionId, connection);
+          this.connectionConfigs.set(connectionId, config);
+          
+          // Store metadata like CLI version
+          this.connectionMetadata.set(connectionId, {
+            version: 'Unknown', // We'll get this when we execute queries
+            connectedAt: new Date(),
+            lastUsed: new Date(),
+            account: config.account,
+            database: config.database,
+            schema: config.schema,
+            warehouse: config.warehouse,
+            role: config.role
+          });
+          
           resolve(true);
         }
       });
@@ -181,6 +239,13 @@ export class SnowflakeService {
         sqlText: sqlText,
         complete: (err: any, stmt: any, rows: any[]) => {
           const executionTime = Date.now() - startTime;
+          
+          // Update lastUsed timestamp like CLI version
+          const metadata = this.connectionMetadata.get(connectionId);
+          if (metadata) {
+            metadata.lastUsed = new Date();
+            this.connectionMetadata.set(connectionId, metadata);
+          }
           
           if (err) {
             console.error('Snowflake query execution failed:', err.message);

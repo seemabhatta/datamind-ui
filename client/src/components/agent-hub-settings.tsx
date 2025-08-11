@@ -847,6 +847,8 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                                               : a
                                           )
                                         );
+                                        // Auto-save after tool assignment changes
+                                        setTimeout(saveConfiguration, 500);
                                       }}
                                     />
                                     <span className="text-sm">{tool.name}</span>
@@ -874,6 +876,8 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                                             : a
                                         )
                                       );
+                                      // Auto-save after context changes
+                                      setTimeout(saveConfiguration, 500);
                                     }}
                                   />
                                 </div>
@@ -891,6 +895,8 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                                             : a
                                         )
                                       );
+                                      // Auto-save after context changes
+                                      setTimeout(saveConfiguration, 500);
                                     }}
                                   />
                                   <Label className="text-xs">Retain Session</Label>
@@ -909,6 +915,8 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                                             : a
                                         )
                                       );
+                                      // Auto-save after context changes
+                                      setTimeout(saveConfiguration, 500);
                                     }}
                                   />
                                   <Label className="text-xs">Auto Execute</Label>
@@ -956,9 +964,16 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
 
                         {editingAgent === agent.id && (
                           <div className="flex space-x-2">
-                            <Button size="sm" onClick={() => setEditingAgent(null)}>
+                            <Button 
+                              size="sm" 
+                              onClick={() => {
+                                saveConfiguration();
+                                setEditingAgent(null);
+                              }}
+                              disabled={saveConfigMutation.isPending}
+                            >
                               <Save className="h-3 w-3 mr-1" />
-                              Save Changes
+                              {saveConfigMutation.isPending ? 'Saving...' : 'Save Changes'}
                             </Button>
                             <Button size="sm" variant="outline" onClick={() => setEditingAgent(null)}>
                               <X className="h-3 w-3 mr-1" />
@@ -1016,6 +1031,8 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                                             : a
                                         )
                                       );
+                                      // Auto-save after mention removal
+                                      setTimeout(saveConfiguration, 500);
                                     }}
                                   >
                                     <X className="h-2 w-2" />
@@ -1041,6 +1058,8 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                                       )
                                     );
                                     e.currentTarget.value = '';
+                                    // Auto-save after mention addition
+                                    setTimeout(saveConfiguration, 500);
                                   }
                                 }
                               }}

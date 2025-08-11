@@ -52,21 +52,139 @@ export const connectToSnowflake: FunctionToolDefinition = {
         currentSchema: 'CORTEX_DEMO'
       });
 
-      return `✅ Successfully connected to Snowflake account: KIXUIIJ-MTC00254
+      // Enhanced structured response matching CLI format
+      const metadata = snowflakeService.getConnectionMetadata(connectionId);
       
+      return `✅ **Connection Successful**
+
 🔗 **Connection Details:**
-- Database: CORTES_DEMO_2
-- Schema: CORTEX_DEMO
-- Warehouse: CORTEX_ANALYST_WH
-- Role: nl2sql_service_role
+- Status: Connected  
+- Connection ID: ${connectionId}
+- Account: ${metadata?.account || 'KIXUIIJ-MTC00254'}
+- Database: ${metadata?.database || 'CORTES_DEMO_2'}
+- Schema: ${metadata?.schema || 'CORTEX_DEMO'}
+- Warehouse: ${metadata?.warehouse || 'CORTEX_ANALYST_WH'}
+- Role: ${metadata?.role || 'nl2sql_service_role'}
 
 🚀 **Ready for queries!** Try:
-- "show databases" - List available databases
-- "show tables" - List tables in current schema
-- "SELECT * FROM table_name" - Run SQL directly`;
+- \`check_connection_status\` - Test connection health
+- \`show databases\` - List available databases
+- \`show tables\` - List tables in current schema
+- \`disconnect\` - Close connection when done`;
 
     } catch (error) {
-      return `Error connecting to Snowflake: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      return `❌ **Connection Failed**
+      
+Error: ${error instanceof Error ? error.message : 'Unknown error'}
+
+💡 Try reconnecting or check your credentials.`;
+    }
+  }
+};
+
+// CLI-style connection status checker
+export const checkConnectionStatus: FunctionToolDefinition = {
+  name: 'check_connection_status',
+  description: 'Check if the current connection is still active and healthy',
+  parameters: {
+    type: 'object',
+    properties: {},
+    required: []
+  },
+  execute: async (context: AgentContext, params: any) => {
+    try {
+      if (!context.connectionId) {
+        return `❌ **No Connection**
+        
+No active connection found. Please connect first with \`connect_to_snowflake\`.`;
+      }
+
+      // Test connection health with SELECT 1 like CLI
+      const result = await snowflakeService.executeQuery(context.connectionId, 'SELECT 1 as test');
+      
+      const metadata = snowflakeService.getConnectionMetadata(context.connectionId);
+      const connectedTime = metadata?.connectedAt ? 
+        new Date().getTime() - metadata.connectedAt.getTime() : 0;
+      const lastUsedAgo = metadata?.lastUsed ? 
+        new Date().getTime() - metadata.lastUsed.getTime() : 0;
+
+      return `✅ **Connection Healthy**
+
+🔗 **Connection Status:**
+- Connection ID: ${context.connectionId}
+- Account: ${metadata?.account || 'KIXUIIJ-MTC00254'}
+- Connected for: ${Math.floor(connectedTime / 1000)}s
+- Last used: ${Math.floor(lastUsedAgo / 1000)}s ago
+- Active connections: ${snowflakeService.getActiveConnectionsCount()}
+
+🏢 **Current Context:**
+- Database: ${context.currentDatabase || 'CORTES_DEMO_2'}
+- Schema: ${context.currentSchema || 'CORTEX_DEMO'}`;
+
+    } catch (error) {
+      // Connection is dead, clean it up like CLI does
+      if (context.connectionId) {
+        snowflakeService.removeConnection(context.connectionId);
+        await agentContextManager.updateContext(context.sessionId, {
+          connectionId: null
+        });
+      }
+      
+      return `❌ **Connection Dead**
+      
+Connection test failed and has been cleaned up: ${error instanceof Error ? error.message : 'Unknown error'}
+
+Please reconnect with \`connect_to_snowflake\`.`;
+    }
+  }
+};
+
+// CLI-style explicit disconnect
+export const disconnect: FunctionToolDefinition = {
+  name: 'disconnect',
+  description: 'Explicitly close the current Snowflake connection',
+  parameters: {
+    type: 'object',
+    properties: {},
+    required: []
+  },
+  execute: async (context: AgentContext, params: any) => {
+    try {
+      if (!context.connectionId) {
+        return `ℹ️ **No Active Connection**
+        
+No connection to disconnect.`;
+      }
+
+      // Get connection info before closing
+      const metadata = snowflakeService.getConnectionMetadata(context.connectionId);
+      
+      // Close connection like CLI
+      const removed = snowflakeService.removeConnection(context.connectionId);
+      
+      if (removed) {
+        // Clear context
+        await agentContextManager.updateContext(context.sessionId, {
+          connectionId: null,
+          currentDatabase: null,
+          currentSchema: null
+        });
+
+        return `✅ **Connection Closed**
+        
+Successfully disconnected from Snowflake account: ${metadata?.account || 'KIXUIIJ-MTC00254'}
+
+Active connections: ${snowflakeService.getActiveConnectionsCount()}`;
+      } else {
+        return `❌ **Disconnect Failed**
+        
+Could not close connection: ${context.connectionId}`;
+      }
+      
+    } catch (error) {
+      return `❌ **Disconnect Error**
+      
+Error closing connection: ${error instanceof Error ? error.message : 'Unknown error'}`;
     }
   }
 };
@@ -1100,6 +1218,8 @@ ${summary}
 // Export all tools for agent registration
 export const enhancedFunctionTools: FunctionToolDefinition[] = [
   connectToSnowflake,
+  checkConnectionStatus,
+  disconnect,
   getCurrentContext,
   getDatabases,
   selectDatabase,

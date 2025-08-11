@@ -3,55 +3,50 @@
 ## Overview
 Analysis comparing expected CLI `metadata_functions.py` patterns with the web platform's metadata management implementation.
 
-## Expected CLI Metadata Functions (Based on DataMind Architecture)
+## Actual CLI Metadata Functions (from metadata_functions.py)
 
 ### 1. Database-Level Functions
 ```python
-def get_databases(connection_id: str)
-def get_database_info(connection_id: str, database_name: str)  
-def select_database(connection_id: str, database_name: str)
+def list_databases(connection_id: str)
+    # Returns: {"status": "success", "databases": [list]}
 ```
 
-### 2. Schema-Level Functions
+### 2. Schema-Level Functions  
 ```python
-def get_schemas(connection_id: str, database_name: str = None)
-def get_schema_info(connection_id: str, schema_name: str)
-def select_schema(connection_id: str, schema_name: str)
+def list_schemas(connection_id: str, database: str)
+    # Returns: {"status": "success", "schemas": [list]}
 ```
 
 ### 3. Table-Level Functions
 ```python
-def get_tables(connection_id: str, database_name: str = None, schema_name: str = None)
-def get_table_info(connection_id: str, table_name: str)
-def describe_table(connection_id: str, table_name: str)
-def get_table_sample(connection_id: str, table_name: str, limit: int = 10)
+def list_tables(connection_id: str, database: str, schema: str)
+    # Returns: {"status": "success", "tables": [{"database", "schema", "table", "table_type"}]}
 ```
 
-### 4. Advanced Metadata Functions
+### 4. Stage-Level Functions
 ```python
-def get_views(connection_id: str)
-def get_functions(connection_id: str)  
-def get_procedures(connection_id: str)
-def get_stages(connection_id: str)
-def get_table_constraints(connection_id: str, table_name: str)
-def get_column_statistics(connection_id: str, table_name: str)
+def list_stages(connection_id: str, database: str, schema: str)
+    # Returns: {"status": "success", "stages": [{"name", "database", "schema", "type"}]}
+
+def list_stage_files(connection_id: str, stage_name: str)
+    # Returns: {"status": "success", "files": [{"name", "size", "last_modified"}]}
 ```
 
 ## Web Implementation Status
 
-### ✅ IMPLEMENTED - Core Metadata Functions
+### ✅ IMPLEMENTED - All CLI Metadata Functions
 
-| Function | CLI Expected | Web Implementation | Status |
-|----------|-------------|-------------------|--------|
+| Function | CLI Implementation | Web Implementation | Status |
+|----------|------------------|-------------------|--------|
 | **Database Operations** |
-| `get_databases` | ✅ List databases | ✅ `getDatabases` | ✅ Complete |
-| `select_database` | ✅ Switch database | ✅ `selectDatabase` | ✅ Complete |
+| `list_databases` | ✅ Returns databases array | ✅ `getDatabases` | ✅ Complete |
 | **Schema Operations** |
-| `get_schemas` | ✅ List schemas | ✅ `getSchemas` | ✅ Complete |
-| `select_schema` | ✅ Switch schema | ✅ `selectSchema` | ✅ Complete |
+| `list_schemas` | ✅ Returns schemas array | ✅ `getSchemas` + `selectSchema` | ✅ Enhanced |
 | **Table Operations** |
-| `get_tables` | ✅ List tables | ✅ `getTables` | ✅ Complete |
-| `describe_table` | ✅ Table structure | ✅ `describeTable` | ✅ Complete |
+| `list_tables` | ✅ Returns table objects with metadata | ✅ `getTables` + `describeTable` | ✅ Enhanced |
+| **Stage Operations** |
+| `list_stages` | ✅ Returns stage objects with metadata | ✅ `getStages` + `selectStage` | ✅ Enhanced |
+| `list_stage_files` | ✅ Returns file objects (name, size, modified) | ✅ `listStageFiles` | ✅ **NEW** |
 
 ### ✅ ENHANCED - Advanced Features
 
@@ -146,21 +141,44 @@ def get_table_constraints(connection_id: str, table_name: str):
     }
 ```
 
-## Implementation Recommendations
+## CLI Parity Achievement: 100%
 
-### 1. Add Missing High-Priority Functions
-- `get_table_sample` - Essential for data preview
-- `get_views` - Important for complete schema understanding
-- `get_table_constraints` - Critical for relationship mapping
+**All 5 CLI metadata functions successfully implemented:**
+✅ `list_databases` → `getDatabases`  
+✅ `list_schemas` → `getSchemas`  
+✅ `list_tables` → `getTables`  
+✅ `list_stages` → `getStages`  
+✅ `list_stage_files` → `listStageFiles` (**Added**)
 
-### 2. Enhance Existing Functions
-- Add row count information to table listings
-- Include table types (table vs view) in responses
-- Add last modified timestamps where available
+## Function Tool Count Impact  
+**Before Enhancement:** 20 function tools  
+**After Enhancement:** 21 function tools  
+- Added: `list_stage_files`
 
-### 3. CLI Parity Achievement
-Current CLI parity: **75%** (6/8 core functions)  
-With missing functions: **100%** CLI parity + Web enhancements
+## Response Format Comparison
+
+**CLI Returns:**
+```python
+{
+  "status": "success",
+  "files": [
+    {
+      "name": "file.txt",
+      "size": 1024,
+      "last_modified": "2025-01-01T00:00:00Z"
+    }
+  ]
+}
+```
+
+**Web Returns:**
+```markdown
+📂 **Stage Files:** `@stage_name`
+**2 files found** (1.0 KB total)
+• **file1.txt** - 512 B (1/1/2025)
+• **file2.txt** - 512 B (1/1/2025)
+💡 **Next steps:** - Query file contents...
+```
 
 ## Web Advantage Summary
 

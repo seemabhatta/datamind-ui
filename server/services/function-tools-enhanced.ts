@@ -789,6 +789,85 @@ export const selectStage: FunctionToolDefinition = {
   }
 };
 
+// CLI-style stage file listing function  
+export const listStageFiles: FunctionToolDefinition = {
+  name: 'list_stage_files',
+  description: 'List files in a specific stage (matching CLI list_stage_files function)',
+  parameters: {
+    type: 'object',
+    properties: {
+      stage_name: {
+        type: 'string',
+        description: 'Name of the stage to list files from'
+      }
+    },
+    required: ['stage_name']
+  },
+  execute: async (context: AgentContext, params: any) => {
+    try {
+      if (!context.connectionId) {
+        return 'Not connected to Snowflake. Please connect first.';
+      }
+
+      const { stage_name } = params;
+      
+      // Execute LIST command like CLI does
+      const result = await snowflakeService.executeQuery(
+        context.connectionId,
+        `LIST @${stage_name}`
+      );
+
+      if (!result.rows || result.rows.length === 0) {
+        return `📂 **Stage Files:** \`@${stage_name}\`
+
+No files found in this stage.
+
+💡 **Try:**
+- Upload files to the stage first
+- Check if the stage name is correct`;
+      }
+
+      // Parse file information like CLI - matching CLI structure
+      const files = result.rows.map((row: any) => {
+        const name = row.name || row.NAME || row[0] || 'unknown';
+        const size = parseInt(row.size || row.SIZE || row[1] || '0');
+        const lastModified = row.last_modified || row.LAST_MODIFIED || row[2] || new Date().toISOString();
+        
+        return {
+          name: name,
+          size: size,
+          last_modified: typeof lastModified === 'string' ? lastModified : lastModified.toString()
+        };
+      });
+
+      // Calculate total size and format like CLI
+      const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+      const formatSize = (bytes: number) => {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+      };
+
+      return `📂 **Stage Files:** \`@${stage_name}\`
+
+**${files.length} files found** (${formatSize(totalSize)} total)
+
+${files.map((file: any) => 
+  `• **${file.name}** - ${formatSize(file.size)} (${new Date(file.last_modified).toLocaleDateString()})`
+).join('\n')}
+
+💡 **Next steps:**
+- \`SELECT * FROM @${stage_name}/filename\` - Query file contents
+- Load data from stage files into tables`;
+
+    } catch (error) {
+      return `Error listing stage files: ${error instanceof Error ? error.message : 'Unknown error'}`;
+    }
+  }
+};
+
 export const getYamlFiles: FunctionToolDefinition = {
   name: 'get_yaml_files',
   description: 'Get YAML files from the current stage',
@@ -1229,6 +1308,7 @@ export const enhancedFunctionTools: FunctionToolDefinition[] = [
   describeTable,
   getStages,
   selectStage,
+  listStageFiles,
   getYamlFiles,
   loadYamlFile,
   getYamlContent,

@@ -39,7 +39,7 @@ export default function ChatPage() {
   const [mentionPosition, setMentionPosition] = useState(0);
   const [currentMentionQuery, setCurrentMentionQuery] = useState('');
   const [activeSettingsTab, setActiveSettingsTab] = useState<'integrations' | 'general' | 'security' | 'agent-hub'>('integrations');
-  const [agentStatuses, setAgentStatuses] = useState({
+  const [agentStatuses, setAgentStatuses] = useState<Record<string, boolean>>({
     'semantic-model': true,
     'query': true,
     'dashboards': true
@@ -126,9 +126,9 @@ export default function ChatPage() {
   };
 
   const toggleSelectAll = () => {
-    if (sessions && selectedChatIds.length === sessions.length) {
+    if (sessions && Array.isArray(sessions) && selectedChatIds.length === sessions.length) {
       setSelectedChatIds([]);
-    } else if (sessions) {
+    } else if (sessions && Array.isArray(sessions)) {
       setSelectedChatIds(sessions.map((s: any) => s.id));
     }
   };
@@ -140,8 +140,10 @@ export default function ChatPage() {
   });
 
   useEffect(() => {
-    if (sessionMessages) {
-      setMessages(sessionMessages || []);
+    if (sessionMessages && Array.isArray(sessionMessages)) {
+      setMessages(sessionMessages);
+    } else {
+      setMessages([]);
     }
   }, [sessionMessages]);
 
@@ -236,7 +238,7 @@ export default function ChatPage() {
     const lowerInput = input.toLowerCase();
     
     // First, consider the current navigation context
-    if (currentView === 'dashboard') {
+    if (currentView === 'dashboards') {
       // In dashboard view, prioritize visualization modes
       if (lowerInput.includes('chart') || lowerInput.includes('graph') || 
           lowerInput.includes('visualiz') || lowerInput.includes('plot') ||
@@ -254,7 +256,7 @@ export default function ChatPage() {
       return 'dashboard';
     }
     
-    if (currentView === 'studio') {
+    if (currentView === 'query') {
       // In studio view, prioritize query/development modes
       if (lowerInput.includes('select') || lowerInput.includes('from') ||
           lowerInput.includes('where') || lowerInput.includes('sql') ||
@@ -402,7 +404,7 @@ export default function ChatPage() {
 
   // Get real tool count for an agent from loaded configuration
   const getRealToolCount = (agentId: string) => {
-    if (!agentConfig?.agentConfigs) return 0;
+    if (!agentConfig || !agentConfig.agentConfigs || !Array.isArray(agentConfig.agentConfigs)) return 0;
     
     const agent = agentConfig.agentConfigs.find((config: any) => {
       // Map agent IDs to match the configuration
@@ -1241,7 +1243,7 @@ compliance:
               </div>
             </div>
           </div>)
-        ) : currentView === 'dashboard' ? (
+        ) : currentView === 'dashboards' ? (
           <div className="flex-1 p-6">
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Dashboard</h2>
@@ -1289,7 +1291,7 @@ compliance:
                 <p className="text-gray-600">Chat history and conversation management</p>
               </div>
               <div className="flex items-center space-x-2">
-                {sessions && sessions.length > 0 && (
+                {sessions && Array.isArray(sessions) && sessions.length > 0 && (
                   <button
                     onClick={() => setIsSelectionMode(!isSelectionMode)}
                     className="px-3 py-2 text-sm border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
@@ -1310,7 +1312,7 @@ compliance:
             </div>
 
             {/* Bulk Selection Controls */}
-            {isSelectionMode && sessions && sessions.length > 0 && (
+            {isSelectionMode && sessions && Array.isArray(sessions) && sessions.length > 0 && (
               <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
@@ -1318,18 +1320,18 @@ compliance:
                       onClick={toggleSelectAll}
                       className="flex items-center space-x-2 text-sm text-blue-700 hover:text-blue-900"
                     >
-                      {selectedChatIds.length === sessions.length ? (
+                      {sessions && Array.isArray(sessions) && selectedChatIds.length === sessions.length ? (
                         <Check className="w-4 h-4" />
                       ) : (
                         <Square className="w-4 h-4" />
                       )}
                       <span>
-                        {selectedChatIds.length === sessions.length ? 'Deselect All' : 'Select All'}
+                        {sessions && Array.isArray(sessions) && selectedChatIds.length === sessions.length ? 'Deselect All' : 'Select All'}
                       </span>
                     </button>
                   </div>
                   <span className="text-sm text-gray-600">
-                    {selectedChatIds.length} of {sessions.length} selected
+                    {selectedChatIds.length} of {sessions && Array.isArray(sessions) ? sessions.length : 0} selected
                   </span>
                 </div>
               </div>

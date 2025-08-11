@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -482,23 +483,24 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
 
   // Save configuration mutation
   const saveConfigMutation = useMutation({
-    mutationFn: (config: { functionTools: FunctionTool[], agentPrompts: AgentPrompt[], agentConfigs: AgentConfig[] }) => {
-      return apiRequest(`/api/agent-config/${userId}`, {
-        method: 'PUT',
-        body: JSON.stringify(config),
-        headers: { 'Content-Type': 'application/json' }
-      });
+    mutationFn: async (config: { functionTools: FunctionTool[], agentPrompts: AgentPrompt[], agentConfigs: AgentConfig[] }) => {
+      console.log('Saving configuration:', config);
+      const response = await apiRequest('PUT', `/api/agent-config/${userId}`, config);
+      console.log('Save response:', response);
+      return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Save successful:', data);
       toast({
         title: "Configuration saved",
         description: "Agent configuration has been successfully saved.",
       });
     },
     onError: (error) => {
+      console.error('Save error:', error);
       toast({
         title: "Save failed",
-        description: "Failed to save configuration. Please try again.",
+        description: `Failed to save configuration: ${error?.message || 'Unknown error'}`,
         variant: "destructive",
       });
     }

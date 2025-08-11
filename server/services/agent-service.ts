@@ -55,17 +55,17 @@ class AgentService {
     return responses[agentType as keyof typeof responses] || responses['general'];
   }
 
-  async processMessage(content: string, agentType: 'query' | 'yaml' | 'dashboards' | 'general', sessionId: string, headers?: any): Promise<AgentResponse> {
+  async processMessage(content: string, agentType: 'query' | 'yaml' | 'dashboards' | 'general', sessionId: string): Promise<AgentResponse> {
     try {
       switch (agentType) {
         case 'query':
-          return await this.processQueryAgent(content, sessionId, headers);
+          return await this.processQueryAgent(content, sessionId);
         case 'yaml':
-          return await this.processYamlAgent(content, sessionId, headers);
+          return await this.processYamlAgent(content, sessionId);
         case 'dashboards':
-          return await this.processDashboardAgent(content, sessionId, headers);
+          return await this.processDashboardAgent(content, sessionId);
         default:
-          return await this.processGeneralAgent(content, sessionId, headers);
+          return await this.processGeneralAgent(content, sessionId);
       }
     } catch (error) {
       console.error('Error processing agent message:', error);
@@ -76,12 +76,12 @@ class AgentService {
     }
   }
 
-  private async processQueryAgent(content: string, sessionId: string, headers?: any): Promise<AgentResponse> {
+  private async processQueryAgent(content: string, sessionId: string): Promise<AgentResponse> {
     try {
       // First try the enhanced Agent SDK implementation
       try {
         const { agentSDKService } = await import('./agent-sdk-service');
-        const result = await agentSDKService.processMessage(sessionId, content, 'query', headers);
+        const result = await agentSDKService.processMessage(sessionId, content, 'query');
         return {
           content: result.content,
           metadata: result.metadata
@@ -92,7 +92,7 @@ class AgentService {
 
       // Fallback to legacy implementation
       const userId = '0d493db8-bfed-4dd0-ab40-ae8a3225f8a5'; // TODO: Get from session
-      const context = agentContextManager.getContext(sessionId);
+      const context = await agentContextManager.getContext(sessionId, userId);
 
       // Add user message to history
       await agentContextManager.addToHistory(sessionId, {
@@ -390,7 +390,7 @@ Respond naturally but mention when function tools would help accomplish their go
     return JSON.stringify(displayRows, null, 2);
   }
 
-  private async processYamlAgent(content: string, sessionId: string, headers?: any): Promise<AgentResponse> {
+  private async processYamlAgent(content: string, sessionId: string): Promise<AgentResponse> {
     try {
       // Use OpenAI to process ontology/semantic modeling requests
       const response = await this.openai.chat.completions.create({
@@ -441,7 +441,7 @@ Context: You are working with users who need to create semantic models and ontol
     }
   }
 
-  private async processDashboardAgent(content: string, sessionId: string, headers?: any): Promise<AgentResponse> {
+  private async processDashboardAgent(content: string, sessionId: string): Promise<AgentResponse> {
     try {
       // Use OpenAI to process dashboard/visualization requests
       const response = await this.openai.chat.completions.create({
@@ -492,7 +492,7 @@ Context: You are helping users build effective dashboards and visualizations for
     }
   }
 
-  private async processGeneralAgent(content: string, sessionId: string, headers?: any): Promise<AgentResponse> {
+  private async processGeneralAgent(content: string, sessionId: string): Promise<AgentResponse> {
     try {
       // Use OpenAI for general assistant conversations
       const response = await this.openai.chat.completions.create({

@@ -94,8 +94,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Process message with appropriate agent
       console.log(`Processing message with agent: ${agentType}`);
-      const headers = message.headers || {};
-      const agentResponse = await agentService.processMessage(content, agentType, sessionId, headers);
+      const agentResponse = await agentService.processMessage(content, agentType, sessionId);
       console.log(`Agent response received:`, agentResponse);
 
       // Save agent response

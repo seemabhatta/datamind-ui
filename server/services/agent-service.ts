@@ -34,6 +34,34 @@ class AgentService {
 
   // Helper method to get system prompt from agent configuration
   private getSystemPrompt(agentType: string, agentConfig?: any): string {
+    console.log('Getting system prompt for agent type:', agentType);
+    
+    if (agentConfig?.configData) {
+      try {
+        const config = agentConfig.configData;
+        const agentConfigs = config.agentConfigs || [];
+        const agentPrompts = config.agentPrompts || [];
+        
+        // Find the agent configuration for this agent type
+        const agent = agentConfigs.find((a: any) => a.type === agentType && a.enabled);
+        
+        if (agent && agent.prompts && agent.prompts.length > 0) {
+          const promptId = agent.prompts[0];
+          const systemPrompt = agentPrompts.find((prompt: any) => 
+            prompt.id === promptId && prompt.enabled
+          );
+          
+          if (systemPrompt?.content) {
+            console.log('Using custom system prompt from prompt library for', agentType);
+            return systemPrompt.content;
+          }
+        }
+      } catch (error) {
+        console.log('Error parsing agent configuration, using default prompt:', error);
+      }
+    }
+    
+    // Fallback default prompts
     const defaultPrompts = {
       'query': `You are a Query Agent for DataMind, a data analytics platform. You help users with natural language queries, SQL generation, and data analysis.
 
@@ -48,83 +76,14 @@ Available function tools: ${availableFunctionTools.map(tool => tool.name).join('
 
 Focus on being accurate, helpful, and efficient in data analysis tasks.`,
       
-      'yaml': `You are an Ontology Agent for DataMind, a data analytics platform. Your role is to help users with semantic data modeling, ontology design, and data relationships.
-
-You can:
-- Help design semantic models and ontologies
-- Explain data relationships and hierarchies
-- Suggest data modeling best practices
-- Generate YAML configurations for data models
-- Provide guidance on schema design
-
-When responding:
-- Be technical but clear
-- Provide structured examples when helpful
-- Focus on data modeling concepts
-- Suggest best practices for data organization
-
-Context: You are working with users who need to create semantic models and ontologies for their data.`,
+      'yaml': `You are an Ontology Agent for DataMind, a data analytics platform. Your role is to help users with semantic data modeling, ontology design, and data relationships.`,
       
-      'dashboards': `You are a Dashboard Agent for DataMind, a data analytics platform. Your role is to help users create interactive dashboards and data visualizations.
-
-You can:
-- Help design dashboard layouts and components
-- Suggest appropriate chart types for different data
-- Provide guidance on data visualization best practices
-- Help create interactive dashboard elements
-- Suggest KPIs and metrics to track
-
-When responding:
-- Focus on practical visualization advice
-- Suggest specific chart types and layouts
-- Consider user experience and clarity
-- Provide actionable dashboard design guidance
-
-Context: You are helping users build effective dashboards and visualizations for their data analytics needs.`,
+      'dashboards': `You are a Dashboard Agent for DataMind, a data analytics platform. Your role is to help users create interactive dashboards and data visualizations.`,
       
-      'general': `You are the DataMind Assistant, a helpful guide for a data analytics platform that connects to Snowflake databases. You help users get started and navigate to the right tools.
-
-CORE PURPOSE:
-- Guide users to connect to data sources and get started with analytics
-- Provide specific, actionable guidance instead of generic responses
-- Direct users to the right specialized agents for their needs
-- Help with platform navigation and feature explanations
-
-AGENT ROUTING GUIDANCE:
-- For data queries, analysis, or SQL: Direct to "@query agent" 
-- For data modeling or YAML dictionaries: Direct to "@ontology agent"
-- For dashboards or visualizations: Direct to "@dashboards agent"
-
-SPECIFIC GUIDANCE EXAMPLES:
-- Connection issues: "Use '@query connect' to establish your Snowflake connection"
-- Data exploration: "Try '@query show tables' to see available data"
-- Need help with queries: "Switch to @query agent for SQL and data analysis"
-- Building models: "Use @ontology agent for semantic data modeling"
-- Creating charts: "Switch to @dashboards agent for visualizations"
-
-Always be specific and actionable in your guidance.`
+      'general': `You are the DataMind Assistant, a helpful guide for a data analytics platform that connects to Snowflake databases.`
     };
-
-    if (agentConfig?.configData) {
-      try {
-        const config = agentConfig.configData;
-        const agentPrompts = config.agentPrompts || [];
-        
-        // Find the system prompt for this agent type
-        const systemPrompt = agentPrompts.find((prompt: any) => 
-          prompt.type === 'system' && 
-          prompt.agentTypes.includes(agentType) && 
-          prompt.enabled
-        );
-        
-        if (systemPrompt?.content) {
-          return systemPrompt.content;
-        }
-      } catch (error) {
-        console.log('Error parsing agent configuration, using default prompt:', error);
-      }
-    }
     
+    console.log('Using default prompt for', agentType);
     return defaultPrompts[agentType as keyof typeof defaultPrompts] || defaultPrompts['general'];
   }
 

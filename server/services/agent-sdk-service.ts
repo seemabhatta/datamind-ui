@@ -93,22 +93,37 @@ export class AgentSDKService {
       try {
         console.log('Parsing config data...');
         const config = agentConfig.configData;
+        const agentConfigs = config.agentConfigs || [];
         const agentPrompts = config.agentPrompts || [];
+        console.log('Found agent configs:', agentConfigs.length);
         console.log('Found agent prompts:', agentPrompts.length);
         
-        // Find the system prompt for this agent type
-        const systemPrompt = agentPrompts.find((prompt: any) => {
-          console.log('Checking prompt:', prompt.name, 'type:', prompt.type, 'agentTypes:', prompt.agentTypes, 'enabled:', prompt.enabled);
-          return prompt.type === 'system' && 
-                 prompt.agentTypes.includes(agentType) && 
-                 prompt.enabled;
+        // Find the agent configuration for this agent type
+        const agentConfig = agentConfigs.find((agent: any) => {
+          console.log('Checking agent:', agent.type, 'enabled:', agent.enabled);
+          return agent.type === agentType && agent.enabled;
         });
         
-        if (systemPrompt?.content) {
-          console.log('Using custom system prompt for', agentType);
-          return systemPrompt.content;
+        if (agentConfig && agentConfig.prompts && agentConfig.prompts.length > 0) {
+          console.log('Found agent config with prompts:', agentConfig.prompts);
+          
+          // Get the first prompt ID from the agent's prompts array
+          const promptId = agentConfig.prompts[0];
+          
+          // Find the actual prompt content
+          const systemPrompt = agentPrompts.find((prompt: any) => {
+            console.log('Checking prompt ID:', prompt.id, 'against:', promptId);
+            return prompt.id === promptId && prompt.enabled;
+          });
+          
+          if (systemPrompt?.content) {
+            console.log('Using custom system prompt from prompt library for', agentType);
+            return systemPrompt.content;
+          } else {
+            console.log('Prompt ID found but content not available for', agentType);
+          }
         } else {
-          console.log('No matching custom prompt found for', agentType);
+          console.log('No agent config or prompts found for', agentType);
         }
       } catch (error) {
         console.log('Error parsing agent configuration, using default prompt:', error);

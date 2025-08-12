@@ -612,7 +612,7 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                     <CardContent className="pt-2">
                       <div className="flex items-start justify-between">
                         <div className="flex-1 space-y-1">
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center space-x-1.5">
                             <h4 className="text-subtitle">{tool.name}</h4>
                             <Badge className={categoryColors[tool.category]}>
                               {tool.category}
@@ -682,8 +682,8 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                     <CardContent className="pt-4">
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <h4 className="font-medium">{prompt.name}</h4>
+                          <div className="flex items-center space-x-1.5">
+                            <h4 className="text-subtitle">{prompt.name}</h4>
                             <Badge variant={prompt.type === 'system' ? 'default' : 'secondary'}>
                               {prompt.type}
                             </Badge>
@@ -775,7 +775,7 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                     <CardContent className="pt-4">
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
+                          <div className="flex items-center space-x-1.5">
                             <h4 className="text-subtitle">{agent.name}</h4>
                             <Badge>{agent.type}</Badge>
                             <Switch

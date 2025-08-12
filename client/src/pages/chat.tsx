@@ -4,6 +4,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { BarChart3, MessageSquare, Home, Database, ChevronLeft, ChevronRight, Minimize2, Maximize2, X, Zap, BookOpen, Settings, Cloud, Link, Send, GraduationCap, ChevronDown, Upload, Plus, Play, Save, Eye, Edit3, Brain, Search, Trash2, Check, Square, Bot } from 'lucide-react';
 import { SnowflakeSettings } from '@/components/snowflake-settings';
 import { AgentHubSettings } from '@/components/agent-hub-settings';
+import { MessageRenderer } from '@/components/message-renderer';
 
 // Type definitions for messages
 interface Message {
@@ -1081,9 +1082,9 @@ compliance:
                     <div className={`max-w-2xl px-4 py-3 rounded-lg ${
                       message.role === 'user' 
                         ? 'bg-blue-600 text-white' 
-                        : 'bg-gray-100 text-gray-900'
+                        : 'bg-white border border-gray-200 shadow-sm'
                     }`}>
-                      {message.content}
+                      <MessageRenderer content={message.content} role={message.role} />
                     </div>
                   </div>
                 ))}

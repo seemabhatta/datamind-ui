@@ -777,7 +777,7 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-1.5">
                             <h4 className="text-subtitle">{agent.name}</h4>
-                            <Badge>{agent.type}</Badge>
+                            <Badge className="text-[12px]">{agent.type}</Badge>
                             <Switch
                               checked={agent.enabled}
                               onCheckedChange={() => toggleAgentEnabled(agent.id)}

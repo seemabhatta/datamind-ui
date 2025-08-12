@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { agentService } from "./services/agent-service";
+import { agentSDKService } from "./services/agent-sdk-service";
 import { visualizationService } from "./services/visualization-service";
 import { 
   insertChatSessionSchema, insertChatMessageSchema, insertVisualizationSchema,
@@ -94,7 +95,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Process message with appropriate agent
       console.log(`Processing message with agent: ${agentType}`);
-      const agentResponse = await agentService.processMessage(content, agentType, sessionId);
+      const agentResponse = await agentSDKService.processMessage(sessionId, content, agentType);
       console.log(`Agent response received:`, agentResponse);
 
       // Save agent response
@@ -160,7 +161,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { content, agentType, sessionId, userId } = req.body;
       console.log(`Processing API chat message: ${content} with agent: ${agentType}`);
       
-      const agentResponse = await agentService.processMessage(content, agentType, sessionId);
+      const agentResponse = await agentSDKService.processMessage(sessionId, content, agentType);
       
       res.json({
         content: agentResponse.content,

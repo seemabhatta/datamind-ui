@@ -172,6 +172,7 @@ export class AgentSDKService {
 
 Please let me know if you'd like to load this file or need further assistance.`;
       
+      console.log('Returning YAML dictionary response:', response.substring(0, 100) + '...');
       return {
         content: response,
         metadata: {
@@ -187,78 +188,6 @@ Please let me know if you'd like to load this file or need further assistance.`;
       console.error('Error during system initialization:', error);
       return {
         content: 'System initialization completed. How can I help you with your data queries?',
-        metadata: {
-          model: 'agent-initialization',
-          agentType: 'query', 
-          sessionId,
-          initialization: true,
-          error: error instanceof Error ? error.message : 'Unknown error'
-        }
-      };
-    }
-  }
-
-  // Handle system initialization like CLI agent
-  private async handleSystemInitialization(sessionId: string, agentConfig?: any): Promise<{
-    content: string;
-    metadata: any;
-  }> {
-    try {
-      console.log('Handling system initialization for query agent');
-      
-      // Get the agent context
-      const context = await agentContextManager.getContext(sessionId);
-      
-      // Try to get YAML files like CLI does
-      const getYamlTool = getEnhancedFunctionTool('get_yaml_files');
-      if (getYamlTool) {
-        try {
-          const yamlResult = await getYamlTool.execute(context, {});
-          console.log('YAML files result:', yamlResult);
-          
-          // Format the response like CLI
-          if (yamlResult && yamlResult.includes('YAML')) {
-            const response = `🤖 Assistant: Here is the available YAML data dictionary:
-
-1. \`HMDA_SAMPLE_dictionary.yaml\`
-
-Please let me know if you'd like to load this file or need further assistance.`;
-            
-            return {
-              content: response,
-              metadata: {
-                model: 'agent-initialization',
-                agentType: 'query',
-                sessionId,
-                initialization: true
-              }
-            };
-          }
-        } catch (error) {
-          console.log('Error getting YAML files during initialization:', error);
-        }
-      }
-      
-      // Fallback initialization message
-      return {
-        content: `🤖 Assistant: System initialized successfully. 
-
-✅ Connected to Snowflake
-✅ Ready for data queries
-
-What would you like to explore?`,
-        metadata: {
-          model: 'agent-initialization', 
-          agentType: 'query',
-          sessionId,
-          initialization: true
-        }
-      };
-      
-    } catch (error) {
-      console.error('Error during system initialization:', error);
-      return {
-        content: '🤖 Assistant: System initialization completed. How can I help you with your data queries?',
         metadata: {
           model: 'agent-initialization',
           agentType: 'query', 

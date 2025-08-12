@@ -1501,7 +1501,7 @@ compliance:
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-white rounded-lg border border-gray-200 p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Other Data Sources</h3>
+                    <h3 className="text-base font-medium text-gray-900">Other Data Sources</h3>
                     <Database className="w-5 h-5 text-gray-400" />
                   </div>
                   <div className="space-y-3">
@@ -1535,7 +1535,7 @@ compliance:
               {/* Destinations */}
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Destinations</h3>
+                  <h3 className="text-base font-medium text-gray-900">Destinations</h3>
                   <Upload className="w-5 h-5 text-gray-400" />
                 </div>
                 <div className="space-y-3">
@@ -1569,7 +1569,7 @@ compliance:
               {/* Connections Section */}
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Active Connections</h3>
+                  <h3 className="text-base font-medium text-gray-900">Active Connections</h3>
                   <Link className="w-5 h-5 text-gray-400" />
                 </div>
                 <div className="space-y-3">
@@ -1596,7 +1596,7 @@ compliance:
               {/* Integration Actions */}
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Integration Actions</h3>
+                  <h3 className="text-base font-medium text-gray-900">Integration Actions</h3>
                   <Zap className="w-5 h-5 text-gray-400" />
                 </div>
                 <div className="space-y-3">

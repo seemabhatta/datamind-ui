@@ -84,10 +84,57 @@ Use the available tools to help users accomplish their goals efficiently.
 
 export class AgentSDKService {
   
+  // Helper method to get system prompt from agent configuration
+  private getSystemPrompt(agentType: string, agentConfig?: any): string {
+    console.log('Getting system prompt for agent type:', agentType);
+    console.log('Agent config available:', !!agentConfig);
+    
+    if (agentConfig?.configData) {
+      try {
+        console.log('Parsing config data...');
+        const config = agentConfig.configData;
+        const agentPrompts = config.agentPrompts || [];
+        console.log('Found agent prompts:', agentPrompts.length);
+        
+        // Find the system prompt for this agent type
+        const systemPrompt = agentPrompts.find((prompt: any) => {
+          console.log('Checking prompt:', prompt.name, 'type:', prompt.type, 'agentTypes:', prompt.agentTypes, 'enabled:', prompt.enabled);
+          return prompt.type === 'system' && 
+                 prompt.agentTypes.includes(agentType) && 
+                 prompt.enabled;
+        });
+        
+        if (systemPrompt?.content) {
+          console.log('Using custom system prompt for', agentType);
+          return systemPrompt.content;
+        } else {
+          console.log('No matching custom prompt found for', agentType);
+        }
+      } catch (error) {
+        console.log('Error parsing agent configuration, using default prompt:', error);
+      }
+    } else {
+      console.log('No config data available, using default prompt');
+    }
+    
+    console.log('Using default instructions for', agentType);
+    // Fall back to default instructions
+    return QUERY_AGENT_INSTRUCTIONS;
+  }
+  
   async processMessage(sessionId: string, message: string, agentType: string = 'query'): Promise<{
     content: string;
     metadata: any;
   }> {
+    // Load user's agent configuration from database
+    const userId = '0d493db8-bfed-4dd0-ab40-ae8a3225f8a5'; // TODO: Get from session
+    let agentConfig: any;
+    try {
+      const { storage } = await import('../storage');
+      agentConfig = await storage.getAgentConfiguration(userId);
+    } catch (error) {
+      console.log('Error loading agent config, using defaults:', error);
+    }
     try {
       const context = await agentContextManager.getContext(sessionId);
       
@@ -105,7 +152,7 @@ export class AgentSDKService {
       }
 
       // Fall back to OpenAI Agent SDK for complex queries
-      return await this.processWithAgentSDK(context, message, agentType);
+      return await this.processWithAgentSDK(context, message, agentType, agentConfig);
 
     } catch (error) {
       console.error('Error in Agent SDK service:', error);
@@ -336,14 +383,17 @@ export class AgentSDKService {
     return null;
   }
 
-  private async processWithAgentSDK(context: AgentContext, message: string, agentType: string): Promise<{
+  private async processWithAgentSDK(context: AgentContext, message: string, agentType: string, agentConfig?: any): Promise<{
     content: string;
     metadata: any;
   }> {
     try {
+      // Get system prompt from configuration or use default
+      const systemPrompt = this.getSystemPrompt(agentType, agentConfig);
+      
       // Build conversation history for context
       const messages: any[] = [
-        { role: "system", content: QUERY_AGENT_INSTRUCTIONS }
+        { role: "system", content: systemPrompt }
       ];
 
       // Add recent conversation history

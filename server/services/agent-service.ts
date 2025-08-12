@@ -239,7 +239,7 @@ Always be specific and actionable in your guidance.`
         messages: [
           {
             role: "system",
-            content: `You are a Query Agent for DataMind, a data analytics platform. You help users with natural language queries, SQL generation, and data analysis.
+            content: `${this.getSystemPrompt('query', agentConfig)}
 
 CAPABILITIES:
 - Convert natural language to SQL queries  

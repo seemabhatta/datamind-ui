@@ -797,7 +797,7 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                         <p className="text-sm text-muted-foreground">{agent.description}</p>
 
                         {editingAgent === agent.id ? (
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-3 gap-4">
                             <div>
                               <Label>Assigned Tools ({agent.tools.length})</Label>
                               <div className="mt-2 space-y-2 max-h-32 overflow-y-auto">
@@ -823,6 +823,31 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                                     <span className="text-sm">{tool.name}</span>
                                   </div>
                                 ))}
+                              </div>
+                            </div>
+                            <div>
+                              <Label>@Mention</Label>
+                              <div className="mt-2 space-y-3">
+                                <div>
+                                  <Label className="text-xs">Primary Mention</Label>
+                                  <Input
+                                    value={agent.mentions[0] || ''}
+                                    placeholder="@agent"
+                                    className="h-8"
+                                    onChange={(e) => {
+                                      setAgentConfigs(prev =>
+                                        prev.map(a =>
+                                          a.id === agent.id
+                                            ? {
+                                                ...a,
+                                                mentions: [e.target.value]
+                                              }
+                                            : a
+                                        )
+                                      );
+                                    }}
+                                  />
+                                </div>
                               </div>
                             </div>
                             <div>
@@ -905,13 +930,13 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                               </div>
                             </div>
                             <div>
-                              <span className="font-medium">Mentions:</span>
+                              <span className="font-medium">Mention:</span>
                               <div className="flex flex-wrap gap-1 mt-1">
-                                {agent.mentions.map((mention) => (
-                                  <Badge key={mention} variant="secondary" className="text-xs">
-                                    {mention}
+                                {agent.mentions[0] && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    {agent.mentions[0]}
                                   </Badge>
-                                ))}
+                                )}
                               </div>
                             </div>
                             <div>

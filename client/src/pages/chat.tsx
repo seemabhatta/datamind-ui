@@ -1440,7 +1440,7 @@ compliance:
           <div className="flex-1 p-4">
             <div className="mb-6">
               <h2 className="text-base font-semibold text-gray-900 mb-2">Settings</h2>
-              <p className="text-gray-600">Application settings and integrations</p>
+              <p className="text-gray-600 text-[12px]">Application settings and integrations</p>
             </div>
 
             {/* Settings Tabs */}

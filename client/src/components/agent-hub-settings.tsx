@@ -593,40 +593,7 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
           </div>
         </div>
         
-        {/* Implementation Status Summary */}
-        <Card className="bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800">
-          <CardContent className="pt-4">
-            <div className="flex items-start space-x-3">
-              <div className="w-2 h-2 bg-amber-500 rounded-full mt-2"></div>
-              <div className="space-y-2">
-                <h3 className="font-medium text-amber-800 dark:text-amber-200">CLI Function Parity Status</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                  <div>
-                    <span className="font-medium">Total Functions:</span>
-                    <span className="ml-2 text-amber-700 dark:text-amber-300">{functionTools.length}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium">Implemented:</span>
-                    <span className="ml-2 text-green-600 dark:text-green-400">{functionTools.filter(f => f.enabled).length}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium">Pending:</span>
-                    <span className="ml-2 text-orange-600 dark:text-orange-400">{functionTools.filter(f => !f.enabled).length}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium">Coverage:</span>
-                    <span className="ml-2 text-blue-600 dark:text-blue-400">
-                      {Math.round((functionTools.filter(f => f.enabled).length / functionTools.length) * 100)}%
-                    </span>
-                  </div>
-                </div>
-                <p className="text-xs text-amber-700 dark:text-amber-300 mt-2">
-                  Based on your original CLI implementation with connection_functions.py, metadata_functions.py, query_functions.py, stage_functions.py, and visualization_tools.py
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+
       </div>
 
       <Tabs value={activeTab} onValueChange={(value: any) => setActiveTab(value)}>

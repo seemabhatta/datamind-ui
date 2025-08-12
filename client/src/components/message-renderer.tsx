@@ -24,25 +24,25 @@ const formatErrorMessage = (content: string) => {
       const suggestion = match[3] || '';
 
       return (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div className="border-l-4 border-gray-400 bg-gray-50 p-4 rounded-r-md">
           <div className="flex items-start space-x-3">
-            <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+            <AlertCircle className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
             <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-semibold text-red-800 mb-2">
+              <h4 className="text-sm font-medium text-gray-900 mb-2">
                 {title.replace(/\*\*/g, '')}
               </h4>
               {message && (
-                <p className="text-sm text-red-700 mb-3 leading-relaxed">
+                <p className="text-sm text-gray-700 mb-3 leading-relaxed">
                   {message.replace(/\*\*/g, '').trim()}
                 </p>
               )}
               {suggestion && (
-                <div className="bg-red-100 border border-red-200 rounded-md p-3">
+                <div className="bg-white border border-gray-200 rounded-md p-3 mt-2">
                   <div className="flex items-center space-x-2">
-                    <Info className="w-4 h-4 text-red-600" />
-                    <p className="text-sm text-red-800 font-medium">Suggestion</p>
+                    <Info className="w-4 h-4 text-gray-500" />
+                    <p className="text-sm text-gray-700 font-medium">Suggestion</p>
                   </div>
-                  <p className="text-sm text-red-700 mt-1">
+                  <p className="text-sm text-gray-600 mt-1">
                     {suggestion.replace(/💡\s*/, '').trim()}
                   </p>
                 </div>
@@ -66,21 +66,21 @@ const formatSuccessMessage = (content: string) => {
 
     if (successItems.length > 0) {
       return (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+        <div className="border-l-4 border-gray-400 bg-gray-50 p-4 rounded-r-md">
           <div className="flex items-start space-x-3">
-            <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+            <CheckCircle className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
             <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-semibold text-green-800 mb-2">Success</h4>
+              <h4 className="text-sm font-medium text-gray-900 mb-2">Success</h4>
               <ul className="space-y-1 mb-3">
                 {successItems.map((item, index) => (
-                  <li key={index} className="text-sm text-green-700 flex items-start space-x-2">
-                    <span className="text-green-500 mt-0.5">•</span>
+                  <li key={index} className="text-sm text-gray-700 flex items-start space-x-2">
+                    <span className="text-gray-500 mt-0.5">•</span>
                     <span>{item.replace('✅', '').trim()}</span>
                   </li>
                 ))}
               </ul>
               {otherContent && (
-                <p className="text-sm text-green-700">{otherContent}</p>
+                <p className="text-sm text-gray-700">{otherContent}</p>
               )}
             </div>
           </div>
@@ -94,26 +94,27 @@ const formatSuccessMessage = (content: string) => {
 
 // Helper function to format lists and structured content
 const formatStructuredContent = (content: string) => {
-  // Check for markdown-style lists
+  // Check for markdown-style lists or bullet points
   const listPattern = /^[\s]*[-*+]\s+(.+)$/gm;
   const numberedListPattern = /^[\s]*\d+\.\s+(.+)$/gm;
+  const bulletPattern = /^[\s]*•\s+(.+)$/gm;
   
-  if (listPattern.test(content) || numberedListPattern.test(content)) {
+  if (listPattern.test(content) || numberedListPattern.test(content) || bulletPattern.test(content)) {
     const lines = content.split('\n');
     const formattedLines = lines.map((line, index) => {
-      if (/^[\s]*[-*+]\s+/.test(line)) {
+      if (/^[\s]*[-*+•]\s+/.test(line)) {
         return (
-          <li key={index} className="text-sm text-gray-700 flex items-start space-x-2">
-            <span className="text-gray-400 mt-0.5">•</span>
-            <span>{line.replace(/^[\s]*[-*+]\s+/, '').trim()}</span>
+          <li key={index} className="text-sm text-gray-700 flex items-start space-x-2 mb-1">
+            <span className="text-gray-400 mt-0.5 flex-shrink-0">•</span>
+            <span className="flex-1">{line.replace(/^[\s]*[-*+•]\s+/, '').trim()}</span>
           </li>
         );
       } else if (/^[\s]*\d+\.\s+/.test(line)) {
         const match = line.match(/^[\s]*(\d+)\.\s+(.+)$/);
         return (
-          <li key={index} className="text-sm text-gray-700 flex items-start space-x-2">
-            <span className="text-gray-400 mt-0.5 font-medium">{match?.[1]}.</span>
-            <span>{match?.[2]?.trim()}</span>
+          <li key={index} className="text-sm text-gray-700 flex items-start space-x-2 mb-1">
+            <span className="text-gray-400 mt-0.5 font-medium flex-shrink-0">{match?.[1]}.</span>
+            <span className="flex-1">{match?.[2]?.trim()}</span>
           </li>
         );
       } else if (line.trim()) {
@@ -123,7 +124,7 @@ const formatStructuredContent = (content: string) => {
     }).filter(Boolean);
 
     return (
-      <div className="space-y-2">
+      <div className="space-y-1">
         <ul className="space-y-1">{formattedLines}</ul>
       </div>
     );
@@ -136,12 +137,12 @@ const formatStructuredContent = (content: string) => {
 const formatWarningMessage = (content: string) => {
   if (content.includes('⚠️') || content.includes('Warning') || content.includes('Note:')) {
     return (
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+      <div className="border-l-4 border-gray-400 bg-gray-50 p-4 rounded-r-md">
         <div className="flex items-start space-x-3">
-          <AlertTriangle className="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" />
+          <AlertTriangle className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
           <div className="flex-1 min-w-0">
-            <h4 className="text-sm font-semibold text-yellow-800 mb-2">Warning</h4>
-            <p className="text-sm text-yellow-700 leading-relaxed">
+            <h4 className="text-sm font-medium text-gray-900 mb-2">Warning</h4>
+            <p className="text-sm text-gray-700 leading-relaxed">
               {content.replace(/⚠️/g, '').replace(/Warning:?/gi, '').trim()}
             </p>
           </div>
@@ -174,6 +175,42 @@ export function MessageRenderer({ content, role }: MessageRendererProps) {
 
   // Default formatting for regular content
   const lines = content.split('\n').filter(line => line.trim());
+  
+  // Check for structured content with headers and sections
+  if (lines.some(line => line.includes('🔗') || line.includes('🚀') || line.includes('**'))) {
+    return (
+      <div className="space-y-3">
+        {lines.map((line, index) => {
+          const trimmedLine = line.trim();
+          
+          // Format headers with emojis or bold text
+          if (trimmedLine.includes('**') && (trimmedLine.includes('🔗') || trimmedLine.includes('🚀'))) {
+            return (
+              <h4 key={index} className="text-sm font-medium text-gray-900 flex items-center space-x-2">
+                <span>{trimmedLine.replace(/\*\*/g, '')}</span>
+              </h4>
+            );
+          }
+          
+          // Format bullet points that start with dashes
+          if (trimmedLine.startsWith('- ')) {
+            return (
+              <div key={index} className="flex items-start space-x-2 ml-4">
+                <span className="text-gray-400 mt-0.5 flex-shrink-0">•</span>
+                <span className="text-sm text-gray-700 flex-1">{trimmedLine.substring(2)}</span>
+              </div>
+            );
+          }
+          
+          return (
+            <p key={index} className="text-sm text-gray-700 leading-relaxed">
+              {trimmedLine}
+            </p>
+          );
+        })}
+      </div>
+    );
+  }
   
   if (lines.length > 1) {
     return (

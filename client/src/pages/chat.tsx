@@ -504,39 +504,43 @@ export default function ChatPage() {
     if (getContextualAgentMode()) {
       // In contextual mode, check if we need generate mode based on agent
       setIsGenerateMode(getContextualAgentMode() === 'semantic-model' || getContextualAgentMode() === 'dashboards');
+      // Allow input clearing even in contextual mode
+      setShowMentionDropdown(false);
       return;
     }
     
-    // Check for @ symbol and show dropdown
-    const lastAtIndex = value.lastIndexOf('@');
-    if (lastAtIndex !== -1 && lastAtIndex === value.length - 1) {
-      // Just typed @, show all options
-      setShowMentionDropdown(true);
-      setMentionPosition(lastAtIndex);
-      setCurrentMentionQuery('');
-    } else if (lastAtIndex !== -1) {
-      // Check if we're still in mention context
-      const afterAt = value.substring(lastAtIndex + 1);
-      const hasSpace = afterAt.includes(' ');
-      
-      if (!hasSpace) {
-        // Still typing mention
+    // Check for @ symbol and show dropdown (only if not in contextual mode)
+    if (!getContextualAgentMode()) {
+      const lastAtIndex = value.lastIndexOf('@');
+      if (lastAtIndex !== -1 && lastAtIndex === value.length - 1) {
+        // Just typed @, show all options
         setShowMentionDropdown(true);
         setMentionPosition(lastAtIndex);
-        setCurrentMentionQuery(afterAt.toLowerCase());
+        setCurrentMentionQuery('');
+      } else if (lastAtIndex !== -1) {
+        // Check if we're still in mention context
+        const afterAt = value.substring(lastAtIndex + 1);
+        const hasSpace = afterAt.includes(' ');
+        
+        if (!hasSpace) {
+          // Still typing mention
+          setShowMentionDropdown(true);
+          setMentionPosition(lastAtIndex);
+          setCurrentMentionQuery(afterAt.toLowerCase());
+        } else {
+          // Space pressed, close dropdown
+          setShowMentionDropdown(false);
+        }
       } else {
-        // Space pressed, close dropdown
         setShowMentionDropdown(false);
       }
-    } else {
-      setShowMentionDropdown(false);
-    }
-    
-    // Check for specific mentions to set modes (but don't activate if we just cleared the input)
-    if (value.trim().length > 0) {
-      setIsGenerateMode(value.includes('@ontology') || value.includes('@dashboard'));
-    } else {
-      setIsGenerateMode(false);
+      
+      // Check for specific mentions to set modes (but don't activate if we just cleared the input)
+      if (value.trim().length > 0) {
+        setIsGenerateMode(value.includes('@ontology') || value.includes('@dashboard'));
+      } else {
+        setIsGenerateMode(false);
+      }
     }
   };
 

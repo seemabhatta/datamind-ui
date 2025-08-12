@@ -112,18 +112,37 @@ export class AgentSDKService {
           
           // Find the actual prompt content
           const systemPrompt = agentPrompts.find((prompt: any) => {
-            console.log('Checking prompt ID:', prompt.id, 'against:', promptId);
+            console.log('Checking prompt ID:', prompt.id, 'against:', promptId, 'content available:', !!prompt.content);
             return prompt.id === promptId && prompt.enabled;
           });
           
           if (systemPrompt?.content) {
-            console.log('Using custom system prompt from prompt library for', agentType);
+            console.log('Using custom system prompt from prompt library for', agentType, '- Content length:', systemPrompt.content.length);
             return systemPrompt.content;
           } else {
             console.log('Prompt ID found but content not available for', agentType);
+            // Let's also check if we found the prompt but it's disabled
+            const disabledPrompt = agentPrompts.find((prompt: any) => prompt.id === promptId);
+            if (disabledPrompt) {
+              console.log('Found prompt but it might be disabled:', disabledPrompt.enabled);
+              console.log('Prompt content exists:', !!disabledPrompt.content);
+              if (disabledPrompt.content) {
+                console.log('Using disabled prompt content anyway for', agentType);
+                return disabledPrompt.content;
+              }
+            }
+            
+            // Also try to find prompt regardless of enabled status as fallback
+            const anyPrompt = agentPrompts.find((prompt: any) => prompt.id === promptId);
+            if (anyPrompt && anyPrompt.content) {
+              console.log('Using prompt content regardless of enabled status for', agentType);
+              return anyPrompt.content;
+            }
           }
         } else {
           console.log('No agent config or prompts found for', agentType);
+          console.log('Available agents:', agentConfigs.map(a => ({type: a.type, enabled: a.enabled})));
+          console.log('Available prompts:', agentPrompts.map(p => ({id: p.id, enabled: p.enabled, hasContent: !!p.content})));
         }
       } catch (error) {
         console.log('Error parsing agent configuration, using default prompt:', error);
@@ -557,6 +576,7 @@ What would you like to explore?`,
     try {
       // Get system prompt from configuration or use default
       const systemPrompt = this.getSystemPrompt(agentType, agentConfig);
+      console.log(`[AgentSDK] Using system prompt for ${agentType}:`, systemPrompt.substring(0, 200) + '...');
       
       // Build conversation history for context
       const messages: any[] = [

@@ -291,7 +291,7 @@ export function SnowflakeSettings({ userId }: SnowflakeSettingsProps) {
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Last Connected</Label>
-                  <p>
+                  <p className="text-[12px]">
                     {connection.lastConnected 
                       ? new Date(connection.lastConnected).toLocaleDateString()
                       : 'Never'

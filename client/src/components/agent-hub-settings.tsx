@@ -580,7 +580,6 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
         
 
       </div>
-
       <Tabs value={activeTab} onValueChange={(value: any) => setActiveTab(value)}>
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="tools" className="flex items-center space-x-2">
@@ -664,7 +663,8 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Agent Prompts</CardTitle>
+                  <CardTitle>Prompt Library
+</CardTitle>
                   <CardDescription>
                     Configure system and user prompts that define agent behavior and capabilities.
                   </CardDescription>

@@ -643,7 +643,7 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                             </div>
                           ) : (
                             <div className="flex space-x-2 mt-2">
-                              <Button size="sm" variant="outline" onClick={() => setEditingTool(tool.name)}>
+                              <Button size="sm" variant="outline" onClick={() => setEditingTool(tool.name)} className="text-[12px]">
                                 <Edit className="h-3 w-3 mr-1" />
                                 Edit
                               </Button>

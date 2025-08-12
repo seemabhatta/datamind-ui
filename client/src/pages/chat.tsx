@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { BarChart3, MessageSquare, Home, Database, ChevronLeft, ChevronRight, Minimize2, Maximize2, X, Zap, BookOpen, Settings, Cloud, Link, Send, GraduationCap, ChevronDown, Upload, Plus, Play, Save, Eye, Edit3, Brain, Search, Trash2, Check, Square, Bot } from 'lucide-react';
@@ -419,52 +419,78 @@ export default function ChatPage() {
   };
 
   // Agent definitions that sync with Agent Hub Configuration - now with real tool counts
-  const agentDefinitions = [
-    { 
-      id: 'query', 
-      label: 'Query', 
-      mention: '@query',
-      description: 'Natural language to SQL query processing', 
-      icon: 'Q', 
-      type: 'agent', 
-      active: agentStatuses['query'],
-      tools: getRealToolCount('query'),
-      category: 'data-analysis'
-    },
-    { 
-      id: 'ontology', 
-      label: 'Ontology', 
-      mention: '@ontology',
-      description: 'Semantic data modeling and YAML dictionary management', 
-      icon: 'O', 
-      type: 'agent', 
-      active: agentStatuses['semantic-model'],
-      tools: getRealToolCount('ontology'),
-      category: 'modeling'
-    },
-    { 
-      id: 'dashboards', 
-      label: 'Dashboard', 
-      mention: '@dashboard',
-      description: 'Interactive visualization and dashboard creation', 
-      icon: 'D', 
-      type: 'agent', 
-      active: agentStatuses['dashboards'],
-      tools: getRealToolCount('dashboards'),
-      category: 'visualization'
-    },
-    { 
-      id: 'general', 
-      label: 'Assistant', 
-      mention: '@help',
-      description: 'General platform guidance and support', 
-      icon: 'A', 
-      type: 'agent', 
-      active: true, // Always available
-      tools: getRealToolCount('general'),
-      category: 'general'
+  // Create dynamic agent definitions based on saved configuration
+  const agentDefinitions = useMemo(() => {
+    const baseDefinitions = [
+      { 
+        id: 'query', 
+        label: 'Query', 
+        defaultMention: '@query',
+        description: 'Natural language to SQL query processing', 
+        icon: 'Q', 
+        type: 'agent', 
+        active: agentStatuses['query'],
+        tools: getRealToolCount('query'),
+        category: 'data-analysis'
+      },
+      { 
+        id: 'ontology', 
+        label: 'Ontology', 
+        defaultMention: '@ontology',
+        description: 'Semantic data modeling and YAML dictionary management', 
+        icon: 'O', 
+        type: 'agent', 
+        active: agentStatuses['semantic-model'],
+        tools: getRealToolCount('ontology'),
+        category: 'modeling'
+      },
+      { 
+        id: 'dashboards', 
+        label: 'Dashboard', 
+        defaultMention: '@dashboard',
+        description: 'Interactive visualization and dashboard creation', 
+        icon: 'D', 
+        type: 'agent', 
+        active: agentStatuses['dashboards'],
+        tools: getRealToolCount('dashboards'),
+        category: 'visualization'
+      },
+      { 
+        id: 'general', 
+        label: 'Assistant', 
+        defaultMention: '@help',
+        description: 'General platform guidance and support', 
+        icon: 'A', 
+        type: 'agent', 
+        active: true, // Always available
+        tools: getRealToolCount('general'),
+        category: 'general'
+      }
+    ];
+
+    // Override with saved agent configurations if available
+    if (agentConfig?.agentConfigs) {
+      return baseDefinitions.map(def => {
+        const savedConfig = agentConfig.agentConfigs.find((config: any) => 
+          config.type.toLowerCase() === def.id || 
+          (def.id === 'dashboards' && config.type.toLowerCase() === 'dashboard')
+        );
+        
+        return {
+          ...def,
+          mention: savedConfig?.mentions?.[0] || def.defaultMention,
+          active: savedConfig?.enabled ?? def.active,
+          label: savedConfig?.name || def.label
+        };
+      });
     }
-  ];
+
+    // Fallback to default mentions
+    return baseDefinitions.map(def => ({
+      ...def,
+      mention: def.defaultMention
+    }));
+  }, [agentStatuses, getRealToolCount, agentConfig]);
 
   // Available mentions for autocomplete - filtered by active agents
   const availableMentions = agentDefinitions.filter(agent => agent.active);

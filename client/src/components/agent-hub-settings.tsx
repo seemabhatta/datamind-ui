@@ -44,6 +44,7 @@ interface AgentConfig {
   enabled: boolean;
   tools: string[];
   prompts: string[];
+  prompt?: string; // Single linked prompt for the agent
   mentions: string[];
   context: {
     maxHistory: number;
@@ -848,6 +849,32 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                                     }}
                                   />
                                 </div>
+                                <div>
+                                  <Label className="text-xs">Linked Prompt</Label>
+                                  <Select
+                                    value={agent.prompt || ''}
+                                    onValueChange={(value) => {
+                                      setAgentConfigs(prev =>
+                                        prev.map(a =>
+                                          a.id === agent.id
+                                            ? { ...a, prompt: value }
+                                            : a
+                                        )
+                                      );
+                                    }}
+                                  >
+                                    <SelectTrigger className="h-8">
+                                      <SelectValue placeholder="Select prompt" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {agentPrompts.map((prompt) => (
+                                        <SelectItem key={prompt.id} value={prompt.id}>
+                                          {prompt.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
                               </div>
                             </div>
                             <div>
@@ -938,6 +965,14 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                                   </Badge>
                                 )}
                               </div>
+                              {agent.prompt && (
+                                <div className="mt-2">
+                                  <span className="text-xs text-muted-foreground">Prompt: </span>
+                                  <Badge variant="outline" className="text-xs">
+                                    {agentPrompts.find(p => p.id === agent.prompt)?.name || 'Unknown'}
+                                  </Badge>
+                                </div>
+                              )}
                             </div>
                             <div>
                               <span className="font-medium">Context:</span>

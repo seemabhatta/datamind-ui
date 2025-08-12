@@ -155,7 +155,9 @@ Always be specific and actionable in your guidance.`
     try {
       // Load user's agent configuration from database
       const userId = '0d493db8-bfed-4dd0-ab40-ae8a3225f8a5'; // TODO: Get from session
+      console.log('Loading agent configuration for user:', userId);
       const agentConfig = await storage.getAgentConfiguration(userId);
+      console.log('Agent config loaded:', !!agentConfig, agentConfig ? Object.keys(agentConfig) : 'null');
       
       switch (agentType) {
         case 'query':

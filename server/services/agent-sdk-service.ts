@@ -131,7 +131,9 @@ export class AgentSDKService {
     let agentConfig: any;
     try {
       const { storage } = await import('../storage');
+      console.log('Loading agent config from AgentSDKService for user:', userId);
       agentConfig = await storage.getAgentConfiguration(userId);
+      console.log('AgentSDKService config loaded:', !!agentConfig, agentConfig ? Object.keys(agentConfig) : 'null');
     } catch (error) {
       console.log('Error loading agent config, using defaults:', error);
     }

@@ -1439,7 +1439,7 @@ compliance:
         ) : currentView === 'settings' ? (
           <div className="flex-1 p-6">
             <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Settings</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-2">Settings</h2>
               <p className="text-gray-600">Application settings and integrations</p>
             </div>
 

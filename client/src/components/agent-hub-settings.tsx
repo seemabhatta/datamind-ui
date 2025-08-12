@@ -582,7 +582,7 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
       </div>
 
       <Tabs value={activeTab} onValueChange={(value: any) => setActiveTab(value)}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="tools" className="flex items-center space-x-2">
             <Code className="h-4 w-4" />
             <span>Tools</span>
@@ -594,10 +594,6 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
           <TabsTrigger value="agents" className="flex items-center space-x-2">
             <Brain className="h-4 w-4" />
             <span>Agents</span>
-          </TabsTrigger>
-          <TabsTrigger value="mentions" className="flex items-center space-x-2">
-            <MessageSquare className="h-4 w-4" />
-            <span>@Mentions</span>
           </TabsTrigger>
         </TabsList>
 
@@ -957,89 +953,7 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
           </Card>
         </TabsContent>
 
-        <TabsContent value="mentions" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>@Mention Mappings</CardTitle>
-              <CardDescription>
-                Configure which @mentions trigger which agents and their behavior.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {agentConfigs.map((agent) => (
-                    <Card key={agent.id}>
-                      <CardContent className="pt-4">
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <h4 className="font-medium">{agent.name}</h4>
-                            <Badge>{agent.type}</Badge>
-                          </div>
-                          
-                          <div>
-                            <Label className="text-sm">Active @Mentions</Label>
-                            <div className="flex flex-wrap gap-2 mt-2">
-                              {agent.mentions.map((mention) => (
-                                <Badge key={mention} variant="secondary" className="flex items-center space-x-1">
-                                  <span>{mention}</span>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="h-3 w-3 p-0 hover:bg-destructive hover:text-destructive-foreground"
-                                    onClick={() => {
-                                      setAgentConfigs(prev =>
-                                        prev.map(a =>
-                                          a.id === agent.id
-                                            ? {
-                                                ...a,
-                                                mentions: a.mentions.filter(m => m !== mention)
-                                              }
-                                            : a
-                                        )
-                                      );
-                                    }}
-                                  >
-                                    <X className="h-2 w-2" />
-                                  </Button>
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
 
-                          <div className="flex space-x-2">
-                            <Input 
-                              placeholder="Add new @mention"
-                              className="h-8"
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  const value = e.currentTarget.value.trim();
-                                  if (value && !agent.mentions.includes(value)) {
-                                    setAgentConfigs(prev =>
-                                      prev.map(a =>
-                                        a.id === agent.id
-                                          ? { ...a, mentions: [...a.mentions, value] }
-                                          : a
-                                      )
-                                    );
-                                    e.currentTarget.value = '';
-                                  }
-                                }
-                              }}
-                            />
-                            <Button size="sm" variant="outline">
-                              <Plus className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
     </div>
   );

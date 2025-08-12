@@ -154,6 +154,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // REST API routes
 
+  // Chat API endpoint for initialization
+  app.post('/api/chat', async (req, res) => {
+    try {
+      const { content, agentType, sessionId, userId } = req.body;
+      console.log(`Processing API chat message: ${content} with agent: ${agentType}`);
+      
+      const agentResponse = await agentService.processMessage(content, agentType, sessionId);
+      
+      res.json({
+        content: agentResponse.content,
+        metadata: agentResponse.metadata
+      });
+    } catch (error) {
+      console.error('Error in chat API:', error);
+      res.status(500).json({
+        error: 'Failed to process chat message',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // Chat sessions
   app.get('/api/sessions/:userId', async (req, res) => {
     try {

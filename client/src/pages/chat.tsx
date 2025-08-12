@@ -590,10 +590,11 @@ export default function ChatPage() {
     setSelectedMentionIndex(0);
   }, [currentMentionQuery, showMentionDropdown]);
 
-  // Function to send agent initialization messages
+  // Function to send agent initialization messages and trigger backend initialization
   const sendAgentInitializationMessage = async (agentType: string) => {
+    // First show the initialization message
     const initMessages: { [key: string]: string } = {
-      'query': '🔄 **Initializing Query Agent...**\n\n*Following prompt library instructions for optimal data interaction*\n\n**Connection Status:** ✅ Auto-connected to Snowflake  \n**Current Database:** CORTES_DEMO_2  \n**Current Schema:** CORTEX_DEMO  \n\n**Available Commands:**\n- `show databases` - List available databases\n- `show tables` - List tables in current schema  \n- `describe [table_name]` - Show table structure\n- Ask any data question in natural language\n\n**Advanced Features:**\n- Auto SQL generation from natural language\n- Context-aware query suggestions\n- Intelligent result summaries\n\n✅ **Ready for immediate querying!** What data would you like to explore?',
+      'query': '🔄 **Initializing Snowflake Query Assistant...**\n\n💡 I can help you query your Snowflake data using natural language!\n💬 Just tell me what you want to do, and I\'ll guide you through it.\n\n📝 Session ID: ' + (currentSessionId || 'new_session') + '\n\n🔄 Initializing system...',
       'ontology': '🔄 **Initializing Ontology Agent...**\n\nFollowing prompt library instructions for semantic data modeling.\n\n**Available Actions:**\n- Create new ontology models\n- Load existing YAML dictionaries\n- Define relationships between data entities\n- Set up semantic mappings\n\n✅ **Ready!** Start by describing your data model or ask me to create one.',
       'dashboards': '🔄 **Initializing Dashboard Agent...**\n\nFollowing prompt library instructions for visualization creation.\n\n**Available Features:**\n- Generate charts from query results\n- Create interactive dashboards\n- Build custom visualizations\n- Pin important charts\n\n✅ **Ready!** Provide data or ask me to create visualizations.',
       'general': '🔄 **General Assistant Ready**\n\nI can help you navigate the DataMind platform and provide guidance.\n\n**I can help with:**\n- Platform navigation\n- Feature explanations  \n- Directing you to specialized agents\n- General questions\n\n✅ **Ready!** How can I assist you today?'
@@ -601,7 +602,7 @@ export default function ChatPage() {
 
     const initMessage = initMessages[agentType] || initMessages['general'];
     
-    // Add system message to the chat
+    // Add initialization message to the chat
     const tempMessage: Message = {
       id: Date.now().toString(),
       sessionId: currentSessionId || '',
@@ -611,6 +612,42 @@ export default function ChatPage() {
     };
 
     setMessages(prev => [...prev, tempMessage]);
+
+    // For query agent, trigger backend initialization to load YAML dictionaries
+    if (agentType === 'query' && currentSessionId) {
+      try {
+        // Send initialization command to backend to mimic CLI behavior
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            content: 'initialize_system',
+            agentType: 'query',
+            sessionId: currentSessionId,
+            userId: userId
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.content) {
+            // Add the backend initialization response
+            const backendMessage: Message = {
+              id: Date.now().toString() + '-backend',
+              sessionId: currentSessionId,
+              role: 'assistant',
+              content: data.content,
+              createdAt: new Date().toISOString()
+            };
+            setMessages(prev => [...prev, backendMessage]);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to trigger backend initialization:', error);
+      }
+    }
   };
 
 

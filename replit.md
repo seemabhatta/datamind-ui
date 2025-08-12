@@ -180,3 +180,22 @@ Context-aware assistant: Agent modes are automatically locked based on current n
 
 **Enhanced Message Rendering Completed On:** August 12, 2025 at 3:50 AM
 **Result:** Professional, structured message formatting that improves readability of error messages, success confirmations, and dynamic content
+
+## Improved General Agent Guidance (August 12, 2025)
+
+**Implementation Status:** ✅ **COMPLETED**
+- **Enhanced System Prompt:** Rewrote general agent's system prompt to provide specific, actionable guidance instead of generic responses
+- **Connection-Focused Responses:** General agent now specifically directs users to "@query connect" for Snowflake database connections
+- **Agent Direction Logic:** Clear routing to specialized agents (@query, @ontology, @dashboards) based on user needs
+- **Actionable Fallback Responses:** Improved fallback responses with specific commands and quick actions
+- **Platform-Specific Context:** General agent now understands DataMind platform features and guides users appropriately
+
+**Key Improvements:**
+- **Connection Requests:** "connect" → "To connect to your Snowflake database, type '@query connect'"
+- **Data Analysis:** Directs to "@query" for SQL queries and data analysis
+- **Data Modeling:** Directs to "@ontology" for semantic modeling and relationships
+- **Visualizations:** Directs to "@dashboards" for charts and dashboard creation
+- **Quick Actions:** Provides specific command syntax for common tasks
+
+**Improved General Agent Completed On:** August 12, 2025 at 3:57 AM
+**Result:** General agent now provides intuitive, platform-specific guidance that helps users accomplish their goals rather than giving generic responses

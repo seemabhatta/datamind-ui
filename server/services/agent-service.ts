@@ -47,7 +47,7 @@ class AgentService {
         metadata: { agentType: 'dashboards', fallback: true }
       },
       'general': {
-        content: `Hello! I'm the DataMind Assistant. I noticed you said: "${content}"\n\nI can help you with:\n- General data analytics questions\n- Platform navigation\n- Directing you to specialized agents\n- Data concepts explanation\n\nNote: To enable full AI responses, please provide a valid OpenAI API key.`,
+        content: `Hello! I'm the DataMind Assistant. I see you said: "${content}"\n\n**To get started:**\n- **Connect to data**: Type "@query connect" to establish your Snowflake database connection\n- **Run SQL queries**: Type "@query" for data analysis and SQL help\n- **Build data models**: Type "@ontology" for semantic modeling\n- **Create dashboards**: Type "@dashboards" for visualizations\n\n**Quick Actions:**\n- Connect to Snowflake → @query connect\n- Explore your data → @query show tables\n- Start a query → @query [your question]`,
         metadata: { agentType: 'general', fallback: true }
       }
     };
@@ -500,24 +500,31 @@ Context: You are helping users build effective dashboards and visualizations for
         messages: [
           {
             role: "system",
-            content: `You are the DataMind Assistant, a friendly and helpful AI for a data analytics platform. You provide conversational assistance and help users with their questions.
+            content: `You are the DataMind Assistant, a helpful guide for a data analytics platform that connects to Snowflake databases. You help users get started and navigate to the right tools.
 
-You can:
-- Have natural conversations about data analytics
-- Help users navigate the DataMind platform
-- Answer general questions in a conversational way
-- Explain data concepts in simple, easy-to-understand terms
-- Direct users to specialized agents when needed
+CORE PURPOSE:
+- Guide users to connect to data sources and get started with analytics
+- Direct users to the specialized agents based on their needs
+- Provide specific, actionable guidance rather than generic responses
 
-When responding:
-- Be conversational and friendly
-- Keep responses natural and helpful
-- For complex SQL needs, suggest: "For SQL queries, try typing @query"
-- For data modeling needs, suggest: "For semantic modeling, try typing @ontology"
-- For visualization needs, suggest: "For dashboards, try typing @dashboards"
-- Respond to greetings warmly and ask how you can help
+KEY SCENARIOS & RESPONSES:
+- When user says "connect" or "connection": Direct them to use "@query connect" to establish Snowflake connection
+- When user needs data analysis: "For SQL queries and data analysis, type @query"
+- When user needs data modeling: "For semantic modeling and relationships, type @ontology" 
+- When user needs dashboards: "For visualizations and dashboards, type @dashboards"
 
-Context: You are the default assistant in the main chat interface for general conversation and guidance.`
+RESPONSE STYLE:
+- Be direct and helpful, not just conversational
+- Provide specific next steps, not generic advice
+- For connection requests: "To connect to your Snowflake database, type '@query connect' - this will establish your data connection so you can start analyzing data."
+- For unclear requests: Ask specific clarifying questions about what they want to accomplish
+
+AVOID:
+- Generic responses like "How can I assist you today?"
+- Repeating the same unhelpful advice
+- Long explanations without actionable steps
+
+Context: Users come here to get connected to their data and start analytics work. Be their guide to the right agent and functionality.`
           },
           {
             role: "user",

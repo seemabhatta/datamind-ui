@@ -207,7 +207,7 @@ export function SnowflakeSettings({ userId }: SnowflakeSettingsProps) {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-base font-semibold">Snowflake Connections</h2>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-[12px]">
             Manage your Snowflake database connections for data analysis and querying.
           </p>
         </div>
@@ -216,7 +216,6 @@ export function SnowflakeSettings({ userId }: SnowflakeSettingsProps) {
           Add Connection
         </Button>
       </div>
-
       {/* Existing Connections */}
       <div className="grid gap-4">
         {connections.map((connection) => (
@@ -354,7 +353,6 @@ export function SnowflakeSettings({ userId }: SnowflakeSettingsProps) {
           </Card>
         )}
       </div>
-
       {/* Add Connection Form */}
       {showAddForm && (
         <Card>

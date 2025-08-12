@@ -573,24 +573,9 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
   return (
     <div className="space-y-6">
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Settings className="h-5 w-5" />
-            <h2 className="text-xl font-semibold">Agent Hub Configuration</h2>
-          </div>
-          <div className="flex items-center space-x-2">
-            {saveConfigMutation.isPending && (
-              <span className="text-sm text-muted-foreground">Saving...</span>
-            )}
-            <Button 
-              onClick={saveConfiguration}
-              disabled={saveConfigMutation.isPending}
-              size="sm"
-            >
-              <Save className="h-4 w-4 mr-1" />
-              Save Configuration
-            </Button>
-          </div>
+        <div className="flex items-center space-x-2">
+          <Settings className="h-5 w-5" />
+          <h2 className="text-xl font-semibold">Agent Hub Configuration</h2>
         </div>
         
 

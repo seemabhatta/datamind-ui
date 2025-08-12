@@ -604,15 +604,10 @@ export default function ChatPage() {
     // Add system message to the chat
     const tempMessage: Message = {
       id: Date.now().toString(),
-      sessionId: currentSession?.id || '',
+      sessionId: currentSessionId || '',
       role: 'assistant',
       content: initMessage,
-      metadata: {
-        model: 'system-init',
-        agentType,
-        initialization: true
-      },
-      createdAt: new Date()
+      createdAt: new Date().toISOString()
     };
 
     setMessages(prev => [...prev, tempMessage]);

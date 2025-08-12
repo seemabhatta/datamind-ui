@@ -32,6 +32,102 @@ class AgentService {
     });
   }
 
+  // Helper method to get system prompt from agent configuration
+  private getSystemPrompt(agentType: string, agentConfig?: any): string {
+    const defaultPrompts = {
+      'query': `You are a Query Agent for DataMind, a data analytics platform. You help users with natural language queries, SQL generation, and data analysis.
+
+CAPABILITIES:
+- Connect to Snowflake databases and browse structures
+- Convert natural language to SQL queries
+- Execute queries and analyze results
+- Generate AI summaries and insights
+- Provide context-aware suggestions
+
+Available function tools: ${availableFunctionTools.map(tool => tool.name).join(', ')}
+
+Focus on being accurate, helpful, and efficient in data analysis tasks.`,
+      
+      'yaml': `You are an Ontology Agent for DataMind, a data analytics platform. Your role is to help users with semantic data modeling, ontology design, and data relationships.
+
+You can:
+- Help design semantic models and ontologies
+- Explain data relationships and hierarchies
+- Suggest data modeling best practices
+- Generate YAML configurations for data models
+- Provide guidance on schema design
+
+When responding:
+- Be technical but clear
+- Provide structured examples when helpful
+- Focus on data modeling concepts
+- Suggest best practices for data organization
+
+Context: You are working with users who need to create semantic models and ontologies for their data.`,
+      
+      'dashboards': `You are a Dashboard Agent for DataMind, a data analytics platform. Your role is to help users create interactive dashboards and data visualizations.
+
+You can:
+- Help design dashboard layouts and components
+- Suggest appropriate chart types for different data
+- Provide guidance on data visualization best practices
+- Help create interactive dashboard elements
+- Suggest KPIs and metrics to track
+
+When responding:
+- Focus on practical visualization advice
+- Suggest specific chart types and layouts
+- Consider user experience and clarity
+- Provide actionable dashboard design guidance
+
+Context: You are helping users build effective dashboards and visualizations for their data analytics needs.`,
+      
+      'general': `You are the DataMind Assistant, a helpful guide for a data analytics platform that connects to Snowflake databases. You help users get started and navigate to the right tools.
+
+CORE PURPOSE:
+- Guide users to connect to data sources and get started with analytics
+- Provide specific, actionable guidance instead of generic responses
+- Direct users to the right specialized agents for their needs
+- Help with platform navigation and feature explanations
+
+AGENT ROUTING GUIDANCE:
+- For data queries, analysis, or SQL: Direct to "@query agent" 
+- For data modeling or YAML dictionaries: Direct to "@ontology agent"
+- For dashboards or visualizations: Direct to "@dashboards agent"
+
+SPECIFIC GUIDANCE EXAMPLES:
+- Connection issues: "Use '@query connect' to establish your Snowflake connection"
+- Data exploration: "Try '@query show tables' to see available data"
+- Need help with queries: "Switch to @query agent for SQL and data analysis"
+- Building models: "Use @ontology agent for semantic data modeling"
+- Creating charts: "Switch to @dashboards agent for visualizations"
+
+Always be specific and actionable in your guidance.`
+    };
+
+    if (agentConfig?.configData) {
+      try {
+        const config = agentConfig.configData;
+        const agentPrompts = config.agentPrompts || [];
+        
+        // Find the system prompt for this agent type
+        const systemPrompt = agentPrompts.find((prompt: any) => 
+          prompt.type === 'system' && 
+          prompt.agentTypes.includes(agentType) && 
+          prompt.enabled
+        );
+        
+        if (systemPrompt?.content) {
+          return systemPrompt.content;
+        }
+      } catch (error) {
+        console.log('Error parsing agent configuration, using default prompt:', error);
+      }
+    }
+    
+    return defaultPrompts[agentType as keyof typeof defaultPrompts] || defaultPrompts['general'];
+  }
+
   private getFallbackResponse(agentType: string, content: string): AgentResponse {
     const responses = {
       'query': {
@@ -57,15 +153,19 @@ class AgentService {
 
   async processMessage(content: string, agentType: 'query' | 'yaml' | 'dashboards' | 'general', sessionId: string): Promise<AgentResponse> {
     try {
+      // Load user's agent configuration from database
+      const userId = '0d493db8-bfed-4dd0-ab40-ae8a3225f8a5'; // TODO: Get from session
+      const agentConfig = await storage.getAgentConfiguration(userId);
+      
       switch (agentType) {
         case 'query':
-          return await this.processQueryAgent(content, sessionId);
+          return await this.processQueryAgent(content, sessionId, agentConfig);
         case 'yaml':
-          return await this.processYamlAgent(content, sessionId);
+          return await this.processYamlAgent(content, sessionId, agentConfig);
         case 'dashboards':
-          return await this.processDashboardAgent(content, sessionId);
+          return await this.processDashboardAgent(content, sessionId, agentConfig);
         default:
-          return await this.processGeneralAgent(content, sessionId);
+          return await this.processGeneralAgent(content, sessionId, agentConfig);
       }
     } catch (error) {
       console.error('Error processing agent message:', error);
@@ -76,7 +176,7 @@ class AgentService {
     }
   }
 
-  private async processQueryAgent(content: string, sessionId: string): Promise<AgentResponse> {
+  private async processQueryAgent(content: string, sessionId: string, agentConfig?: any): Promise<AgentResponse> {
     try {
       // First try the enhanced Agent SDK implementation
       try {
@@ -390,7 +490,7 @@ Respond naturally but mention when function tools would help accomplish their go
     return JSON.stringify(displayRows, null, 2);
   }
 
-  private async processYamlAgent(content: string, sessionId: string): Promise<AgentResponse> {
+  private async processYamlAgent(content: string, sessionId: string, agentConfig?: any): Promise<AgentResponse> {
     try {
       // Use OpenAI to process ontology/semantic modeling requests
       const response = await this.openai.chat.completions.create({
@@ -441,7 +541,7 @@ Context: You are working with users who need to create semantic models and ontol
     }
   }
 
-  private async processDashboardAgent(content: string, sessionId: string): Promise<AgentResponse> {
+  private async processDashboardAgent(content: string, sessionId: string, agentConfig?: any): Promise<AgentResponse> {
     try {
       // Use OpenAI to process dashboard/visualization requests
       const response = await this.openai.chat.completions.create({
@@ -492,7 +592,7 @@ Context: You are helping users build effective dashboards and visualizations for
     }
   }
 
-  private async processGeneralAgent(content: string, sessionId: string): Promise<AgentResponse> {
+  private async processGeneralAgent(content: string, sessionId: string, agentConfig?: any): Promise<AgentResponse> {
     try {
       // Use OpenAI for general assistant conversations
       const response = await this.openai.chat.completions.create({

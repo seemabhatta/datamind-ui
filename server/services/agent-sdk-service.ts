@@ -89,10 +89,10 @@ export class AgentSDKService {
     metadata: any;
   }> {
     try {
-      const context = agentContextManager.getContext(sessionId);
+      const context = await agentContextManager.getContext(sessionId);
       
       // Add user message to conversation history
-      agentContextManager.addToHistory(sessionId, {
+      await agentContextManager.addToHistory(sessionId, {
         role: 'user',
         content: message,
         timestamp: new Date()
@@ -358,7 +358,7 @@ export class AgentSDKService {
       });
 
       // Add current context summary
-      const contextSummary = agentContextManager.getContextSummary(context);
+      const contextSummary = await agentContextManager.getContextSummary(context.sessionId);
       const contextMessage = `Current Agent State:${contextSummary}
 
 Available tools: ${enhancedFunctionTools.map(t => t.name).join(', ')}`;

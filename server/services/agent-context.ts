@@ -37,37 +37,58 @@ export interface AgentContext {
 export class AgentContextManager {
   private contexts = new Map<string, AgentContext>();
 
-  createContext(sessionId: string): AgentContext {
+  async createContext(sessionId: string): Promise<AgentContext> {
     const context: AgentContext = {
       sessionId,
       tables: [],
       conversationHistory: []
     };
     this.contexts.set(sessionId, context);
+    
+    // Auto-connect to the default Snowflake connection
+    await this.autoConnectToSnowflake(context);
+    
     return context;
   }
 
-  getContext(sessionId: string): AgentContext {
+  private async autoConnectToSnowflake(context: AgentContext): Promise<void> {
+    try {
+      // Import function tools to access connect_to_snowflake
+      const { getFunctionTool } = await import('./function-tools');
+      const connectTool = getFunctionTool('connect_to_snowflake');
+      
+      if (connectTool) {
+        console.log(`Auto-connecting session ${context.sessionId} to Snowflake...`);
+        await connectTool.execute(context, {});
+        console.log(`Auto-connection successful for session ${context.sessionId}`);
+      }
+    } catch (error) {
+      console.log(`Auto-connection failed for session ${context.sessionId}:`, error);
+      // Don't throw - let the session continue without auto-connection
+    }
+  }
+
+  async getContext(sessionId: string): Promise<AgentContext> {
     let context = this.contexts.get(sessionId);
     if (!context) {
-      context = this.createContext(sessionId);
+      context = await this.createContext(sessionId);
     }
     return context;
   }
 
-  updateContext(sessionId: string, updates: Partial<AgentContext>): void {
-    const context = this.getContext(sessionId);
+  async updateContext(sessionId: string, updates: Partial<AgentContext>): Promise<void> {
+    const context = await this.getContext(sessionId);
     Object.assign(context, updates);
     this.contexts.set(sessionId, context);
   }
 
-  addToHistory(sessionId: string, entry: {
+  async addToHistory(sessionId: string, entry: {
     role: 'user' | 'assistant' | 'function';
     content: string;
     functionCall?: string;
     timestamp: Date;
-  }): void {
-    const context = this.getContext(sessionId);
+  }): Promise<void> {
+    const context = await this.getContext(sessionId);
     context.conversationHistory.push(entry);
     
     // Keep only last 50 entries to prevent memory bloat
@@ -78,7 +99,8 @@ export class AgentContextManager {
     this.contexts.set(sessionId, context);
   }
 
-  getContextSummary(context: AgentContext): string {
+  async getContextSummary(sessionId: string): Promise<string> {
+    const context = await this.getContext(sessionId);
     const parts = [];
     
     if (context.connectionId) {

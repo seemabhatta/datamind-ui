@@ -92,7 +92,7 @@ class AgentService {
 
       // Fallback to legacy implementation
       const userId = '0d493db8-bfed-4dd0-ab40-ae8a3225f8a5'; // TODO: Get from session
-      const context = await agentContextManager.getContext(sessionId, userId);
+      const context = await agentContextManager.getContext(sessionId);
 
       // Add user message to history
       await agentContextManager.addToHistory(sessionId, {
@@ -132,7 +132,7 @@ class AgentService {
       }
 
       // Use OpenAI with enhanced context
-      const contextSummary = agentContextManager.getContextSummary(context);
+      const contextSummary = await agentContextManager.getContextSummary(sessionId);
       
       const response = await this.openai.chat.completions.create({
         model: "gpt-4o",

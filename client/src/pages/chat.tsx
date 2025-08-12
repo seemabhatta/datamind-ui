@@ -884,7 +884,7 @@ compliance:
                 setCurrentSessionId('');
                 setCurrentView('chat');
                 setSelectedAgentType(agent.id);
-                setChatInput(agent.mention + ' '); // Pre-fill the mention
+                setChatInput(''); // Start with empty input - agent is already contextually selected
               }}
               className={`w-full flex items-center justify-start ${isLeftSidebarCollapsed ? 'px-2 py-3 justify-center' : 'px-3 py-2'} text-sm font-medium rounded-md transition-colors ${
                 selectedAgentType === agent.id && currentView === 'chat'

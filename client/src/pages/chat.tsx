@@ -548,12 +548,8 @@ export default function ChatPage() {
 
   // Handle mention selection
   const selectMention = (mention: typeof availableMentions[0]) => {
-    const beforeMention = chatInput.substring(0, mentionPosition);
-    const afterMention = chatInput.substring(mentionPosition + 1 + currentMentionQuery.length);
-    // Include the @mention in the input for clarity
-    const newValue = `${beforeMention}${mention.mention} ${afterMention}`.trim();
-    
-    setChatInput(newValue);
+    // Clear the input field after selecting an agent - the agent selection will be shown above
+    setChatInput('');
     setShowMentionDropdown(false);
     setSelectedAgentType(mention.id);
     setIsGenerateMode(mention.id === 'ontology' || mention.id === 'dashboards');

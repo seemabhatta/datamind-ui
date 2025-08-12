@@ -99,16 +99,16 @@ export class AgentSDKService {
         console.log('Found agent prompts:', agentPrompts.length);
         
         // Find the agent configuration for this agent type
-        const agentConfig = agentConfigs.find((agent: any) => {
+        const foundAgentConfig = agentConfigs.find((agent: any) => {
           console.log('Checking agent:', agent.type, 'enabled:', agent.enabled);
           return agent.type === agentType && agent.enabled;
         });
         
-        if (agentConfig && agentConfig.prompts && agentConfig.prompts.length > 0) {
-          console.log('Found agent config with prompts:', agentConfig.prompts);
+        if (foundAgentConfig && foundAgentConfig.prompts && foundAgentConfig.prompts.length > 0) {
+          console.log('Found agent config with prompts:', foundAgentConfig.prompts);
           
           // Get the first prompt ID from the agent's prompts array
-          const promptId = agentConfig.prompts[0];
+          const promptId = foundAgentConfig.prompts[0];
           
           // Find the actual prompt content
           const systemPrompt = agentPrompts.find((prompt: any) => {

@@ -572,11 +572,11 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div className="space-y-4">
         <div className="flex items-center space-x-2">
           <Settings className="h-5 w-5" />
-          <h2 className="text-base font-semibold">Agent Hub Configuration</h2>
+          <h2 className="text-sm font-semibold">Agent Hub Configuration</h2>
         </div>
         
 
@@ -597,22 +597,22 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="tools" className="space-y-4">
+        <TabsContent value="tools" className="space-y-2">
           <Card>
             <CardHeader>
-              <CardTitle>Function Tools</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-sm">Function Tools</CardTitle>
+              <CardDescription className="text-xs">
                 Manage available function tools that agents can use to interact with data sources and perform operations.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {functionTools.map((tool) => (
                   <Card key={tool.name} className={`border-l-4 ${tool.enabled ? 'border-l-green-500' : 'border-l-gray-300'}`}>
-                    <CardContent className="pt-4">
+                    <CardContent className="pt-2">
                       <div className="flex items-start justify-between">
-                        <div className="flex-1 space-y-2">
-                          <div className="flex items-center space-x-3">
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center space-x-2">
                             <h4 className="text-xs font-medium">{tool.name}</h4>
                             <Badge className={categoryColors[tool.category]}>
                               {tool.category}
@@ -622,7 +622,7 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                               onCheckedChange={() => toggleToolEnabled(tool.name)}
                             />
                           </div>
-                          <p className="text-sm text-muted-foreground">{tool.description}</p>
+                          <p className="text-xs text-muted-foreground">{tool.description}</p>
                           
                           {editingTool === tool.name ? (
                             <div className="space-y-2 mt-3">
@@ -659,14 +659,13 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
           </Card>
         </TabsContent>
 
-        <TabsContent value="prompts" className="space-y-4">
+        <TabsContent value="prompts" className="space-y-2">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Prompt Library
-</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-sm">Prompt Library</CardTitle>
+                  <CardDescription className="text-xs">
                     Configure system and user prompts that define agent behavior and capabilities.
                   </CardDescription>
                 </div>
@@ -753,13 +752,13 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
           </Card>
         </TabsContent>
 
-        <TabsContent value="agents" className="space-y-4">
+        <TabsContent value="agents" className="space-y-2">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Agent Configuration</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-sm">Agent Configuration</CardTitle>
+                  <CardDescription className="text-xs">
                     Configure agent types, their assigned tools, prompts, and behavior settings.
                   </CardDescription>
                 </div>
@@ -795,7 +794,7 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                           </div>
                         </div>
 
-                        <p className="text-sm text-muted-foreground">{agent.description}</p>
+                        <p className="text-xs text-muted-foreground">{agent.description}</p>
 
                         {editingAgent === agent.id ? (
                           <div className="grid grid-cols-3 gap-4">

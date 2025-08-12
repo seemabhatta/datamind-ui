@@ -108,6 +108,26 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
+  
+  /* Unified Typography System - Compact Design */
+  .text-display {
+    @apply text-lg font-semibold;
+  }
+  .text-title {
+    @apply text-sm font-medium;
+  }
+  .text-subtitle {
+    @apply text-xs font-medium;
+  }
+  .text-body {
+    @apply text-sm;
+  }
+  .text-caption {
+    @apply text-xs text-muted-foreground;
+  }
+  .text-micro {
+    @apply text-xs;
+  }
 }
 
 /* Custom styles for Plotly charts */

@@ -600,8 +600,8 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
         <TabsContent value="tools" className="space-y-2">
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">Function Tools</CardTitle>
-              <CardDescription className="text-xs">
+              <CardTitle className="text-title">Function Tools</CardTitle>
+              <CardDescription className="text-caption">
                 Manage available function tools that agents can use to interact with data sources and perform operations.
               </CardDescription>
             </CardHeader>
@@ -613,7 +613,7 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                       <div className="flex items-start justify-between">
                         <div className="flex-1 space-y-1">
                           <div className="flex items-center space-x-2">
-                            <h4 className="text-xs font-medium">{tool.name}</h4>
+                            <h4 className="text-subtitle">{tool.name}</h4>
                             <Badge className={categoryColors[tool.category]}>
                               {tool.category}
                             </Badge>
@@ -622,7 +622,7 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                               onCheckedChange={() => toggleToolEnabled(tool.name)}
                             />
                           </div>
-                          <p className="text-xs text-muted-foreground">{tool.description}</p>
+                          <p className="text-caption">{tool.description}</p>
                           
                           {editingTool === tool.name ? (
                             <div className="space-y-2 mt-3">
@@ -664,8 +664,8 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-sm">Prompt Library</CardTitle>
-                  <CardDescription className="text-xs">
+                  <CardTitle className="text-title">Prompt Library</CardTitle>
+                  <CardDescription className="text-caption">
                     Configure system and user prompts that define agent behavior and capabilities.
                   </CardDescription>
                 </div>
@@ -757,8 +757,8 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-sm">Agent Configuration</CardTitle>
-                  <CardDescription className="text-xs">
+                  <CardTitle className="text-title">Agent Configuration</CardTitle>
+                  <CardDescription className="text-caption">
                     Configure agent types, their assigned tools, prompts, and behavior settings.
                   </CardDescription>
                 </div>
@@ -776,7 +776,7 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
-                            <h4 className="text-xs font-medium">{agent.name}</h4>
+                            <h4 className="text-subtitle">{agent.name}</h4>
                             <Badge>{agent.type}</Badge>
                             <Switch
                               checked={agent.enabled}
@@ -794,7 +794,7 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                           </div>
                         </div>
 
-                        <p className="text-xs text-muted-foreground">{agent.description}</p>
+                        <p className="text-caption">{agent.description}</p>
 
                         {editingAgent === agent.id ? (
                           <div className="grid grid-cols-3 gap-4">

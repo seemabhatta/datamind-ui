@@ -34,9 +34,9 @@ export function MessageBubble({ message }: MessageBubbleProps) {
       <div className="flex space-x-3 justify-end">
         <div className="flex-1 max-w-2xl">
           <div className="bg-primary-600 text-white rounded-lg px-4 py-3">
-            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+            <p className="text-body whitespace-pre-wrap">{message.content}</p>
           </div>
-          <p className="text-xs text-slate-500 mt-1 text-right">
+          <p className="text-micro text-slate-500 mt-1 text-right">
             {formatTime(message.createdAt!)}
           </p>
         </div>
@@ -65,12 +65,12 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                 if (sqlQuery) {
                   return (
                     <div key={index} className="my-4">
-                      <div className="bg-slate-800 text-slate-100 rounded-md p-3 text-sm font-mono">
+                      <div className="bg-slate-800 text-slate-100 rounded-md p-3 text-body font-mono">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-slate-400">SQL Query</span>
                           <button 
                             onClick={() => copyToClipboard(sqlQuery)}
-                            className="text-slate-400 hover:text-white text-xs"
+                            className="text-slate-400 hover:text-white text-micro"
                           >
                             Copy
                           </button>

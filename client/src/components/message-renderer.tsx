@@ -176,38 +176,98 @@ export function MessageRenderer({ content, role }: MessageRendererProps) {
   // Default formatting for regular content
   const lines = content.split('\n').filter(line => line.trim());
   
-  // Check for structured content with headers and sections
-  if (lines.some(line => line.includes('🔗') || line.includes('🚀') || line.includes('**'))) {
+  // Check for structured content with headers, sections, and connection details
+  if (lines.some(line => line.includes('🔗') || line.includes('🚀') || line.includes('**') || line.includes('✅'))) {
     return (
       <div className="space-y-3">
         {lines.map((line, index) => {
           const trimmedLine = line.trim();
           
-          // Format headers with emojis or bold text
-          if (trimmedLine.includes('**') && (trimmedLine.includes('🔗') || trimmedLine.includes('🚀'))) {
+          // Format success headers with checkmarks
+          if (trimmedLine.includes('✅') && trimmedLine.includes('**')) {
             return (
-              <h4 key={index} className="text-sm font-medium text-gray-900 flex items-center space-x-2">
-                <span>{trimmedLine.replace(/\*\*/g, '')}</span>
-              </h4>
-            );
-          }
-          
-          // Format bullet points that start with dashes
-          if (trimmedLine.startsWith('- ')) {
-            return (
-              <div key={index} className="flex items-start space-x-2 ml-4">
-                <span className="text-gray-400 mt-0.5 flex-shrink-0">•</span>
-                <span className="text-sm text-gray-700 flex-1">{trimmedLine.substring(2)}</span>
+              <div key={index} className="flex items-center space-x-2 mb-3">
+                <CheckCircle className="w-4 h-4 text-gray-600" />
+                <h3 className="text-sm font-medium text-gray-900">
+                  {trimmedLine.replace(/[✅*]/g, '').trim()}
+                </h3>
               </div>
             );
           }
           
-          return (
-            <p key={index} className="text-sm text-gray-700 leading-relaxed">
-              {trimmedLine}
-            </p>
-          );
-        })}
+          // Format section headers with emojis
+          if (trimmedLine.includes('**') && (trimmedLine.includes('🔗') || trimmedLine.includes('🚀'))) {
+            const emoji = trimmedLine.includes('🔗') ? '🔗' : '🚀';
+            const title = trimmedLine.replace(/[🔗🚀*]/g, '').replace(':', '').trim();
+            
+            return (
+              <div key={index} className="flex items-center space-x-2 mt-4 mb-2">
+                <span className="text-gray-600">{emoji === '🔗' ? '🔗' : '🚀'}</span>
+                <h4 className="text-sm font-medium text-gray-900">{title}:</h4>
+              </div>
+            );
+          }
+          
+          // Format key-value pairs with dashes (Connection Details format)
+          if (trimmedLine.startsWith('- ') && trimmedLine.includes(':')) {
+            const [key, ...valueParts] = trimmedLine.substring(2).split(':');
+            const value = valueParts.join(':').trim();
+            
+            return (
+              <div key={index} className="flex items-start space-x-2 ml-6 mb-1">
+                <span className="text-gray-400 mt-0.5 flex-shrink-0">•</span>
+                <div className="flex-1">
+                  <span className="text-sm font-medium text-gray-900">{key.trim()}:</span>
+                  <span className="text-sm text-gray-700 ml-1 font-mono">{value}</span>
+                </div>
+              </div>
+            );
+          }
+          
+          // Format regular bullet points that start with dashes
+          if (trimmedLine.startsWith('- ')) {
+            const content = trimmedLine.substring(2);
+            
+            // Check if it contains backticks for inline code
+            if (content.includes('`')) {
+              const parts = content.split('`');
+              return (
+                <div key={index} className="flex items-start space-x-2 ml-6 mb-1">
+                  <span className="text-gray-400 mt-0.5 flex-shrink-0">•</span>
+                  <div className="text-sm text-gray-700 flex-1">
+                    {parts.map((part, partIndex) => 
+                      partIndex % 2 === 0 ? (
+                        <span key={partIndex}>{part}</span>
+                      ) : (
+                        <code key={partIndex} className="bg-gray-100 px-1 py-0.5 rounded text-xs font-mono text-gray-800">
+                          {part}
+                        </code>
+                      )
+                    )}
+                  </div>
+                </div>
+              );
+            }
+            
+            return (
+              <div key={index} className="flex items-start space-x-2 ml-6 mb-1">
+                <span className="text-gray-400 mt-0.5 flex-shrink-0">•</span>
+                <span className="text-sm text-gray-700 flex-1">{content}</span>
+              </div>
+            );
+          }
+          
+          // Handle regular paragraphs
+          if (trimmedLine) {
+            return (
+              <p key={index} className="text-sm text-gray-700 leading-relaxed">
+                {trimmedLine}
+              </p>
+            );
+          }
+          
+          return null;
+        }).filter(Boolean)}
       </div>
     );
   }

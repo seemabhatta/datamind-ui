@@ -614,7 +614,7 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                         <div className="flex-1 space-y-1">
                           <div className="flex items-center space-x-1.5">
                             <h4 className="text-subtitle">{tool.name}</h4>
-                            <Badge className={categoryColors[tool.category]}>
+                            <Badge className="inline-flex items-center rounded border px-1 py-0 font-normal transition-colors focus:outline-none focus:ring-1 focus:ring-ring focus:ring-offset-1 border-transparent hover:bg-primary/80 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 text-[12px]">
                               {tool.category}
                             </Badge>
                             <Switch

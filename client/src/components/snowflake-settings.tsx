@@ -252,11 +252,11 @@ export function SnowflakeSettings({ userId }: SnowflakeSettingsProps) {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <Label className="text-muted-foreground">Warehouse</Label>
-                  <p>{connection.warehouse || 'Not specified'}</p>
+                  <p className="text-[12px]">{connection.warehouse || 'Not specified'}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Schema</Label>
-                  <p>{connection.schema || 'Not specified'}</p>
+                  <p className="text-[12px]">{connection.schema || 'Not specified'}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Role</Label>

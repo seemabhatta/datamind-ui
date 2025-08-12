@@ -548,12 +548,15 @@ export default function ChatPage() {
   );
 
   // Handle mention selection
-  const selectMention = (mention: typeof availableMentions[0]) => {
+  const selectMention = async (mention: typeof availableMentions[0]) => {
     // Clear the input field after selecting an agent - the agent selection will be shown above
     setChatInput('');
     setShowMentionDropdown(false);
     setSelectedAgentType(mention.id);
     setIsGenerateMode(mention.id === 'ontology' || mention.id === 'dashboards');
+    
+    // Send initialization message for the selected agent
+    await sendAgentInitializationMessage(mention.id);
   };
 
   // Handle keyboard navigation in mention dropdown
@@ -586,6 +589,34 @@ export default function ChatPage() {
   useEffect(() => {
     setSelectedMentionIndex(0);
   }, [currentMentionQuery, showMentionDropdown]);
+
+  // Function to send agent initialization messages
+  const sendAgentInitializationMessage = async (agentType: string) => {
+    const initMessages: { [key: string]: string } = {
+      'query': '🔄 **Initializing Query Agent...**\n\n*Following prompt library instructions for optimal data interaction*\n\n**Connection Status:** ✅ Auto-connected to Snowflake  \n**Current Database:** CORTES_DEMO_2  \n**Current Schema:** CORTEX_DEMO  \n\n**Available Commands:**\n- `show databases` - List available databases\n- `show tables` - List tables in current schema  \n- `describe [table_name]` - Show table structure\n- Ask any data question in natural language\n\n**Advanced Features:**\n- Auto SQL generation from natural language\n- Context-aware query suggestions\n- Intelligent result summaries\n\n✅ **Ready for immediate querying!** What data would you like to explore?',
+      'ontology': '🔄 **Initializing Ontology Agent...**\n\nFollowing prompt library instructions for semantic data modeling.\n\n**Available Actions:**\n- Create new ontology models\n- Load existing YAML dictionaries\n- Define relationships between data entities\n- Set up semantic mappings\n\n✅ **Ready!** Start by describing your data model or ask me to create one.',
+      'dashboards': '🔄 **Initializing Dashboard Agent...**\n\nFollowing prompt library instructions for visualization creation.\n\n**Available Features:**\n- Generate charts from query results\n- Create interactive dashboards\n- Build custom visualizations\n- Pin important charts\n\n✅ **Ready!** Provide data or ask me to create visualizations.',
+      'general': '🔄 **General Assistant Ready**\n\nI can help you navigate the DataMind platform and provide guidance.\n\n**I can help with:**\n- Platform navigation\n- Feature explanations  \n- Directing you to specialized agents\n- General questions\n\n✅ **Ready!** How can I assist you today?'
+    };
+
+    const initMessage = initMessages[agentType] || initMessages['general'];
+    
+    // Add system message to the chat
+    const tempMessage: Message = {
+      id: Date.now().toString(),
+      sessionId: currentSession?.id || '',
+      role: 'assistant',
+      content: initMessage,
+      metadata: {
+        model: 'system-init',
+        agentType,
+        initialization: true
+      },
+      createdAt: new Date()
+    };
+
+    setMessages(prev => [...prev, tempMessage]);
+  };
 
 
 

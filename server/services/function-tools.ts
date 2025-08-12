@@ -29,7 +29,7 @@ export const connectToSnowflake: FunctionTool = {
   },
   execute: async (context: AgentContext, params: any) => {
     try {
-      const connections = await storage.getSnowflakeConnections(context.userId);
+      const connections = await storage.getSnowflakeConnections(context.userId || '0d493db8-bfed-4dd0-ab40-ae8a3225f8a5');
       const defaultConnection = connections.find(c => c.isDefault && c.isActive);
       
       if (!defaultConnection) {
@@ -534,7 +534,7 @@ export const getCurrentContext: FunctionTool = {
     required: []
   },
   execute: async (context: AgentContext, params: any) => {
-    const summary = agentContextManager.getContextSummary(context);
+    const summary = agentContextManager.getContextSummary(context.sessionId);
     return `Current agent state:${summary}`;
   }
 };

@@ -5,6 +5,7 @@
 
 export interface AgentContext {
   sessionId: string;
+  userId?: string; // Add userId to support connection lookups
   connectionId?: string;
   currentDatabase?: string;
   currentSchema?: string;
@@ -40,6 +41,7 @@ export class AgentContextManager {
   async createContext(sessionId: string): Promise<AgentContext> {
     const context: AgentContext = {
       sessionId,
+      userId: '0d493db8-bfed-4dd0-ab40-ae8a3225f8a5', // TODO: Get from session
       tables: [],
       conversationHistory: []
     };
@@ -59,8 +61,19 @@ export class AgentContextManager {
       
       if (connectTool) {
         console.log(`Auto-connecting session ${context.sessionId} to Snowflake...`);
-        await connectTool.execute(context, {});
+        const result = await connectTool.execute(context, {});
+        console.log(`Auto-connection result:`, result);
         console.log(`Auto-connection successful for session ${context.sessionId}`);
+        
+        // Force refresh the context to ensure connectionId is properly set
+        const updatedContext = this.contexts.get(context.sessionId);
+        if (updatedContext?.connectionId) {
+          console.log(`Context updated with connectionId: ${updatedContext.connectionId}`);
+        } else {
+          console.log('Warning: Context still missing connectionId after auto-connection');
+        }
+      } else {
+        console.log('Warning: connect_to_snowflake tool not found');
       }
     } catch (error) {
       console.log(`Auto-connection failed for session ${context.sessionId}:`, error);

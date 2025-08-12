@@ -141,8 +141,8 @@ export class AgentSDKService {
           }
         } else {
           console.log('No agent config or prompts found for', agentType);
-          console.log('Available agents:', agentConfigs.map(a => ({type: a.type, enabled: a.enabled})));
-          console.log('Available prompts:', agentPrompts.map(p => ({id: p.id, enabled: p.enabled, hasContent: !!p.content})));
+          console.log('Available agents:', agentConfigs.map((a: any) => ({type: a.type, enabled: a.enabled})));
+          console.log('Available prompts:', agentPrompts.map((p: any) => ({id: p.id, enabled: p.enabled, hasContent: !!p.content})));
         }
       } catch (error) {
         console.log('Error parsing agent configuration, using default prompt:', error);
@@ -229,6 +229,15 @@ Please let me know if you'd like to load this file or need further assistance.`;
         content: message,
         timestamp: new Date()
       });
+
+      // Ensure context has connectionId before trying function tools
+      if (!context.connectionId) {
+        console.log('Context missing connectionId, refreshing context...');
+        await agentContextManager.getContext(sessionId); // This will trigger auto-connection if needed
+        const refreshedContext = await agentContextManager.getContext(sessionId);
+        context = refreshedContext;
+        console.log('Context refreshed, connectionId:', context.connectionId);
+      }
 
       // First try enhanced function tool pattern matching
       const enhancedResult = await this.tryEnhancedFunctionTools(context, message);

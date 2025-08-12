@@ -572,11 +572,11 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="space-y-4">
         <div className="flex items-center space-x-2">
           <Settings className="h-5 w-5" />
-          <h2 className="text-lg font-semibold">Agent Hub Configuration</h2>
+          <h2 className="text-base font-semibold">Agent Hub Configuration</h2>
         </div>
         
 
@@ -613,7 +613,7 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                       <div className="flex items-start justify-between">
                         <div className="flex-1 space-y-2">
                           <div className="flex items-center space-x-3">
-                            <h4 className="text-sm font-medium">{tool.name}</h4>
+                            <h4 className="text-xs font-medium">{tool.name}</h4>
                             <Badge className={categoryColors[tool.category]}>
                               {tool.category}
                             </Badge>
@@ -777,7 +777,7 @@ export function AgentHubSettings({ userId }: AgentHubSettingsProps) {
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
-                            <h4 className="text-sm font-medium">{agent.name}</h4>
+                            <h4 className="text-xs font-medium">{agent.name}</h4>
                             <Badge>{agent.type}</Badge>
                             <Switch
                               checked={agent.enabled}

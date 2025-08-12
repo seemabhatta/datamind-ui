@@ -18,7 +18,7 @@ export function Sidebar({
   return (
     <div className="w-64 bg-white border-r border-slate-200 flex flex-col">
       {/* Header */}
-      <div className="p-6 border-b border-slate-200">
+      <div className="p-4 border-b border-slate-200">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
             <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -26,7 +26,7 @@ export function Sidebar({
             </svg>
           </div>
           <div>
-            <h1 className="text-lg font-bold text-slate-900">DataMind</h1>
+            <h1 className="text-base font-bold text-slate-900">DataMind</h1>
             <p className="text-sm text-slate-500">AI Analytics Platform</p>
           </div>
         </div>

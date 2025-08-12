@@ -203,10 +203,10 @@ export function SnowflakeSettings({ userId }: SnowflakeSettingsProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold">Snowflake Connections</h2>
+          <h2 className="text-base font-semibold">Snowflake Connections</h2>
           <p className="text-muted-foreground">
             Manage your Snowflake database connections for data analysis and querying.
           </p>
@@ -226,7 +226,7 @@ export function SnowflakeSettings({ userId }: SnowflakeSettingsProps) {
                 <div className="flex items-center gap-3">
                   <Database className="w-5 h-5 text-blue-500" />
                   <div>
-                    <CardTitle className="text-base font-medium">{connection.name}</CardTitle>
+                    <CardTitle className="text-sm font-medium">{connection.name}</CardTitle>
                     <CardDescription>
                       {connection.account} • {connection.username}
                       {connection.database && ` • ${connection.database}`}

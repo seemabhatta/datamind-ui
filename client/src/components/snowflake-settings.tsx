@@ -260,7 +260,7 @@ export function SnowflakeSettings({ userId }: SnowflakeSettingsProps) {
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Role</Label>
-                  <p>{connection.role || 'Not specified'}</p>
+                  <p className="text-[12px]">{connection.role || 'Not specified'}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Authentication</Label>
